@@ -99,12 +99,19 @@ public enum TopicPageParser {
             edit: edited.flatMap(edit(in:)),
             quoteCount: edited.flatMap(quoteCount(in:)) ?? 0,
             body: MessageBodyParser.body(of: content) { element in
-                element.hasClass("edited") || element.hasClass("signature")
+                element.hasClass("edited") || element.hasClass("signature") || isRepeatNotice(element)
             },
             signature: signature.flatMap(signatureBody(in:)),
             isDeleted: table.ancestor(tag: "table", class: "messagetabledel") != nil || table.hasClass("messagetabledel"),
+            isRepeatedFromPreviousPage: content.children.first.map(isRepeatNotice) ?? false,
             links: links(in: table, edited: edited)
         )
+    }
+
+    /// From page 2 on, HFR repeats the last message of the previous page first, under
+    /// "<p><strong>Reprise du message précédent :</strong></p>".
+    private static func isRepeatNotice(_ element: HTMLElement) -> Bool {
+        element.tagName == "p" && element.first("strong")?.text.hasPrefix("Reprise du message précédent") == true
     }
 
     /// "Message édité par X le 15-02-2025 à 21:17:37".

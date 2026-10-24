@@ -112,3 +112,22 @@ struct TopicPageParserTests {
         }
     }
 }
+
+@Suite("Reprise du message précédent")
+struct RepeatedPostTests {
+    @Test func marksTheRepeatedFirstMessage() throws {
+        let page = try TopicPageParser.parse(html: Fixture.html("sujet-blackwell-p350"))
+        #expect(page.posts.first?.isRepeatedFromPreviousPage == true)
+        #expect(page.posts.dropFirst().allSatisfy { !$0.isRepeatedFromPreviousPage })
+        // The notice itself is not part of the message.
+        guard case .quote = page.posts.first?.body.blocks.first else {
+            Issue.record("Le message repris devrait commencer par sa citation")
+            return
+        }
+    }
+
+    @Test func firstPageHasNoRepeat() throws {
+        let page = try TopicPageParser.parse(html: Fixture.html("sujet-blackwell-p1"))
+        #expect(page.posts.allSatisfy { !$0.isRepeatedFromPreviousPage })
+    }
+}

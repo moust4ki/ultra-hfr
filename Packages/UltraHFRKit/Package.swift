@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .library(name: "HFRContent", targets: ["HFRContent"]),
         .library(name: "HFRKit", targets: ["HFRKit"]),
+        .library(name: "HFRReader", targets: ["HFRReader"]),
     ],
     dependencies: [
         // Lecture du HTML de HFR (MIT). Seule dépendance externe du projet.
@@ -23,7 +24,13 @@ let package = Package(
                 .product(name: "SwiftSoup", package: "SwiftSoup"),
             ]
         ),
+        .target(
+            name: "HFRReader",
+            dependencies: ["HFRKit", "HFRContent"],
+            resources: [.copy("Resources")]
+        ),
         .testTarget(name: "HFRContentTests", dependencies: ["HFRContent"]),
+        .testTarget(name: "HFRReaderTests", dependencies: ["HFRReader", "HFRKit"]),
         .testTarget(
             name: "HFRKitTests",
             dependencies: ["HFRKit"],

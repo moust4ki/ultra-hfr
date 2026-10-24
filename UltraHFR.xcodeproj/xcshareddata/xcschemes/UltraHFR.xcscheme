@@ -62,6 +62,17 @@
                ReferencedContainer = "container:Packages/UltraHFRKit">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "HFRReaderTests"
+               BuildableName = "HFRReaderTests"
+               BlueprintName = "HFRReaderTests"
+               ReferencedContainer = "container:Packages/UltraHFRKit">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

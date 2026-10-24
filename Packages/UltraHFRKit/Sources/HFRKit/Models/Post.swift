@@ -23,6 +23,8 @@ public struct Post: Sendable, Hashable, Codable, Identifiable {
     public var signature: MessageBody?
     /// Message deleted by its author or the moderators; the body is HFR's notice.
     public var isDeleted: Bool
+    /// First message of pages 2 and up: HFR repeats the last message of the previous page.
+    public var isRepeatedFromPreviousPage: Bool
     public var links: PostLinks
 
     public init(
@@ -37,6 +39,7 @@ public struct Post: Sendable, Hashable, Codable, Identifiable {
         body: MessageBody,
         signature: MessageBody? = nil,
         isDeleted: Bool = false,
+        isRepeatedFromPreviousPage: Bool = false,
         links: PostLinks = PostLinks()
     ) {
         self.id = id
@@ -50,6 +53,7 @@ public struct Post: Sendable, Hashable, Codable, Identifiable {
         self.body = body
         self.signature = signature
         self.isDeleted = isDeleted
+        self.isRepeatedFromPreviousPage = isRepeatedFromPreviousPage
         self.links = links
     }
 }

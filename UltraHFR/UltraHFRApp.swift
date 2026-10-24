@@ -9,7 +9,7 @@ import SwiftUI
 struct UltraHFRApp: App {
     var body: some Scene {
         WindowGroup {
-            RootView()
+            EssaysView()
         }
     }
 }

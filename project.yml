@@ -37,6 +37,8 @@ targets:
         product: HFRKit
       - package: UltraHFRKit
         product: HFRContent
+      - package: UltraHFRKit
+        product: HFRReader
     settings:
       base:
         PRODUCT_NAME: UltraHFR
@@ -62,4 +64,5 @@ targets:
       testTargets:
         - package: UltraHFRKit/HFRKitTests
         - package: UltraHFRKit/HFRContentTests
+        - package: UltraHFRKit/HFRReaderTests
       gatherCoverageData: true

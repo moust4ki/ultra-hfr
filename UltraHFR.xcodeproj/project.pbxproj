@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6DA468BA93DAD6D0DDE5F9E1 /* HFRKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2DD6E1D92280D706CD860339 /* HFRKit */; };
 		737ADBB3FCB5C6AE15BB3428 /* HFRContent in Frameworks */ = {isa = PBXBuildFile; productRef = 11AC188F2E70BB89103E5999 /* HFRContent */; };
+		E6C73EAD84A17086846872A2 /* HFRReader in Frameworks */ = {isa = PBXBuildFile; productRef = 97B01110700E2620FA15D4E3 /* HFRReader */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 			files = (
 				6DA468BA93DAD6D0DDE5F9E1 /* HFRKit in Frameworks */,
 				737ADBB3FCB5C6AE15BB3428 /* HFRContent in Frameworks */,
+				E6C73EAD84A17086846872A2 /* HFRReader in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +100,7 @@
 			packageProductDependencies = (
 				2DD6E1D92280D706CD860339 /* HFRKit */,
 				11AC188F2E70BB89103E5999 /* HFRContent */,
+				97B01110700E2620FA15D4E3 /* HFRReader */,
 			);
 			productName = UltraHFR;
 			productReference = 6579C8D19B7DB93F1AD8E3D2 /* UltraHFR.app */;
@@ -397,6 +400,10 @@
 		2DD6E1D92280D706CD860339 /* HFRKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = HFRKit;
+		};
+		97B01110700E2620FA15D4E3 /* HFRReader */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HFRReader;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

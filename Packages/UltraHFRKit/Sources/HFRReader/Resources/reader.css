@@ -1,0 +1,53 @@
+/* Ultra HFR — compléments de post.css (maquette « Le Fil ») pour les blocs que la maquette
+   ne détaille pas et pour le défilement continu. */
+
+html { scroll-behavior: auto; }
+/* Room on the right for the page cursor, which sits over the edge of the page. */
+.thread { padding-right: 16px; }
+body { padding-bottom: 120px; -webkit-touch-callout: none; }
+.thread { overflow-x: hidden; }
+
+/* Les pages éloignées ne sont pas calculées tant qu'elles ne sont pas visibles. */
+.topic-page { content-visibility: auto; contain-intrinsic-size: auto 4000px; }
+
+/* Un message suit le geste horizontal (glisser pour citer), le défilement reste vertical. */
+.post { touch-action: pan-y; transition: transform .25s cubic-bezier(.2, .8, .2, 1); background: var(--bg); }
+.post.swiping { transition: none; }
+.post::after { content: ""; position: absolute; top: 50%; left: 0; width: 36px; height: 36px; margin-top: -18px;
+  transform: translateX(calc(-1 * var(--swipe, 0px) + 18px)); opacity: 0; pointer-events: none;
+  background: center / 18px no-repeat url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23606369' d='M4.6 17.4c-.8-.9-1.3-1.9-1.3-3.5 0-2.8 2-5.3 4.8-6.5l.7 1.1c-2.6 1.4-3.1 3.2-3.3 4.4.4-.2 1-.3 1.6-.2 1.5.1 2.6 1.4 2.6 2.9a3 3 0 0 1-3 3c-.9 0-1.8-.4-2.1-1.2Zm10 0c-.8-.9-1.3-1.9-1.3-3.5 0-2.8 2-5.3 4.8-6.5l.7 1.1c-2.6 1.4-3.1 3.2-3.3 4.4.4-.2 1-.3 1.6-.2 1.5.1 2.6 1.4 2.6 2.9a3 3 0 0 1-3 3c-.9 0-1.8-.4-2.1-1.2Z'/></svg>"); }
+.post.swiping::after { opacity: 1; }
+.post.swiping.armed::after { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M4.6 17.4c-.8-.9-1.3-1.9-1.3-3.5 0-2.8 2-5.3 4.8-6.5l.7 1.1c-2.6 1.4-3.1 3.2-3.3 4.4.4-.2 1-.3 1.6-.2 1.5.1 2.6 1.4 2.6 2.9a3 3 0 0 1-3 3c-.9 0-1.8-.4-2.1-1.2Zm10 0c-.8-.9-1.3-1.9-1.3-3.5 0-2.8 2-5.3 4.8-6.5l.7 1.1c-2.6 1.4-3.1 3.2-3.3 4.4.4-.2 1-.3 1.6-.2 1.5.1 2.6 1.4 2.6 2.9a3 3 0 0 1-3 3c-.9 0-1.8-.4-2.1-1.2Z'/></svg>"); }
+.post.quoted .post-head .pseudo::after { content: "  ❝ Cité"; font-size: 12px; font-weight: 600; color: var(--accent); }
+
+/* En-tête : badge « Cité » et mention de modification */
+.post-head .edited-note { color: var(--text-3); }
+
+/* Spoiler en bloc : contenu masqué jusqu'au toucher */
+.spoiler-block { margin: 10px 0; border-radius: 12px; background: var(--surface); padding: 10px 12px; }
+.spoiler-block .spoiler-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.spoiler-block:not(.revealed) .spoiler-content { filter: blur(9px); opacity: .5; user-select: none; pointer-events: none; }
+.spoiler-block:not(.revealed) { cursor: pointer; }
+.spoiler-block .spoiler-content { margin-top: 6px; transition: filter .2s; }
+
+/* [fixed] et [code] */
+.fixed { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: calc(var(--body-size) - 3px);
+  background: var(--surface); border-radius: 10px; padding: 10px 12px; margin: 10px 0; overflow-x: auto; }
+pre.code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: calc(var(--body-size) - 4px);
+  background: var(--surface); border-radius: 10px; padding: 10px 12px; margin: 10px 0; overflow-x: auto; white-space: pre; }
+
+/* Listes */
+.post-body ul { margin: 0 0 .6em; padding-left: 1.3em; }
+.post-body li { margin: .2em 0; }
+
+/* Vidéo : vignette, lecture dans l'app */
+.video { position: relative; display: block; margin: 12px 0; border-radius: 12px; overflow: hidden;
+  aspect-ratio: 16 / 9; background: var(--surface-2) center / cover no-repeat; }
+.video::after { content: "▶"; position: absolute; inset: 0; display: grid; place-items: center;
+  color: #fff; font-size: 28px; text-shadow: 0 1px 8px rgba(0, 0, 0, .5); }
+
+/* Images : place réservée tant qu'elles chargent */
+.post-body img.image { min-height: 60px; background: var(--surface); }
+
+/* Pages en cours de chargement ou en erreur */
+.page-status { padding: 24px var(--page-padding); color: var(--text-2); font-size: 14px; text-align: center; }

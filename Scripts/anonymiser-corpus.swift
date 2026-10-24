@@ -203,6 +203,9 @@ func anonymizedURL(_ url: String) -> String {
 
 let urlAttribute = regex(#"((?:src|href|alt|title)=")(https?://[^"]+)(")"#)
 
+/// Text that HFR itself writes inside message bodies and that parsers rely on.
+let protectedPhrases: Set<String> = ["Reprise du message précédent :"]
+
 /// Scrambles the text of every `<div id="para…">` (message, quotes, signature) except quote
 /// headers ("X a écrit :") and the "edited" block, which the parsers read and which only get
 /// their pseudos replaced.
@@ -242,7 +245,8 @@ func scrambleMessageBodies(_ html: String) -> String {
             } else {
                 let textEnd = html[cursor...].firstIndex(of: "<") ?? html.endIndex
                 let text = html[cursor..<textEnd]
-                output += (editedDepth != nil || inQuoteHeader || inScript) ? String(text) : scrambleText(text)
+                let isKept = editedDepth != nil || inQuoteHeader || inScript || protectedPhrases.contains(text.trimmingCharacters(in: .whitespaces))
+                output += isKept ? String(text) : scrambleText(text)
                 cursor = textEnd
             }
         }
