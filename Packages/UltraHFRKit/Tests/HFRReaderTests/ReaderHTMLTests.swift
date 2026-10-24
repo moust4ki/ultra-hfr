@@ -51,6 +51,12 @@ struct ReaderHTMLTests {
         #expect(ReaderHTML.postDate(older, now: now, calendar: calendar).contains("2013"))
     }
 
+    @Test func bodyClassesFollowTheSettings() {
+        #expect(ReaderStyle().bodyClasses.isEmpty)
+        #expect(ReaderStyle(isCompact: true, showsSignatures: false).bodyClasses == "compact hide-signatures")
+        #expect(ReaderHTML.document(style: ReaderStyle(showsSignatures: false)).contains("<body class=\"hide-signatures\">"))
+    }
+
     @Test func avatarHueIsStable() {
         #expect(ReaderHTML.hue(of: "Kaiju") == ReaderHTML.hue(of: "kaiju"))
     }

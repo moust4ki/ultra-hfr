@@ -40,10 +40,13 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
                 root.style.setProperty('--body-size', size + 'px');
                 root.style.setProperty('--accent', accent);
                 root.style.setProperty('--accent-fill', accentFill);
+                root.style.setProperty('--smiley-scale', smileyScale);
                 document.body.classList.toggle('compact', compact);
+                document.body.classList.toggle('hide-signatures', !signatures);
                 """,
                 ["theme": newStyle.theme.rawValue, "size": newStyle.bodySize, "accent": newStyle.accent,
-                 "accentFill": newStyle.accentFill, "compact": newStyle.isCompact])
+                 "accentFill": newStyle.accentFill, "smileyScale": newStyle.smileyScale,
+                 "compact": newStyle.isCompact, "signatures": newStyle.showsSignatures])
         }
     }
 

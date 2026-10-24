@@ -107,7 +107,9 @@ struct ComposerView: View {
             accent: palette.accent.text.hex,
             accentFill: palette.accent.fill.hex,
             bodySize: UIFont.preferredFont(forTextStyle: .body).pointSize,
-            isCompact: settings.isCompactReading
+            smileyScale: settings.smileyScale,
+            isCompact: settings.isCompactReading,
+            showsSignatures: settings.showsSignatures
         )
     }
 

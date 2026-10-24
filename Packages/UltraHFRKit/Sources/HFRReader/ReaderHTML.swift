@@ -23,7 +23,7 @@ public enum ReaderHTML {
         <style>\(resource("reader", "css"))</style>
         <style>:root { \(style.cssVariables) }</style>
         </head>
-        <body class="\(style.isCompact ? "compact" : "")">
+        <body class="\(style.bodyClasses)">
         <main class="thread" id="thread"></main>
         <script>\(resource("reader", "js"))</script>
         </body>
