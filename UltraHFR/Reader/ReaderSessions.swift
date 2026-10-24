@@ -15,12 +15,12 @@ final class ReaderSessions {
     @ObservationIgnored private var order: [TopicID] = []
     private let capacity = 3
 
-    func model(for route: TopicRoute, client: HFRClient) -> ReaderModel {
+    func model(for route: TopicRoute, client: HFRClient, cache: HTMLPageCache) -> ReaderModel {
         if let existing = models[route.topic] {
             touch(route.topic)
             return existing
         }
-        let model = ReaderModel(route: route, client: client)
+        let model = ReaderModel(route: route, client: client, cache: cache)
         models[route.topic] = model
         touch(route.topic)
         while order.count > capacity {

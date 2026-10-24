@@ -20,4 +20,15 @@ enum ForumTime {
         }
         return date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year(.twoDigits))
     }
+
+    /// "Hors ligne · copie de 01:25", "… copie d'hier", "… copie du 21 oct.".
+    static func offline(since date: Date, now: Date = .now, calendar: Calendar = .current) -> String {
+        if calendar.isDate(date, inSameDayAs: now) {
+            return "Hors ligne · copie de \(date.formatted(.dateTime.hour().minute()))"
+        }
+        if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(date, inSameDayAs: yesterday) {
+            return "Hors ligne · copie d'hier"
+        }
+        return "Hors ligne · copie du \(date.formatted(.dateTime.day().month(.abbreviated)))"
+    }
 }

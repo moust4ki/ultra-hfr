@@ -8,12 +8,25 @@ import SwiftUI
 /// Loading, error and, for the essays, the time taken to read the last page.
 struct ReaderStatusBanner: View {
     let model: ReaderModel
+    /// The offline notice fades after a few seconds, so that it does not hide the messages.
+    @State private var showsOffline = true
 
     var body: some View {
-        if let error = model.errorMessage {
-            ReaderStatusCapsule(text: error, systemImage: "wifi.slash", isPulsing: false)
-        } else if model.loadedPages == nil {
-            ReaderStatusCapsule(text: "Chargement…", systemImage: "arrow.down.circle", isPulsing: true)
+        Group {
+            if let error = model.errorMessage {
+                ReaderStatusCapsule(text: error, systemImage: "wifi.slash", isPulsing: false)
+            } else if let since = model.offlineSince, showsOffline {
+                ReaderStatusCapsule(text: ForumTime.offline(since: since), systemImage: "wifi.slash", isPulsing: false)
+                    .transition(.opacity)
+            } else if model.loadedPages == nil {
+                ReaderStatusCapsule(text: "Chargement…", systemImage: "arrow.down.circle", isPulsing: true)
+            }
+        }
+        .task(id: model.offlineSince) {
+            showsOffline = true
+            guard model.offlineSince != nil else { return }
+            try? await Task.sleep(for: .seconds(5))
+            withAnimation { showsOffline = false }
         }
     }
 }

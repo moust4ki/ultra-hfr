@@ -23,6 +23,9 @@ final class ReaderModel {
     private(set) var loadingPages: Set<Int> = []
     private(set) var quoted: [PostID] = []
     private(set) var errorMessage: String?
+    /// When the page on screen was saved, if HFR could not be reached and the copy kept on the
+    /// device is shown.
+    private(set) var offlineSince: Date?
     /// Time to read the last page (essay S2 on the device).
     private(set) var lastParseDuration: Duration?
     /// Bumped to play a light haptic (swipe to quote reaching its threshold).
@@ -41,6 +44,7 @@ final class ReaderModel {
     /// A link of a message was tapped (topics of the forum open in the app, the rest outside).
     @ObservationIgnored var onOpenLink: ((URL) -> Void)?
     @ObservationIgnored private let client: HFRClient
+    @ObservationIgnored private let cache: HTMLPageCache
     /// HTML of the loaded pages, in order, to rebuild the page when the web view is recreated
     /// (folding or unfolding the iPhone Duo switches layouts).
     @ObservationIgnored private var renderedPages: [(page: Int, html: String)] = []
@@ -52,10 +56,11 @@ final class ReaderModel {
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var pendingOpen: (page: Int, anchor: PostID?)?
 
-    init(route: TopicRoute, client: HFRClient) {
+    init(route: TopicRoute, client: HFRClient, cache: HTMLPageCache) {
         self.route = route
         self.title = route.title
         self.client = client
+        self.cache = cache
     }
 
     /// First display, or a new request for the same topic (another page or message).
@@ -131,7 +136,9 @@ final class ReaderModel {
             ForumPath.topic(category: route.category, topic: route.topic, page: page)
         }
         do {
-            let html = try await client.page(path)
+            let answer = try await client.page(path, cache: cache)
+            let html = answer.content
+            offlineSince = answer.savedAt
             let (topicPage, rendered, duration) = try await Self.parseAndRender(html: html, quoted: Set(quoted), excluding: excluding)
             lastParseDuration = duration
             title = topicPage.title.isEmpty ? title : topicPage.title

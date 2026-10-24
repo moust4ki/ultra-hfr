@@ -18,6 +18,8 @@ final class TopicListModel {
     /// Page that could not be loaded, shown inline with a retry button.
     private(set) var failedPage: Int?
     private(set) var errorMessage: String?
+    /// When the first page shown was saved, if HFR could not be reached.
+    private(set) var offlineSince: Date?
     var filter: TopicFilter = .all
     var showsReadStickies = false
 
@@ -45,34 +47,36 @@ final class TopicListModel {
         return last.page < last.pageCount || !last.isPageCountExact
     }
 
-    func loadFirstPage(using client: HFRClient) async {
+    func loadFirstPage(using client: HFRClient, cache: HTMLPageCache) async {
         guard pages.isEmpty else { return }
-        await load(page: 1, using: client)
+        await load(page: 1, using: client, cache: cache)
     }
 
-    func refresh(using client: HFRClient) async {
+    func refresh(using client: HFRClient, cache: HTMLPageCache) async {
         pages = []
         seenTopics = []
-        await load(page: 1, using: client)
+        await load(page: 1, using: client, cache: cache)
     }
 
-    func loadNextPage(using client: HFRClient) async {
+    func loadNextPage(using client: HFRClient, cache: HTMLPageCache) async {
         guard canLoadMore, failedPage == nil, let last = pages.last else { return }
-        await load(page: last.page + 1, using: client)
+        await load(page: last.page + 1, using: client, cache: cache)
     }
 
-    func retry(using client: HFRClient) async {
+    func retry(using client: HFRClient, cache: HTMLPageCache) async {
         guard let failedPage else { return }
         self.failedPage = nil
-        await load(page: failedPage, using: client)
+        await load(page: failedPage, using: client, cache: cache)
     }
 
-    private func load(page: Int, using client: HFRClient) async {
+    private func load(page: Int, using client: HFRClient, cache: HTMLPageCache) async {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         do {
-            var list = try await client.topicList(path: route.path, page: page)
+            let answer = try await client.topicList(path: route.path, page: page, cache: cache)
+            var list = answer.content
+            if page == 1 { offlineSince = answer.savedAt }
             // Lists move while reading: a topic may come back on the next page.
             list.topics = list.topics.filter { seenTopics.insert($0.id).inserted }
             if list.page == page {
@@ -81,7 +85,13 @@ final class TopicListModel {
             errorMessage = nil
         } catch {
             failedPage = page
-            errorMessage = page == 1 ? "Impossible de charger cette liste." : "Page \(page) non chargée."
+            if page > 1 {
+                errorMessage = "Page \(page) non chargée."
+            } else if case .network = error {
+                errorMessage = "Pas de connexion à HFR, et cette liste n'a pas encore été ouverte sur cet appareil."
+            } else {
+                errorMessage = "Impossible de charger cette liste."
+            }
         }
     }
 }

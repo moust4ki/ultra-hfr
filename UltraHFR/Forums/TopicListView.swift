@@ -18,6 +18,7 @@ struct TopicListView: View {
     @State private var model: TopicListModel
     @Query private var positions: [ReadingPosition]
     @Environment(\.hfrClient) private var client
+    @Environment(\.pageCache) private var pageCache
     @Environment(\.hfrPalette) private var palette
     @Environment(AppNavigation.self) private var navigation
     @Environment(ForumsStore.self) private var forums
@@ -68,10 +69,16 @@ struct TopicListView: View {
                 TopicListPlaceholder(model: model)
             }
         }
-        .refreshable { await model.refresh(using: client) }
+        .overlay(alignment: .bottom) {
+            if let since = model.offlineSince {
+                OfflineBanner(ForumTime.offline(since: since))
+                    .padding(.bottom, 8)
+            }
+        }
+        .refreshable { await model.refresh(using: client, cache: pageCache) }
         .task {
             forums.noteVisit(route)
-            await model.loadFirstPage(using: client)
+            await model.loadFirstPage(using: client, cache: pageCache)
         }
     }
 
@@ -210,6 +217,7 @@ private struct PinnedSummaryRow: View {
 private struct TopicListFooter: View {
     let model: TopicListModel
     @Environment(\.hfrClient) private var client
+    @Environment(\.pageCache) private var pageCache
     @Environment(\.hfrPalette) private var palette
 
     var body: some View {
@@ -218,12 +226,12 @@ private struct TopicListFooter: View {
                 Text("Page \(failed) non chargée")
                     .foregroundStyle(palette.text2.color)
                 Spacer()
-                Button("Réessayer") { Task { await model.retry(using: client) } }
+                Button("Réessayer") { Task { await model.retry(using: client, cache: pageCache) } }
             }
             .font(.subheadline)
         } else if model.canLoadMore {
             SkeletonRow()
-                .task { await model.loadNextPage(using: client) }
+                .task { await model.loadNextPage(using: client, cache: pageCache) }
         }
     }
 }
@@ -232,6 +240,7 @@ private struct TopicListFooter: View {
 private struct TopicListPlaceholder: View {
     let model: TopicListModel
     @Environment(\.hfrClient) private var client
+    @Environment(\.pageCache) private var pageCache
 
     var body: some View {
         if let error = model.errorMessage {
@@ -240,7 +249,7 @@ private struct TopicListPlaceholder: View {
             } description: {
                 Text(error)
             } actions: {
-                Button("Réessayer") { Task { await model.retry(using: client) } }
+                Button("Réessayer") { Task { await model.retry(using: client, cache: pageCache) } }
             }
         } else {
             List(0..<10, id: \.self) { _ in SkeletonRow() }

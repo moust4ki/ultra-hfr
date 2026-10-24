@@ -14,9 +14,10 @@ struct ReaderView: View {
     let route: TopicRoute
     @Environment(ReaderSessions.self) private var sessions
     @Environment(\.hfrClient) private var client
+    @Environment(\.pageCache) private var pageCache
 
     var body: some View {
-        ReaderScreen(route: route, model: sessions.model(for: route, client: client))
+        ReaderScreen(route: route, model: sessions.model(for: route, client: client, cache: pageCache))
     }
 }
 

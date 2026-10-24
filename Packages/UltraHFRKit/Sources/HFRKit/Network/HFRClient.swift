@@ -15,8 +15,11 @@ public actor HFRClient {
 
     private let session: URLSession
     private let limiter = RequestLimiter(limit: 2)
+    /// Every request fails as without a connection (to try the offline states).
+    private let simulatesNoConnection: Bool
 
-    public init() {
+    public init(simulatesNoConnection: Bool = false) {
+        self.simulatesNoConnection = simulatesNoConnection
         let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = nil
         configuration.httpShouldSetCookies = false
@@ -31,6 +34,7 @@ public actor HFRClient {
     /// HFR's own error pages (missing topic…) are returned as pages, not as errors.
     public func page(_ path: String) async throws(HFRClientError) -> String {
         guard let url = URL(string: path, relativeTo: HFRKit.forumURL) else { throw .httpStatus(0) }
+        guard !simulatesNoConnection else { throw .network(URLError.Code.notConnectedToInternet.rawValue) }
         await limiter.acquire()
         let result: (Data, URLResponse)
         do {
@@ -47,6 +51,18 @@ public actor HFRClient {
         }
         // HFR answers in UTF-8; very old pages may still be Latin-1.
         return String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) ?? ""
+    }
+
+    /// A page that is kept on the device, and shown from there when HFR cannot be reached.
+    public func page(_ path: String, cache: HTMLPageCache) async throws(HFRClientError) -> OfflineAwarePage<String> {
+        do {
+            let html = try await page(path)
+            await cache.store(html, for: path)
+            return OfflineAwarePage(content: html)
+        } catch .network(let code) {
+            guard let saved = await cache.page(for: path) else { throw .network(code) }
+            return OfflineAwarePage(content: saved.html, savedAt: saved.savedAt)
+        }
     }
 
     /// A request with an account's cookies; the response carries the cookies after it.
@@ -174,6 +190,14 @@ public actor HFRClient {
     public func topicList(path: String, page: Int) async throws(HFRClientError) -> TopicListPage {
         let html = try await self.page(ForumPath.topicList(path, page: page))
         return try await Self.parse { () throws(HFRParsingError) in try TopicListParser.parse(html: html) }
+    }
+
+    /// Page `page` of a topic list, from the device when HFR cannot be reached.
+    public func topicList(path: String, page: Int, cache: HTMLPageCache) async throws(HFRClientError) -> OfflineAwarePage<TopicListPage> {
+        let answer = try await self.page(ForumPath.topicList(path, page: page), cache: cache)
+        let html = answer.content
+        let list = try await Self.parse { () throws(HFRParsingError) in try TopicListParser.parse(html: html) }
+        return OfflineAwarePage(content: list, savedAt: answer.savedAt)
     }
 
     /// Parsing runs off the client actor so that one slow page never holds other requests.
