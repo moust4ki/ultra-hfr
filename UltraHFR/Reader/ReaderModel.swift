@@ -62,6 +62,15 @@ final class ReaderModel {
     @ObservationIgnored private var pendingOpen: (page: Int, anchor: PostID?)?
     /// Last message read when the topic was opened, until the page with the next one is shown.
     @ObservationIgnored private var pendingNewMarker: PostID?
+    /// What to do again after a page could not be loaded.
+    @ObservationIgnored private var retryAction: RetryAction?
+
+    private enum RetryAction {
+        case open(page: Int, anchor: PostID?)
+        case next
+        case previous
+        case lastMessage
+    }
 
     init(route: TopicRoute, client: HFRClient, cache: HTMLPageCache) {
         self.route = route
@@ -100,7 +109,11 @@ final class ReaderModel {
             return
         }
         Task {
-            guard let (topicPage, html) = await load(page, excluding: [], anchor: anchor) else { return }
+            guard let (topicPage, html) = await load(page, excluding: [], anchor: anchor) else {
+                retryAction = .open(page: page, anchor: anchor)
+                return
+            }
+            retryAction = nil
             renderedPosts = Set(topicPage.posts.map(\.id))
             renderedPages = [(topicPage.page, html)]
             loadedPages = topicPage.page...topicPage.page
@@ -119,8 +132,12 @@ final class ReaderModel {
         guard let range = loadedPages, let pageCount, range.upperBound < pageCount,
               !loadingPages.contains(range.upperBound + 1) else { return }
         Task {
-            guard let (topicPage, html) = await load(range.upperBound + 1, excluding: renderedPosts),
-                  let current = loadedPages, topicPage.page == current.upperBound + 1 else { return }
+            guard let (topicPage, html) = await load(range.upperBound + 1, excluding: renderedPosts) else {
+                retryAction = .next
+                return
+            }
+            guard let current = loadedPages, topicPage.page == current.upperBound + 1 else { return }
+            retryAction = nil
             renderedPosts.formUnion(topicPage.posts.map(\.id))
             renderedPages.append((topicPage.page, html))
             loadedPages = current.lowerBound...topicPage.page
@@ -132,8 +149,12 @@ final class ReaderModel {
         guard let range = loadedPages, range.lowerBound > 1,
               !loadingPages.contains(range.lowerBound - 1) else { return }
         Task {
-            guard let (topicPage, html) = await load(range.lowerBound - 1, excluding: renderedPosts),
-                  let current = loadedPages, topicPage.page == current.lowerBound - 1 else { return }
+            guard let (topicPage, html) = await load(range.lowerBound - 1, excluding: renderedPosts) else {
+                retryAction = .previous
+                return
+            }
+            guard let current = loadedPages, topicPage.page == current.lowerBound - 1 else { return }
+            retryAction = nil
             renderedPosts.formUnion(topicPage.posts.map(\.id))
             renderedPages.insert((topicPage.page, html), at: 0)
             loadedPages = topicPage.page...current.upperBound
@@ -278,6 +299,18 @@ final class ReaderModel {
         open(page: page, anchor: post)
     }
 
+    /// Loads again the page that failed (the page script does not ask twice for the same edge).
+    func retry() {
+        guard let action = retryAction else { return }
+        errorMessage = nil
+        switch action {
+        case .open(let page, let anchor): open(page: page, anchor: anchor)
+        case .next: loadNext()
+        case .previous: loadPrevious()
+        case .lastMessage: openLastMessage()
+        }
+    }
+
     func jump(to page: Int) {
         pendingNewMarker = nil
         open(page: page)
@@ -312,7 +345,11 @@ final class ReaderModel {
             return
         }
         Task {
-            guard let (topicPage, html) = await load(TopicRoute.lastPage, excluding: []) else { return }
+            guard let (topicPage, html) = await load(TopicRoute.lastPage, excluding: []) else {
+                retryAction = .lastMessage
+                return
+            }
+            retryAction = nil
             renderedPosts = Set(topicPage.posts.map(\.id))
             renderedPages = [(topicPage.page, html)]
             loadedPages = topicPage.page...topicPage.page

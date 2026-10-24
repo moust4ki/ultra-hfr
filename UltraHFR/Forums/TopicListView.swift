@@ -42,15 +42,29 @@ struct TopicListView: View {
                     Text(pages)
                 }
             }
-            ForEach(model.pages, id: \.page) { page in
+            let pageRows = model.pages.map { ($0, rows(of: $0, positionsByTopic: positionsByTopic)) }
+            ForEach(pageRows, id: \.0.page) { page, rows in
                 TopicListPageSection(
                     page: page,
-                    rows: rows(of: page, positionsByTopic: positionsByTopic),
+                    rows: rows,
                     showsReadStickies: $model.showsReadStickies,
                     open: open
                 )
             }
-            TopicListFooter(model: model)
+            if model.filter != .all, !model.pages.isEmpty, pageRows.allSatisfy({ $0.1.isEmpty }) {
+                ContentUnavailableView {
+                    Label("Aucun sujet non lu", systemImage: "checkmark.circle")
+                } description: {
+                    Text(model.pages.count == 1 ? "Rien de nouveau sur la première page." : "Rien de nouveau sur les \(model.pages.count) pages chargées.")
+                } actions: {
+                    Button("Afficher tous les sujets") { model.filter = .all }
+                        .buttonStyle(.bordered)
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+            }
+            // A filter may hide every topic of a page: no automatic loading then, to stay polite.
+            TopicListFooter(model: model, loadsAutomatically: model.filter == .all)
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -216,6 +230,7 @@ private struct PinnedSummaryRow: View {
 /// End of the list: next page loading, its error, or nothing.
 private struct TopicListFooter: View {
     let model: TopicListModel
+    let loadsAutomatically: Bool
     @Environment(\.hfrClient) private var client
     @Environment(\.pageCache) private var pageCache
     @Environment(\.hfrPalette) private var palette
@@ -229,9 +244,14 @@ private struct TopicListFooter: View {
                 Button("Réessayer") { Task { await model.retry(using: client, cache: pageCache) } }
             }
             .font(.subheadline)
-        } else if model.canLoadMore {
+        } else if model.canLoadMore, loadsAutomatically || model.isLoading {
             SkeletonRow()
                 .task { await model.loadNextPage(using: client, cache: pageCache) }
+        } else if model.canLoadMore, let last = model.pages.last {
+            Button("Charger la page \((last.page + 1).formatted())", systemImage: "arrow.down") {
+                Task { await model.loadNextPage(using: client, cache: pageCache) }
+            }
+            .font(.subheadline)
         }
     }
 }

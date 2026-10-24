@@ -14,7 +14,12 @@ struct ReaderStatusBanner: View {
     var body: some View {
         Group {
             if let error = model.errorMessage {
-                ReaderStatusCapsule(text: error, systemImage: "wifi.slash", isPulsing: false)
+                Button(action: model.retry) {
+                    ReaderStatusCapsule(text: "\(error) · Réessayer", systemImage: "arrow.clockwise", isPulsing: false)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(error)
+                .accessibilityHint("Réessaie de charger la page")
             } else if let since = model.offlineSince, showsOffline {
                 ReaderStatusCapsule(text: ForumTime.offline(since: since), systemImage: "wifi.slash", isPulsing: false)
                     .transition(.opacity)
