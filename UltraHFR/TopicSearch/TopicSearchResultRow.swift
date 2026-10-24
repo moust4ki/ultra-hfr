@@ -23,6 +23,16 @@ struct TopicSearchResultRow: View {
                     .bold()
                     .foregroundStyle(palette.text.color)
                 Spacer()
+                if post.quoteCount > 0 {
+                    HStack(spacing: 2) {
+                        Image(systemName: "quote.opening")
+                            .imageScale(.small)
+                        Text(post.quoteCount.formatted())
+                    }
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(palette.accent.text.color)
+                        .accessibilityLabel(post.quoteCount == 1 ? "Cité 1 fois" : "Cité \(post.quoteCount) fois")
+                }
                 if let date = post.postedAt {
                     Text(date.formatted(date: .abbreviated, time: .shortened))
                         .font(.footnote)

@@ -4,6 +4,11 @@
 //
 
 extension MessageBody {
+    /// The message shows at least one image of its own (quotes left out).
+    public var hasImages: Bool {
+        blocks.contains(where: \.hasImages)
+    }
+
     /// The message as plain text, for excerpts: quotes left out unless asked for, spoilers
     /// hidden, smileys and images dropped.
     public func plainText(includingQuotes: Bool = false) -> String {
@@ -40,6 +45,27 @@ private struct PlainTextWriter {
         case .lineBreak: "\n"
         case .styled(_, let inlines), .colored(_, let inlines), .link(_, let inlines): text(of: inlines)
         case .smiley, .image: ""
+        }
+    }
+}
+
+private extension ContentBlock {
+    var hasImages: Bool {
+        switch self {
+        case .paragraph(let inlines): inlines.contains(where: \.hasImages)
+        case .spoiler(let blocks), .fixed(let blocks): blocks.contains(where: \.hasImages)
+        case .list(let items): items.contains { $0.contains(where: \.hasImages) }
+        case .quote, .code, .unsupported: false
+        }
+    }
+}
+
+private extension ContentInline {
+    var hasImages: Bool {
+        switch self {
+        case .image: true
+        case .styled(_, let inlines), .colored(_, let inlines), .link(_, let inlines): inlines.contains(where: \.hasImages)
+        case .text, .lineBreak, .smiley: false
         }
     }
 }

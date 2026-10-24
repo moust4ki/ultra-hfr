@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import HFRContent
 import HFRKit
 import Observation
 
@@ -26,6 +27,22 @@ final class TopicSearchModel {
     private(set) var errorMessage: String?
     /// The search the results belong to (the fields may have changed since).
     private(set) var current: TopicSearch?
+    /// « Les plus cités » (« Le Fil », E2): most quoted first, on the results received.
+    var sortsByQuotes = false
+    /// « Avec images »: only the messages showing an image.
+    var onlyWithImages = false
+
+    /// Results as shown, after the local filter and order.
+    var shownResults: [Post] {
+        var posts = onlyWithImages ? results.filter(\.body.hasImages) : results
+        if sortsByQuotes {
+            // Stable: equally quoted messages keep the topic order.
+            posts = posts.enumerated()
+                .sorted { ($0.element.quoteCount, -$0.offset) > ($1.element.quoteCount, -$1.offset) }
+                .map(\.element)
+        }
+        return posts
+    }
 
     init(category: CategoryID, topic: TopicID, pseudo: String = "", start: TopicSearchStart? = nil) {
         self.category = category
@@ -51,6 +68,12 @@ final class TopicSearchModel {
         current = query
         await load(query, using: client)
     }
+
+    #if DEBUG
+    func setResultsForTesting(_ posts: [Post]) {
+        results = posts
+    }
+    #endif
 
     func clear() {
         results = []

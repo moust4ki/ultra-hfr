@@ -128,12 +128,28 @@ private struct TopicSearchChips: View {
                         model.searchesFromStart.toggle()
                         changed()
                     } label: {
-                        Text("Depuis la p. \(start.page.formatted())")
+                        Text("Depuis p. \(start.page.formatted())")
                             .chipStyle(isSelected: model.searchesFromStart, palette: palette)
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(model.searchesFromStart ? .isSelected : [])
                 }
+                Button {
+                    model.sortsByQuotes.toggle()
+                } label: {
+                    Text("Les plus cités")
+                        .chipStyle(isSelected: model.sortsByQuotes, palette: palette)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(model.sortsByQuotes ? .isSelected : [])
+                Button {
+                    model.onlyWithImages.toggle()
+                } label: {
+                    Text("Avec images")
+                        .chipStyle(isSelected: model.onlyWithImages, palette: palette)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(model.onlyWithImages ? .isSelected : [])
             }
             .padding(.horizontal, 1)
         }
@@ -169,9 +185,10 @@ private struct TopicSearchResults: View {
         }
         if model.current != nil {
             Section {
-                ForEach(model.results.enumerated(), id: \.element.id) { index, post in
+                let shown = model.shownResults
+                ForEach(shown.enumerated(), id: \.element.id) { index, post in
                     Button {
-                        open(TopicSearchSelection(posts: model.results.map(\.id), index: index, words: model.highlightedWords))
+                        open(TopicSearchSelection(posts: shown.map(\.id), index: index, words: model.highlightedWords))
                     } label: {
                         TopicSearchResultRow(post: post, words: model.highlightedWords)
                             .contentShape(.rect)
@@ -191,13 +208,17 @@ private struct TopicSearchResults: View {
                 } else if model.results.isEmpty, model.errorMessage == nil {
                     Text("Aucun message trouvé.")
                         .foregroundStyle(palette.text2.color)
+                } else if shown.isEmpty, model.errorMessage == nil {
+                    Text("Aucun de ces messages ne contient d'image.")
+                        .foregroundStyle(palette.text2.color)
                 } else if model.errorMessage == nil {
                     Text("Fin des résultats.")
                         .foregroundStyle(palette.text3.color)
                 }
             } header: {
-                if !model.results.isEmpty {
-                    Text(model.results.count == 1 ? "1 message" : "\(model.results.count.formatted()) messages")
+                let count = model.shownResults.count
+                if count > 0 {
+                    Text(count == 1 ? "1 message" : "\(count.formatted()) messages")
                 }
             }
         }
