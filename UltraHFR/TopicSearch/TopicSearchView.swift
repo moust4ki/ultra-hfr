@@ -12,14 +12,14 @@ import SwiftUI
 
 struct TopicSearchView: View {
     let title: String
-    let open: (PostID) -> Void
+    let open: (TopicSearchSelection) -> Void
     @State private var model: TopicSearchModel
     @State private var isPseudoPromptShown = false
     @State private var pseudoDraft = ""
     @Environment(\.hfrClient) private var client
     @Environment(\.dismiss) private var dismiss
 
-    init(category: CategoryID, topic: TopicID, title: String, request: TopicSearchRequest, open: @escaping (PostID) -> Void) {
+    init(category: CategoryID, topic: TopicID, title: String, request: TopicSearchRequest, open: @escaping (TopicSearchSelection) -> Void) {
         self.title = title
         self.open = open
         _model = State(initialValue: TopicSearchModel(category: category, topic: topic, pseudo: request.pseudo, start: request.start))
@@ -67,7 +67,13 @@ struct TopicSearchView: View {
                 }
             }
             .task {
-                if !model.pseudo.isEmpty {
+                #if DEBUG
+                // Simulator checks: SIMCTL_CHILD_ULTRAHFR_TOPIC_SEARCH=mot xcrun simctl launch …
+                if let preset = ProcessInfo.processInfo.environment["ULTRAHFR_TOPIC_SEARCH"], model.pseudo.isEmpty {
+                    model.word = preset
+                }
+                #endif
+                if !model.query.isEmpty {
                     await model.search(using: client)
                 }
             }
@@ -150,7 +156,7 @@ private extension View {
 /// The messages found, the next batch, or why there is nothing.
 private struct TopicSearchResults: View {
     let model: TopicSearchModel
-    let open: (PostID) -> Void
+    let open: (TopicSearchSelection) -> Void
     @Environment(\.hfrClient) private var client
     @Environment(\.hfrPalette) private var palette
 
@@ -163,9 +169,9 @@ private struct TopicSearchResults: View {
         }
         if model.current != nil {
             Section {
-                ForEach(model.results) { post in
+                ForEach(model.results.enumerated(), id: \.element.id) { index, post in
                     Button {
-                        open(post.id)
+                        open(TopicSearchSelection(posts: model.results.map(\.id), index: index, words: model.highlightedWords))
                     } label: {
                         TopicSearchResultRow(post: post, words: model.highlightedWords)
                             .contentShape(.rect)

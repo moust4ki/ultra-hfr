@@ -39,6 +39,8 @@ final class ReaderModel {
     var topicSearch: TopicSearchRequest?
     /// A member's profile, open.
     var presentedProfile: ProfileRequest?
+    /// Messages found by « Rechercher dans le sujet », gone through one by one.
+    private(set) var searchSelection: TopicSearchSelection?
 
     @ObservationIgnored weak var driver: ReaderPageDriver?
     /// Called when the last message read changes: its page, the page count, the message and
@@ -107,6 +109,9 @@ final class ReaderModel {
             let isTopicStart = topicPage.page == 1 && anchor == topicPage.posts.first?.id
             await driver?.replace(html: html, anchor: isTopicStart ? nil : anchor)
             await driver?.setLocked(route.isLocked)
+            if let selection = searchSelection, renderedPosts.contains(selection.current) {
+                await driver?.highlight(post: selection.current, words: selection.words)
+            }
         }
     }
 
@@ -278,14 +283,26 @@ final class ReaderModel {
         open(page: page)
     }
 
-    /// A message found by the topic search: scrolled to when it is on the loaded pages,
-    /// otherwise its page is opened.
-    func show(post id: PostID) {
+    /// A message found by the topic search: highlighted and scrolled to when it is on the
+    /// loaded pages, otherwise its page is opened.
+    func show(_ selection: TopicSearchSelection) {
+        searchSelection = selection
+        let id = selection.current
         if renderedPosts.contains(id) {
-            Task { await driver?.scrollTo(post: id) }
+            Task { await driver?.highlight(post: id, words: selection.words) }
         } else {
             open(page: postPages[id] ?? TopicRoute.pageOfAnchor, anchor: id)
         }
+    }
+
+    func moveInSearch(by offset: Int) {
+        guard let selection = searchSelection else { return }
+        show(selection.moved(by: offset))
+    }
+
+    func closeSearch() {
+        searchSelection = nil
+        Task { await driver?.highlight(post: nil, words: "") }
     }
 
     /// The last message of the topic (the last page may have grown since it was loaded).

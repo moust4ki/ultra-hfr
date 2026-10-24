@@ -71,6 +71,10 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         await run("reader.scrollToPost(id)", ["id": post.rawValue])
     }
 
+    func highlight(post: PostID?, words: String) async {
+        await run("reader.highlight(id, words)", ["id": post?.rawValue ?? 0, "words": words])
+    }
+
     /// No swipe to quote in a locked topic.
     func setLocked(_ isLocked: Bool) async {
         await run("document.body.classList.toggle('locked', locked)", ["locked": isLocked])

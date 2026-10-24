@@ -13,4 +13,5 @@ protocol ReaderPageDriver: AnyObject {
     func setQuoted(_ posts: [PostID]) async
     func scrollTo(post: PostID) async
     func setLocked(_ isLocked: Bool) async
+    func highlight(post: PostID?, words: String) async
 }

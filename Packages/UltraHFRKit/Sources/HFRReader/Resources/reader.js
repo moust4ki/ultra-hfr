@@ -69,10 +69,52 @@
       }
     },
 
+    /** Marks the message found by a search and the searched words in it; `id` 0 clears. */
+    highlight(id, words) {
+      for (const post of document.querySelectorAll(".post.search-hit")) post.classList.remove("search-hit");
+      for (const mark of document.querySelectorAll("mark[data-search]")) {
+        const parent = mark.parentNode;
+        mark.replaceWith(document.createTextNode(mark.textContent));
+        parent.normalize();
+      }
+      const post = id ? document.getElementById("t" + id) : null;
+      if (!post) return;
+      post.classList.add("search-hit");
+      const terms = words.split(/\s+/).filter((word) => word.length >= 2)
+        .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+      const body = post.querySelector(".post-body");
+      if (terms.length && body) markTerms(body, new RegExp(terms.join("|"), "giu"));
+      reader.scrollToPost(id);
+    },
+
     setTopInset(value) {
       document.documentElement.style.setProperty("--top-inset", value + "px");
     },
   };
+
+  function markTerms(root, pattern) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const node of nodes) {
+      const text = node.nodeValue;
+      pattern.lastIndex = 0;
+      if (!pattern.test(text)) continue;
+      pattern.lastIndex = 0;
+      const fragment = document.createDocumentFragment();
+      let last = 0;
+      for (const match of text.matchAll(pattern)) {
+        fragment.append(text.slice(last, match.index));
+        const mark = document.createElement("mark");
+        mark.dataset.search = "";
+        mark.textContent = match[0];
+        fragment.append(mark);
+        last = match.index + match[0].length;
+      }
+      fragment.append(text.slice(last));
+      node.replaceWith(fragment);
+    }
+  }
 
   function topInset() {
     return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--top-inset")) || 0;

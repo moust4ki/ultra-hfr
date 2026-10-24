@@ -39,9 +39,7 @@ struct TopicSearchResultRow: View {
     }
 
     private var excerpt: String {
-        let text = post.body.plainText()
-            .split(whereSeparator: \.isWhitespace)
-            .joined(separator: " ")
+        let text = SearchExcerpt.excerpt(of: post.body.plainText(), around: words)
         return text.isEmpty ? "(citation, image ou smiley)" : text
     }
 }

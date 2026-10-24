@@ -47,7 +47,11 @@ private struct ReaderScreen: View {
             }
             .overlay(alignment: .bottom) {
                 Group {
-                    if !model.quoted.isEmpty {
+                    if let selection = model.searchSelection {
+                        SearchResultsCapsule(selection: selection, move: { model.moveInSearch(by: $0) }, close: { model.closeSearch() })
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else if !model.quoted.isEmpty {
                         QuoteTray(authors: model.quotedAuthors, clear: { model.clearQuotes() }, reply: {
                             composer = ComposerRequest(quotes: model.quotedBBCode, authors: model.authorsOfLoadedPosts)
                         })
@@ -65,6 +69,7 @@ private struct ReaderScreen: View {
                 ReaderStatusBanner(model: model)
             }
             .animation(.smooth, value: model.quoted.isEmpty)
+            .animation(.smooth, value: model.searchSelection == nil)
             .sensoryFeedback(.impact(weight: .light), trigger: model.swipeHapticTrigger)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -121,7 +126,7 @@ private struct ReaderScreen: View {
             .sheet(item: Binding(get: { model.topicSearch }, set: { model.topicSearch = $0 })) { request in
                 TopicSearchView(category: route.category, topic: route.topic, title: model.title, request: request) { post in
                     model.topicSearch = nil
-                    model.show(post: post)
+                    model.show(post)
                 }
             }
             .sheet(item: Binding(get: { model.presentedProfile }, set: { model.presentedProfile = $0 })) { request in
