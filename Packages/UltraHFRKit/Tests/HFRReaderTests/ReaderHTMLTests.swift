@@ -42,6 +42,16 @@ struct ReaderHTMLTests {
         #expect(!ReaderHTML.page(page, newAfter: 104).contains("new-marker\" id"))
     }
 
+    @Test func lastPageEndsWithTheUpToDateCard() {
+        let posts = [Post(id: 1, author: "a", body: MessageBody(blocks: [.paragraph([.text("x")])]))]
+        let last = TopicPage(topicID: 1, categoryID: 1, title: "Sujet", page: 3, pageCount: 3, posts: posts)
+        let middle = TopicPage(topicID: 1, categoryID: 1, title: "Sujet", page: 2, pageCount: 3, posts: posts)
+        #expect(ReaderHTML.page(last).contains("class=\"topic-end\""))
+        #expect(!ReaderHTML.page(middle).contains("class=\"topic-end\""))
+        // Messages added to a page already shown: no second divider.
+        #expect(!ReaderHTML.page(last, continuing: true).contains("page-divider"))
+    }
+
     @Test func olderMessagesShowTheirYear() throws {
         let calendar = Calendar(identifier: .gregorian)
         let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 25)))

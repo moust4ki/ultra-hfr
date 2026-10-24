@@ -162,7 +162,27 @@ final class ReaderModel {
         }
     }
 
-    private func load(_ page: Int, excluding: Set<PostID>, anchor: PostID? = nil) async -> (TopicPage, String)? {
+    /// The last page again, for the messages posted since it was shown.
+    func checkForNewMessages() {
+        guard let range = loadedPages, !loadingPages.contains(range.upperBound) else { return }
+        let lastPage = range.upperBound
+        Task {
+            guard let (topicPage, html) = await load(lastPage, excluding: renderedPosts, continuing: true) else {
+                await driver?.endChecked("Réessayer")
+                return
+            }
+            let newPosts = topicPage.posts.filter { !renderedPosts.contains($0.id) }
+            guard !newPosts.isEmpty else {
+                await driver?.endChecked("Rien de nouveau · Vérifier encore")
+                return
+            }
+            renderedPosts.formUnion(newPosts.map(\.id))
+            renderedPages.append((topicPage.page, html))
+            await driver?.append(html: html)
+        }
+    }
+
+    private func load(_ page: Int, excluding: Set<PostID>, anchor: PostID? = nil, continuing: Bool = false) async -> (TopicPage, String)? {
         loadingPages.insert(page)
         defer { loadingPages.remove(page) }
         let path = if page == TopicRoute.pageOfAnchor, let anchor {
@@ -174,7 +194,9 @@ final class ReaderModel {
             let answer = try await client.page(path, cache: cache)
             let html = answer.content
             offlineSince = answer.savedAt
-            let (topicPage, rendered, duration) = try await Self.parseAndRender(html: html, quoted: Set(quoted), excluding: excluding, newAfter: pendingNewMarker)
+            let (topicPage, rendered, duration) = try await Self.parseAndRender(
+                html: html, quoted: Set(quoted), excluding: excluding, newAfter: pendingNewMarker, continuing: continuing
+            )
             if let marker = pendingNewMarker, topicPage.posts.contains(where: { $0.id.rawValue > marker.rawValue }) {
                 pendingNewMarker = nil
             }
@@ -196,14 +218,16 @@ final class ReaderModel {
 
     /// Off the main actor: reading the page and building its HTML.
     @concurrent
-    private nonisolated static func parseAndRender(html: String, quoted: Set<PostID>, excluding: Set<PostID>, newAfter: PostID?) async throws -> (TopicPage, String, Duration) {
+    private nonisolated static func parseAndRender(
+        html: String, quoted: Set<PostID>, excluding: Set<PostID>, newAfter: PostID?, continuing: Bool
+    ) async throws -> (TopicPage, String, Duration) {
         let clock = ContinuousClock()
         var page: TopicPage?
         let duration = try clock.measure {
             page = try TopicPageParser.parse(html: html)
         }
         guard let page else { throw HFRParsingError.unexpectedPage }
-        return (page, ReaderHTML.page(page, quoted: quoted, excluding: excluding, newAfter: newAfter), duration)
+        return (page, ReaderHTML.page(page, quoted: quoted, excluding: excluding, newAfter: newAfter, continuing: continuing), duration)
     }
 
     private static func message(for error: any Error) -> String {

@@ -74,6 +74,10 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         await run("reader.scrollToPost(id)", ["id": post.rawValue])
     }
 
+    func endChecked(_ message: String) async {
+        await run("reader.endChecked(message)", ["message": message])
+    }
+
     func highlight(post: PostID?, words: String) async {
         await run("reader.highlight(id, words)", ["id": post?.rawValue ?? 0, "words": words])
     }
@@ -117,6 +121,8 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
                 let seenPage = (body["seenPage"] as? NSNumber)?.intValue ?? page
                 model.didShow(post: post, page: page, seen: seen, seenPage: seenPage)
             }
+        case "refresh":
+            model.checkForNewMessages()
         case "haptic":
             model.swipeReachedThreshold()
         case "toggleQuote":

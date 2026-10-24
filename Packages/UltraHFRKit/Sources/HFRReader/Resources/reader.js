@@ -35,6 +35,8 @@
     },
 
     append(html) {
+      // The topic grew: the end card moves to the new end.
+      for (const end of document.querySelectorAll(".topic-end")) end.remove();
       thread().insertAdjacentHTML("beforeend", html);
       nearEndSent = false;
       changed();
@@ -85,6 +87,15 @@
       const body = post.querySelector(".post-body");
       if (terms.length && body) markTerms(body, new RegExp(terms.join("|"), "giu"));
       reader.scrollToPost(id);
+    },
+
+    /** Nothing new after a check: the end card says so. */
+    endChecked(message) {
+      const end = document.querySelector(".topic-end");
+      if (!end) return;
+      end.classList.remove("checking");
+      const button = end.querySelector(".topic-refresh");
+      if (button) button.textContent = message;
     },
 
     setTopInset(value) {
@@ -285,6 +296,13 @@
       if (!reader.scrollToPost(id)) {
         send({ type: "openQuotedPost", post: id, path: quoteLink.getAttribute("href") });
       }
+      return;
+    }
+    const refresh = event.target.closest(".topic-refresh");
+    if (refresh) {
+      refresh.closest(".topic-end")?.classList.add("checking");
+      refresh.textContent = "Vérification…";
+      send({ type: "refresh" });
       return;
     }
     const expand = event.target.closest(".quote-expand");
