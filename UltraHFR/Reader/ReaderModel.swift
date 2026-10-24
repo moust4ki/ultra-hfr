@@ -13,7 +13,8 @@ import Observation
 
 @Observable
 final class ReaderModel {
-    let topic: EssayTopic
+    /// The last request: topic, page and message to show.
+    private(set) var route: TopicRoute
     private(set) var title: String
     private(set) var pageCount: Int?
     private(set) var visiblePage: Int?
@@ -27,16 +28,35 @@ final class ReaderModel {
     private(set) var swipeHapticTrigger = 0
 
     @ObservationIgnored weak var driver: ReaderPageDriver?
-    @ObservationIgnored private let client = HFRClient()
+    /// Called when the message at the top of the screen changes: page, page count, message, author.
+    @ObservationIgnored var onPositionChange: ((Int, Int, PostID, String) -> Void)?
+    @ObservationIgnored private let client: HFRClient
+    /// HTML of the loaded pages, in order, to rebuild the page when the web view is recreated
+    /// (folding or unfolding the iPhone Duo switches layouts).
+    @ObservationIgnored private var renderedPages: [(page: Int, html: String)] = []
+    @ObservationIgnored private(set) var lastVisiblePost: PostID?
     @ObservationIgnored private var posts: [PostID: Post] = [:]
     /// Messages in the page, so that HFR's repeat of a page's last message is not shown twice.
     @ObservationIgnored private var renderedPosts: Set<PostID> = []
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var pendingOpen: (page: Int, anchor: PostID?)?
 
-    init(topic: EssayTopic) {
-        self.topic = topic
-        self.title = topic.title
+    init(route: TopicRoute, client: HFRClient) {
+        self.route = route
+        self.title = route.title
+        self.client = client
+    }
+
+    /// First display, or a new request for the same topic (another page or message).
+    func show(_ newRoute: TopicRoute) {
+        if loadedPages != nil, newRoute == route { return }
+        route = newRoute
+        open(page: newRoute.page, anchor: newRoute.anchor)
+    }
+
+    /// A new web view took over: wait for its "ready" before talking to it.
+    func driverAttached() {
+        isReady = false
     }
 
     var quotedAuthors: [String] {
@@ -58,6 +78,7 @@ final class ReaderModel {
         Task {
             guard let (topicPage, html) = await load(page, excluding: []) else { return }
             renderedPosts = Set(topicPage.posts.map(\.id))
+            renderedPages = [(topicPage.page, html)]
             loadedPages = topicPage.page...topicPage.page
             visiblePage = topicPage.page
             await driver?.replace(html: html, anchor: anchor)
@@ -71,6 +92,7 @@ final class ReaderModel {
             guard let (topicPage, html) = await load(range.upperBound + 1, excluding: renderedPosts),
                   let current = loadedPages, topicPage.page == current.upperBound + 1 else { return }
             renderedPosts.formUnion(topicPage.posts.map(\.id))
+            renderedPages.append((topicPage.page, html))
             loadedPages = current.lowerBound...topicPage.page
             await driver?.append(html: html)
         }
@@ -83,6 +105,7 @@ final class ReaderModel {
             guard let (topicPage, html) = await load(range.lowerBound - 1, excluding: renderedPosts),
                   let current = loadedPages, topicPage.page == current.lowerBound - 1 else { return }
             renderedPosts.formUnion(topicPage.posts.map(\.id))
+            renderedPages.insert((topicPage.page, html), at: 0)
             loadedPages = topicPage.page...current.upperBound
             await driver?.prepend(html: html)
         }
@@ -92,7 +115,7 @@ final class ReaderModel {
         loadingPages.insert(page)
         defer { loadingPages.remove(page) }
         do {
-            let html = try await client.page("/forum2.php?config=hfr.inc&cat=\(topic.category)&post=\(topic.topic)&page=\(page)&p=1")
+            let html = try await client.page(ForumPath.topic(category: route.category, topic: route.topic, page: page))
             let (topicPage, rendered, duration) = try await Self.parseAndRender(html: html, quoted: Set(quoted), excluding: excluding)
             lastParseDuration = duration
             title = topicPage.title.isEmpty ? title : topicPage.title
@@ -138,11 +161,20 @@ final class ReaderModel {
         if let pendingOpen {
             self.pendingOpen = nil
             open(page: pendingOpen.page, anchor: pendingOpen.anchor)
+        } else if !renderedPages.isEmpty {
+            // Same topic in a new web view: show the same pages at the same message.
+            let html = renderedPages.map(\.html).joined()
+            let anchor = lastVisiblePost
+            Task { await driver?.replace(html: html, anchor: anchor) }
         }
     }
 
     func didShow(post: PostID, page: Int) {
         visiblePage = page
+        lastVisiblePost = post
+        if let author = posts[post]?.author {
+            onPositionChange?(page, pageCount ?? page, post, author)
+        }
     }
 
     func swipeReachedThreshold() {
@@ -166,7 +198,7 @@ final class ReaderModel {
 
     /// A quote header was tapped and its message is not on the loaded pages.
     func openQuotedPost(_ post: PostID, path: String?) {
-        guard let page = path.flatMap(Self.pageNumber(in:)) else { return }
+        guard let page = path.flatMap(ForumPath.topicPageNumber(in:)) else { return }
         open(page: page, anchor: post)
     }
 
@@ -174,15 +206,9 @@ final class ReaderModel {
         open(page: page)
     }
 
-    /// Page number of a forum path such as `/hfr/…-sujet_1061629_348.htm#t11405947`.
-    static func pageNumber(in path: String) -> Int? {
-        guard let end = path.range(of: ".htm")?.lowerBound,
-              let start = path[..<end].lastIndex(of: "_") else { return nil }
-        return Int(path[path.index(after: start)..<end])
-    }
 
     /// Address of a message on the forum, for "Copier le lien".
     func permalink(of post: PostID) -> URL? {
-        URL(string: "/forum2.php?config=hfr.inc&cat=\(topic.category)&post=\(topic.topic)&numreponse=\(post)#t\(post)", relativeTo: HFRKit.forumURL)?.absoluteURL
+        URL(string: "/forum2.php?config=hfr.inc&cat=\(route.category)&post=\(route.topic)&numreponse=\(post)#t\(post)", relativeTo: HFRKit.forumURL)?.absoluteURL
     }
 }

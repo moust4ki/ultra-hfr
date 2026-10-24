@@ -32,6 +32,6 @@ public struct ReaderStyle: Sendable, Hashable {
     }
 
     var cssVariables: String {
-        "--body-size: \(bodySize)px; --smiley-scale: \(smileyScale);"
+        "--body-size: \(bodySize)px; --smiley-scale: \(smileyScale); --accent: \(accent); --accent-fill: \(accentFill);"
     }
 }

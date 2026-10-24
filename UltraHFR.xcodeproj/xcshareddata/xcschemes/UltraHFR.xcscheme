@@ -73,6 +73,28 @@
                ReferencedContainer = "container:Packages/UltraHFRKit">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "HFRDesignTests"
+               BuildableName = "HFRDesignTests"
+               BlueprintName = "HFRDesignTests"
+               ReferencedContainer = "container:Packages/UltraHFRKit">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "5B71BBE0CD8C716B87080388"
+               BuildableName = "UltraHFRTests.xctest"
+               BlueprintName = "UltraHFRTests"
+               ReferencedContainer = "container:UltraHFR.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

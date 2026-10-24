@@ -39,6 +39,8 @@ targets:
         product: HFRContent
       - package: UltraHFRKit
         product: HFRReader
+      - package: UltraHFRKit
+        product: HFRDesign
     settings:
       base:
         PRODUCT_NAME: UltraHFR
@@ -65,4 +67,20 @@ targets:
         - package: UltraHFRKit/HFRKitTests
         - package: UltraHFRKit/HFRContentTests
         - package: UltraHFRKit/HFRReaderTests
+        - package: UltraHFRKit/HFRDesignTests
+        - UltraHFRTests
       gatherCoverageData: true
+  UltraHFRTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: UltraHFRTests
+        type: syncedFolder
+    dependencies:
+      - target: UltraHFR
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: $(ULTRAHFR_BUNDLE_ID).tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/UltraHFR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/UltraHFR
+        BUNDLE_LOADER: $(TEST_HOST)

@@ -18,7 +18,7 @@ struct EssayTopicRow: View {
                 .foregroundStyle(.secondary)
             HStack {
                 Button("Page 1") { open(1) }
-                Button("Dernière page") { open(ReaderRoute.lastPage) }
+                Button("Dernière page") { open(TopicRoute.lastPage) }
             }
             .buttonStyle(.bordered)
             .font(.subheadline)

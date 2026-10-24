@@ -3,23 +3,33 @@
 //  UltraHFR
 //
 
+import HFRDesign
 import HFRReader
+import SwiftData
 import SwiftUI
 
+/// Reading a topic: continuous pages, page cursor, multi-quote tray.
 struct ReaderView: View {
-    let route: ReaderRoute
-    @State private var model: ReaderModel
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let route: TopicRoute
+    @Environment(ReaderSessions.self) private var sessions
+    @Environment(\.hfrClient) private var client
 
-    init(route: ReaderRoute) {
-        self.route = route
-        _model = State(initialValue: ReaderModel(topic: route.topic))
+    var body: some View {
+        ReaderScreen(route: route, model: sessions.model(for: route, client: client))
     }
+}
+
+private struct ReaderScreen: View {
+    let route: TopicRoute
+    let model: ReaderModel
+    @Environment(\.hfrPalette) private var palette
+    @Environment(AppSettings.self) private var settings
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         ReaderWebView(model: model, style: style)
             .ignoresSafeArea(edges: .bottom)
+            .background(palette.background.color)
             .overlay(alignment: .trailing) {
                 if let pageCount = model.pageCount, pageCount > 1 {
                     PageScrubber(currentPage: model.visiblePage ?? 1, pageCount: pageCount) { page in
@@ -35,10 +45,8 @@ struct ReaderView: View {
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .overlay(alignment: .bottomLeading) {
-                if model.quoted.isEmpty {
-                    ReaderStatusBanner(model: model)
-                }
+            .overlay(alignment: .top) {
+                ReaderStatusBanner(model: model)
             }
             .animation(.smooth, value: model.quoted.isEmpty)
             .sensoryFeedback(.impact(weight: .light), trigger: model.swipeHapticTrigger)
@@ -54,18 +62,24 @@ struct ReaderView: View {
                     .frame(width: 0, height: 0)
                     .accessibilityHidden(true)
             }
-            .task {
-                model.open(page: route.page)
+            .task(id: route) {
+                let recorder = ReadingPositionRecorder(context: modelContext)
+                model.onPositionChange = { [route] page, pageCount, post, author in
+                    var titled = route
+                    titled.title = model.title
+                    recorder.record(topic: titled, page: page, pageCount: pageCount, post: post, author: author)
+                }
+                model.show(route)
             }
     }
 
     private var style: ReaderStyle {
-        let bodySize = UIFont.preferredFont(forTextStyle: .body).pointSize
-        return ReaderStyle(
-            theme: colorScheme == .dark ? .dark : .light,
-            accent: colorScheme == .dark ? "#6AA7F4" : "#2171CC",
-            accentFill: colorScheme == .dark ? "#2474CF" : "#2171CC",
-            bodySize: bodySize
+        ReaderStyle(
+            theme: palette.isOLED ? .oled : (palette.isDark ? .dark : .light),
+            accent: palette.accent.text.hex,
+            accentFill: palette.accent.fill.hex,
+            bodySize: UIFont.preferredFont(forTextStyle: .body).pointSize,
+            isCompact: settings.isCompactReading
         )
     }
 }

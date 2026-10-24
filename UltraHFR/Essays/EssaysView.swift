@@ -5,33 +5,24 @@
 
 import SwiftUI
 
-/// Lot 0 home: real topics to try the continuous reader on.
+/// Lot 0 essays: real topics to try the continuous reader on (Moi › Essais du lot 0).
 struct EssaysView: View {
-    @State private var path: [ReaderRoute] = []
+    let section: AppSection
+    @Environment(AppNavigation.self) private var navigation
 
     var body: some View {
-        NavigationStack(path: $path) {
-            List {
-                Section {
-                    ForEach(EssayTopic.samples) { topic in
-                        EssayTopicRow(topic: topic) { page in
-                            path.append(ReaderRoute(topic: topic, page: page))
-                        }
+        List {
+            Section {
+                ForEach(EssayTopic.samples) { topic in
+                    EssayTopicRow(topic: topic) { page in
+                        navigation.open(TopicRoute(title: topic.title, category: topic.category, topic: topic.topic, page: page), from: section)
                     }
-                } header: {
-                    Text("Essai S1 · lecture continue")
-                } footer: {
-                    Text("Pages chargées sans compte, une à la fois, au fil du défilement. Glisse un message vers la droite pour le citer ; le bouton ••• ouvre le menu du message ; le curseur à droite saute de page en page.")
                 }
-            }
-            .navigationTitle("Ultra HFR")
-            .navigationDestination(for: ReaderRoute.self) { route in
-                ReaderView(route: route)
+            } footer: {
+                Text("Pages chargées sans compte, une à la fois, au fil du défilement. Glisse un message vers la droite pour le citer ; le bouton ••• ouvre le menu du message ; le curseur à droite saute de page en page.")
             }
         }
+        .hfrGroupedBackground()
+        .navigationTitle("Essais du lot 0")
     }
-}
-
-#Preview {
-    EssaysView()
 }

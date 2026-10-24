@@ -24,6 +24,7 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
     func attach(to webView: WKWebView, style: ReaderStyle) {
         self.webView = webView
         self.style = style
+        model.driverAttached()
         model.driver = self
     }
 
@@ -31,8 +32,16 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         guard newStyle != style else { return }
         style = newStyle
         Task {
-            await run("document.documentElement.dataset.theme = theme; document.documentElement.style.setProperty('--body-size', size + 'px')",
-                      ["theme": newStyle.theme.rawValue, "size": newStyle.bodySize])
+            await run("""
+                const root = document.documentElement;
+                root.dataset.theme = theme;
+                root.style.setProperty('--body-size', size + 'px');
+                root.style.setProperty('--accent', accent);
+                root.style.setProperty('--accent-fill', accentFill);
+                document.body.classList.toggle('compact', compact);
+                """,
+                ["theme": newStyle.theme.rawValue, "size": newStyle.bodySize, "accent": newStyle.accent,
+                 "accentFill": newStyle.accentFill, "compact": newStyle.isCompact])
         }
     }
 

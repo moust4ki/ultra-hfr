@@ -9,13 +9,25 @@
 /* Begin PBXBuildFile section */
 		6DA468BA93DAD6D0DDE5F9E1 /* HFRKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2DD6E1D92280D706CD860339 /* HFRKit */; };
 		737ADBB3FCB5C6AE15BB3428 /* HFRContent in Frameworks */ = {isa = PBXBuildFile; productRef = 11AC188F2E70BB89103E5999 /* HFRContent */; };
+		BD1C09AD54DBC2622F56C332 /* HFRDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 90C0BEE7CF6E023DDC519DA0 /* HFRDesign */; };
 		E6C73EAD84A17086846872A2 /* HFRReader in Frameworks */ = {isa = PBXBuildFile; productRef = 97B01110700E2620FA15D4E3 /* HFRReader */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		46FA50B4068A4435F6F11BB4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F1726B68905CDB86C0F61918 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 997328CB59DC018527477E07;
+			remoteInfo = UltraHFR;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0A97D64099D18926F59FB3CB /* UltraHFRKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = UltraHFRKit; path = Packages/UltraHFRKit; sourceTree = SOURCE_ROOT; };
 		6579C8D19B7DB93F1AD8E3D2 /* UltraHFR.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = UltraHFR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A15EA67E3D776960D4DECDFB /* UltraHFR.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = UltraHFR.xcconfig; sourceTree = "<group>"; };
+		F3FEE682ACF2D319076F84CD /* UltraHFRTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = UltraHFRTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -28,6 +40,15 @@
 			path = UltraHFR;
 			sourceTree = "<group>";
 		};
+		BC04C526F89034F75148125C /* UltraHFRTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = UltraHFRTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +59,7 @@
 				6DA468BA93DAD6D0DDE5F9E1 /* HFRKit in Frameworks */,
 				737ADBB3FCB5C6AE15BB3428 /* HFRContent in Frameworks */,
 				E6C73EAD84A17086846872A2 /* HFRReader in Frameworks */,
+				BD1C09AD54DBC2622F56C332 /* HFRDesign in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,6 +72,7 @@
 				FC0DAAB6E4376425A49BACF3 /* Config */,
 				4CA0C65BDA9909F42FC593E6 /* Packages */,
 				29E376035EA93BE80FEDE2F0 /* UltraHFR */,
+				BC04C526F89034F75148125C /* UltraHFRTests */,
 				A74FEED6A19E1E6624AA9D91 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -66,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				6579C8D19B7DB93F1AD8E3D2 /* UltraHFR.app */,
+				F3FEE682ACF2D319076F84CD /* UltraHFRTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -81,6 +105,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5B71BBE0CD8C716B87080388 /* UltraHFRTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3507023EC3BAAA95343344C /* Build configuration list for PBXNativeTarget "UltraHFRTests" */;
+			buildPhases = (
+				B7A9CB08611974A535E8394A /* Sources */,
+				147DB7F1B5EA7B970E387AEC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4097319E78CB85EAF3B043EB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BC04C526F89034F75148125C /* UltraHFRTests */,
+			);
+			name = UltraHFRTests;
+			packageProductDependencies = (
+			);
+			productName = UltraHFRTests;
+			productReference = F3FEE682ACF2D319076F84CD /* UltraHFRTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		997328CB59DC018527477E07 /* UltraHFR */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7A473CCE8AEE832E1F293FCD /* Build configuration list for PBXNativeTarget "UltraHFR" */;
@@ -101,6 +147,7 @@
 				2DD6E1D92280D706CD860339 /* HFRKit */,
 				11AC188F2E70BB89103E5999 /* HFRContent */,
 				97B01110700E2620FA15D4E3 /* HFRReader */,
+				90C0BEE7CF6E023DDC519DA0 /* HFRDesign */,
 			);
 			productName = UltraHFR;
 			productReference = 6579C8D19B7DB93F1AD8E3D2 /* UltraHFR.app */;
@@ -138,12 +185,20 @@
 			projectRoot = "";
 			targets = (
 				997328CB59DC018527477E07 /* UltraHFR */,
+				5B71BBE0CD8C716B87080388 /* UltraHFRTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		135FF4DCC9533F930FF305D2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		147DB7F1B5EA7B970E387AEC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -160,7 +215,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B7A9CB08611974A535E8394A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4097319E78CB85EAF3B043EB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 997328CB59DC018527477E07 /* UltraHFR */;
+			targetProxy = 46FA50B4068A4435F6F11BB4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		6DC4B1CAC3277E554E176B78 /* Release */ = {
@@ -191,6 +261,23 @@
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		724E68132A8A369895DB32B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ULTRAHFR_BUNDLE_ID).tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UltraHFR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/UltraHFR";
 			};
 			name = Release;
 		};
@@ -297,6 +384,23 @@
 			};
 			name = Debug;
 		};
+		C7A766F928E39B35EFB1189C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(ULTRAHFR_BUNDLE_ID).tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UltraHFR.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/UltraHFR";
+			};
+			name = Debug;
+		};
 		CB433E7E5E0D582DE9D73EE7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A15EA67E3D776960D4DECDFB /* UltraHFR.xcconfig */;
@@ -383,6 +487,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		F3507023EC3BAAA95343344C /* Build configuration list for PBXNativeTarget "UltraHFRTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7A766F928E39B35EFB1189C /* Debug */,
+				724E68132A8A369895DB32B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -400,6 +513,10 @@
 		2DD6E1D92280D706CD860339 /* HFRKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = HFRKit;
+		};
+		90C0BEE7CF6E023DDC519DA0 /* HFRDesign */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HFRDesign;
 		};
 		97B01110700E2620FA15D4E3 /* HFRReader */ = {
 			isa = XCSwiftPackageProductDependency;

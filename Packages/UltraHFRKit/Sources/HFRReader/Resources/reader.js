@@ -64,7 +64,7 @@
 
     setQuoted(ids) {
       const quoted = new Set(ids.map(String));
-      for (const post of document.querySelectorAll(".post")) {
+      for (const post of document.querySelectorAll(".post[data-post]")) {
         post.classList.toggle("quoted", quoted.has(post.dataset.post));
       }
     },
@@ -81,7 +81,7 @@
   // MARK: Scroll: visible message, edges
 
   function posts() {
-    if (!postsCache) postsCache = Array.from(document.querySelectorAll(".post"));
+    if (!postsCache) postsCache = Array.from(document.querySelectorAll(".post[data-post]"));
     return postsCache;
   }
 
@@ -108,7 +108,7 @@
   /** First page divider or message below the top bar: the anchor kept still by prepend(). */
   function visibleElement() {
     const limit = topInset() + 8;
-    for (const element of document.querySelectorAll(".page-divider, .post")) {
+    for (const element of document.querySelectorAll(".page-divider, .post[data-post]")) {
       if (element.getBoundingClientRect().bottom > limit) return element;
     }
     return null;
@@ -221,7 +221,7 @@
   let swipe = null;
 
   document.addEventListener("touchstart", (event) => {
-    const post = event.target.closest(".post");
+    const post = event.target.closest(".post[data-post]");
     if (!post || event.touches.length !== 1 || document.body.classList.contains("locked")) return;
     const touch = event.touches[0];
     swipe = { post, startX: touch.clientX, startY: touch.clientY, active: false, armed: false };
