@@ -53,7 +53,7 @@ private struct ReaderScreen: View {
                         })
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else if model.loadedPages != nil {
-                        ReaderBottomBar(pagesAfter: model.pagesAfterVisible, goToLastMessage: { model.openLastMessage() }, reply: {
+                        ReaderBottomBar(pagesAfter: model.pagesAfterVisible, isLocked: model.route.isLocked, goToLastMessage: { model.openLastMessage() }, reply: {
                             composer = ComposerRequest(quotes: "", authors: model.authorsOfLoadedPosts)
                         })
                     }

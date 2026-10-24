@@ -71,6 +71,11 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         await run("reader.scrollToPost(id)", ["id": post.rawValue])
     }
 
+    /// No swipe to quote in a locked topic.
+    func setLocked(_ isLocked: Bool) async {
+        await run("document.body.classList.toggle('locked', locked)", ["locked": isLocked])
+    }
+
     /// The page measures what is "visible" below the navigation bar; the bar's height changes
     /// with the orientation and the folding of the iPhone Duo.
     private func updateTopInset() async {
@@ -184,7 +189,8 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             UIAction(title: "Citer", image: UIImage(systemName: "quote.opening"), attributes: needsAccount) { _ in },
             UIAction(
                 title: isQuoted ? "Retirer de la multi-citation" : "Ajouter à la multi-citation",
-                image: UIImage(systemName: isQuoted ? "text.badge.minus" : "text.badge.plus")
+                image: UIImage(systemName: isQuoted ? "text.badge.minus" : "text.badge.plus"),
+                attributes: model.route.isLocked && !isQuoted ? .disabled : []
             ) { [weak self] _ in self?.model.toggleQuote(id) },
         ])
         let share = UIMenu(options: .displayInline, children: [

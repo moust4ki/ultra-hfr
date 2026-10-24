@@ -12,4 +12,5 @@ protocol ReaderPageDriver: AnyObject {
     func prepend(html: String) async
     func setQuoted(_ posts: [PostID]) async
     func scrollTo(post: PostID) async
+    func setLocked(_ isLocked: Bool) async
 }

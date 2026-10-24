@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ReaderBottomBar: View {
     let pagesAfter: Int
+    var isLocked = false
     let goToLastMessage: () -> Void
     let reply: () -> Void
     @Environment(\.hfrPalette) private var palette
@@ -22,17 +23,31 @@ struct ReaderBottomBar: View {
                     systemImage: pagesAfter > 0 ? "arrow.down" : "arrow.down.to.line"
                 )
                 .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .fixedSize()
                 .padding(.horizontal, 16)
                 .frame(minHeight: 44)
             }
             .buttonStyle(.glass)
             Spacer()
-            Button("Répondre", systemImage: "square.and.pencil", action: reply)
-                .labelStyle(.iconOnly)
-                .font(.title3)
-                .frame(width: 52, height: 52)
-                .foregroundStyle(palette.accent.onFill.color)
-                .background(palette.accent.fill.color, in: .circle)
+            if isLocked {
+                Label("Fermé", systemImage: "lock.fill")
+                    .font(.footnote.weight(.semibold))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .foregroundStyle(palette.text2.color)
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 44)
+                    .glassEffect()
+                    .accessibilityLabel("Sujet verrouillé : les réponses sont fermées")
+            } else {
+                Button("Répondre", systemImage: "square.and.pencil", action: reply)
+                    .labelStyle(.iconOnly)
+                    .font(.title3)
+                    .frame(width: 52, height: 52)
+                    .foregroundStyle(palette.accent.onFill.color)
+                    .background(palette.accent.fill.color, in: .circle)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 8)

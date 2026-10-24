@@ -106,6 +106,7 @@ final class ReaderModel {
             // On the first message of page 1, show the top of the page: the poll is above it.
             let isTopicStart = topicPage.page == 1 && anchor == topicPage.posts.first?.id
             await driver?.replace(html: html, anchor: isTopicStart ? nil : anchor)
+            await driver?.setLocked(route.isLocked)
         }
     }
 
@@ -201,7 +202,11 @@ final class ReaderModel {
             // Same topic in a new web view: show the same pages at the same message.
             let html = renderedPages.map(\.html).joined()
             let anchor = lastVisiblePost
-            Task { await driver?.replace(html: html, anchor: anchor) }
+            let isLocked = route.isLocked
+            Task {
+                await driver?.replace(html: html, anchor: anchor)
+                await driver?.setLocked(isLocked)
+            }
         }
     }
 

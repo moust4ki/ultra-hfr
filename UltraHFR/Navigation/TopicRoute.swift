@@ -15,6 +15,8 @@ struct TopicRoute: Hashable {
     var anchor: PostID?
     /// Last message read: the « Nouveau » marker goes after it.
     var newAfter: PostID?
+    /// Known from the topic list (a page read without an account does not say it).
+    var isLocked = false
 
     static let lastPage = 99_999
     /// The page holding `anchor`, found by HFR (it redirects a message's address to its page).

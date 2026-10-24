@@ -43,9 +43,10 @@ struct TopicRowModel: Identifiable {
                 topic: topic.id,
                 page: position.page,
                 anchor: lastRead,
-                newAfter: state == .unread ? lastRead : nil
+                newAfter: state == .unread ? lastRead : nil,
+                isLocked: topic.isLocked
             )
         }
-        return TopicRoute(title: topic.title, category: category, topic: topic.id, page: 1)
+        return TopicRoute(title: topic.title, category: category, topic: topic.id, page: 1, isLocked: topic.isLocked)
     }
 }
