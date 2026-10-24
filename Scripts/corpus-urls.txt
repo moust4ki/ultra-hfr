@@ -36,3 +36,7 @@ sujet-cyberpunk-spoilers https://forum.hardware.fr/hfr/JeuxVideo/PC/unique-cyber
 sujet-blindtest https://forum.hardware.fr/hfr/Discussions/Musique/blindtest-nouveau-inedit-sujet_45986_7953.htm
 sujet-musique-videos https://forum.hardware.fr/hfr/Discussions/Musique/musique-ecoutez-moment-sujet_8177_1477.htm
 sujet-switch-images https://forum.hardware.fr/hfr/JeuxVideo/Consoles/nintendo-switch-switch-sujet_185457_7140.htm
+
+# Recherche (une seule requête GET, sans session ; la catégorie est obligatoire)
+recherche-titres-5090 https://forum.hardware.fr/forum1.php?recherches=1&cat=1&orderSearch=0&config=hfr.inc&pseud=&search=5090&titre=1&resSearch=200&daterange=2&subcat=0&searchtype=1
+recherche-contenu-undervolt https://forum.hardware.fr/forum1.php?recherches=1&cat=1&orderSearch=0&config=hfr.inc&pseud=&search=undervolt&titre=0&resSearch=200&daterange=2&subcat=0&searchtype=1

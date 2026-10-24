@@ -101,8 +101,17 @@ public enum TopicListParser {
                 }
             },
             flag: flag(fromImage: flagImage),
-            flagPath: flagLink?.attribute("href")
+            flagPath: flagLink?.attribute("href"),
+            match: match(in: row)
         )
+    }
+
+    /// Content search: second link of the title cell, with the excerpt in `span.s1`.
+    private static func match(in row: HTMLElement) -> TopicMatch? {
+        guard let excerpt = row.first("td.sujetCase3 span.s1")?.text,
+              let link = row.select("td.sujetCase3 a").dropFirst().first?.attribute("href") else { return nil }
+        let trimmed = excerpt.trimmingCharacters(in: .whitespacesAndNewlines)
+        return TopicMatch(path: link, excerpt: trimmed.hasSuffix("[...]") ? String(trimmed.dropLast(5)).trimmingCharacters(in: .whitespaces) + "…" : trimmed)
     }
 
     private static func flag(fromImage source: String) -> TopicFlag? {

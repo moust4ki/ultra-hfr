@@ -22,6 +22,8 @@ public struct TopicSummary: Sendable, Hashable, Codable, Identifiable {
     public var flag: TopicFlag?
     /// Where the member stopped reading (page and message), from the flag link.
     public var flagPath: String?
+    /// In content search results: the matching message.
+    public var match: TopicMatch?
 
     public init(
         id: TopicID,
@@ -37,7 +39,8 @@ public struct TopicSummary: Sendable, Hashable, Codable, Identifiable {
         viewCount: Int? = nil,
         lastPost: LastPost? = nil,
         flag: TopicFlag? = nil,
-        flagPath: String? = nil
+        flagPath: String? = nil,
+        match: TopicMatch? = nil
     ) {
         self.id = id
         self.title = title
@@ -53,5 +56,6 @@ public struct TopicSummary: Sendable, Hashable, Codable, Identifiable {
         self.lastPost = lastPost
         self.flag = flag
         self.flagPath = flagPath
+        self.match = match
     }
 }

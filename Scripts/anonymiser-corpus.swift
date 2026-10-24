@@ -283,6 +283,10 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
     var page = scrambleMessageBodies(html)
     page = scrambleQualitayReports(page)
 
+    // Excerpts of messages in search results.
+    page = replaceMatches(in: page, regex(#"(<span class="s1">)(.*?)(</span>)"#, [.dotMatchesLineSeparators])) {
+        $0[1] + scrambleText($0[2]) + $0[3]
+    }
     // Statuses chosen by members.
     page = replaceMatches(in: page, regex(#"(<span class="MoodStatus">)([^<]*)(</span>)"#)) {
         $0[1] + scrambleText($0[2]) + $0[3]

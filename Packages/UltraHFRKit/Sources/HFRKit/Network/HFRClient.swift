@@ -140,6 +140,17 @@ public actor HFRClient {
         return try await Self.parse { () throws(HFRParsingError) in try HomePageParser.parse(html: html) }
     }
 
+    /// Search results (topics, with the matching message for content searches).
+    public func search(_ query: ForumSearchQuery) async throws(HFRClientError) -> [TopicSummary] {
+        let html = try await self.page(query.path)
+        do {
+            return try await Self.parse { () throws(HFRParsingError) in try TopicListParser.parse(html: html) }.topics
+        } catch .parsing(.forumMessage) {
+            // "Aucune réponse" pages are messages, not errors.
+            return []
+        }
+    }
+
     /// Page `page` of a category or sub-forum topic list.
     public func topicList(path: String, page: Int) async throws(HFRClientError) -> TopicListPage {
         let html = try await self.page(ForumPath.topicList(path, page: page))
