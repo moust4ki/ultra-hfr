@@ -224,6 +224,28 @@ final class ReaderModel {
         open(page: page)
     }
 
+    /// The last message of the topic (the last page may have grown since it was loaded).
+    func openLastMessage() {
+        guard isReady else {
+            pendingOpen = (TopicRoute.lastPage, nil)
+            return
+        }
+        Task {
+            guard let (topicPage, html) = await load(TopicRoute.lastPage, excluding: []) else { return }
+            renderedPosts = Set(topicPage.posts.map(\.id))
+            renderedPages = [(topicPage.page, html)]
+            loadedPages = topicPage.page...topicPage.page
+            visiblePage = topicPage.page
+            await driver?.replace(html: html, anchor: topicPage.posts.last?.id)
+        }
+    }
+
+    /// Pages after the one on screen.
+    var pagesAfterVisible: Int {
+        guard let pageCount, let visiblePage else { return 0 }
+        return max(0, pageCount - visiblePage)
+    }
+
 
     /// Address of a message on the forum, for "Copier le lien".
     func permalink(of post: PostID) -> URL? {

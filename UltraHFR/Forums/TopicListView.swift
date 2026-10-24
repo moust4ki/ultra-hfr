@@ -138,10 +138,18 @@ private struct TopicListPageSection: View {
     }
 }
 
-/// A topic: opens where the reader stopped; long press for the first and last pages.
+/// A topic: opens where the reader stopped; long press for the first and last pages. In the
+/// regular column the topic being read is highlighted (« Le Fil », H1).
 private struct TopicListRow: View {
     let row: TopicRowModel
     let open: (TopicRowModel, Int?) -> Void
+    @Environment(AppNavigation.self) private var navigation
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.hfrPalette) private var palette
+
+    private var isOpen: Bool {
+        horizontalSizeClass == .regular && navigation.openTopic?.topic == row.topic.id
+    }
 
     var body: some View {
         Button {
@@ -160,6 +168,8 @@ private struct TopicListRow: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .listRowBackground(isOpen ? palette.accent.soft.color : Color.clear)
+        .accessibilityAddTraits(isOpen ? .isSelected : [])
         .contextMenu {
             Button("Première page", systemImage: "arrow.up.to.line") { open(row, 1) }
             Button("Dernière page", systemImage: "arrow.down.to.line") { open(row, TopicRoute.lastPage) }

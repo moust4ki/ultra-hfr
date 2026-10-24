@@ -46,6 +46,8 @@ private struct ReaderScreen: View {
                 if !model.quoted.isEmpty {
                     QuoteTray(authors: model.quotedAuthors) { model.clearQuotes() }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else if model.loadedPages != nil {
+                    ReaderBottomBar(pagesAfter: model.pagesAfterVisible) { model.openLastMessage() }
                 }
             }
             .overlay(alignment: .top) {
