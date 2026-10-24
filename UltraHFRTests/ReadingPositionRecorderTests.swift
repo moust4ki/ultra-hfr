@@ -33,6 +33,15 @@ struct ReadingPositionRecorderTests {
         #expect(try positions(in: context).count == 1)
     }
 
+    @Test func remembersTheLockForTheFil() throws {
+        let container = try ModelContainer(for: ReadingPosition.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = ModelContext(container)
+        var locked = route
+        locked.isLocked = true
+        ReadingPositionRecorder(context: context).record(topic: locked, page: 1, pageCount: 1, post: 1, author: "a")
+        #expect(try positions(in: context).first?.isLocked == true)
+    }
+
     @Test func listsOpenOnTheLastMessageReadWithTheMarkerWhenThereIsMore() throws {
         let position = ReadingPosition(topicID: 1061629, categoryID: 1, title: "Blackwell", page: 350, pageCount: 350, postID: 11_405_000, postAuthor: "Kaiju")
         let topic = TopicSummary(id: 1061629, title: "Blackwell", path: "/hfr/Hardware/2D-3D/blackwell-sujet_1061629_1.htm", pageCount: 352, author: "Xixou2")

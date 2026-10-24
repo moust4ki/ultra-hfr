@@ -19,8 +19,10 @@ final class ReadingPosition {
     var postID: Int = 0
     var postAuthor: String = ""
     var updatedAt = Date.now
+    /// Known from the topic list: no reply nor quote in the reader.
+    var isLocked = false
 
-    init(topicID: Int, categoryID: Int, title: String, page: Int, pageCount: Int, postID: Int, postAuthor: String) {
+    init(topicID: Int, categoryID: Int, title: String, page: Int, pageCount: Int, postID: Int, postAuthor: String, isLocked: Bool = false) {
         self.topicID = topicID
         self.categoryID = categoryID
         self.title = title
@@ -28,5 +30,6 @@ final class ReadingPosition {
         self.pageCount = pageCount
         self.postID = postID
         self.postAuthor = postAuthor
+        self.isLocked = isLocked
     }
 }

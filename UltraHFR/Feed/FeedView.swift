@@ -17,6 +17,8 @@ struct FeedView: View {
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
     @Environment(AppNavigation.self) private var navigation
     @Environment(QualitayStore.self) private var qualitay
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.hfrPalette) private var palette
 
     var body: some View {
         List {
@@ -30,6 +32,11 @@ struct FeedView: View {
                     }
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
+                    .contextMenu {
+                        Button("Retirer de l'historique", systemImage: "eye.slash", role: .destructive) {
+                            modelContext.delete(latest)
+                        }
+                    }
                 }
             }
             if positions.count > 1 {
@@ -47,6 +54,17 @@ struct FeedView: View {
                             .contentShape(.rect)
                         }
                         .buttonStyle(.plain)
+                        .swipeActions {
+                            Button("Retirer", systemImage: "eye.slash", role: .destructive) {
+                                modelContext.delete(position)
+                            }
+                            .tint(palette.destructive.color)
+                        }
+                        .contextMenu {
+                            Button("Retirer de l'historique", systemImage: "eye.slash", role: .destructive) {
+                                modelContext.delete(position)
+                            }
+                        }
                     }
                 } header: {
                     SectionHeader("Lus récemment")
@@ -106,7 +124,8 @@ struct FeedView: View {
             topic: TopicID(rawValue: position.topicID),
             page: position.page,
             anchor: PostID(rawValue: position.postID),
-            newAfter: PostID(rawValue: position.postID)
+            newAfter: PostID(rawValue: position.postID),
+            isLocked: position.isLocked
         )
     }
 }

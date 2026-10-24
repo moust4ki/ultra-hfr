@@ -24,6 +24,7 @@ struct ReadingPositionRecorder {
             }
             existing.pageCount = max(pageCount, existing.page)
             existing.title = topic.title
+            existing.isLocked = topic.isLocked
             existing.updatedAt = .now
         } else {
             context.insert(ReadingPosition(
@@ -33,7 +34,8 @@ struct ReadingPositionRecorder {
                 page: page,
                 pageCount: max(pageCount, page),
                 postID: post.rawValue,
-                postAuthor: author
+                postAuthor: author,
+                isLocked: topic.isLocked
             ))
         }
     }
