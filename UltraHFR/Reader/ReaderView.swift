@@ -136,8 +136,15 @@ private struct ReaderScreen: View {
                 }
             }
             .sheet(isPresented: Binding(get: { model.isGoToPagePresented }, set: { model.isGoToPagePresented = $0 })) {
-                GoToPageView(currentPage: model.visiblePage ?? 1, pageCount: model.pageCount ?? 1) { page in
-                    model.jump(to: page)
+                GoToPageView(
+                    currentPage: model.visiblePage ?? 1,
+                    pageCount: model.pageCount ?? 1,
+                    unreadPage: route.newAfter != nil ? route.page : nil
+                ) { target in
+                    switch target {
+                    case .page(let page): model.jump(to: page)
+                    case .post(let post): model.open(page: TopicRoute.pageOfAnchor, anchor: post)
+                    }
                 }
             }
     }

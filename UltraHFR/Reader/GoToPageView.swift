@@ -2,7 +2,8 @@
 //  GoToPageView.swift
 //  UltraHFR
 //
-//  « Le Fil », GoToPage: page number, slider, first and last page.
+//  « Le Fil », GoToPage: page number (or message number), slider, first page, first unread
+//  page, last page.
 //
 
 import HFRDesign
@@ -11,16 +12,19 @@ import SwiftUI
 struct GoToPageView: View {
     let currentPage: Int
     let pageCount: Int
-    let go: (Int) -> Void
+    /// Page of the first unread message, when the topic was opened on it.
+    var unreadPage: Int?
+    let go: (GoToTarget) -> Void
 
     @State private var page: Int
     @FocusState private var isFieldFocused: Bool
     @Environment(\.dismiss) private var dismiss
     @Environment(\.hfrPalette) private var palette
 
-    init(currentPage: Int, pageCount: Int, go: @escaping (Int) -> Void) {
+    init(currentPage: Int, pageCount: Int, unreadPage: Int? = nil, go: @escaping (GoToTarget) -> Void) {
         self.currentPage = currentPage
         self.pageCount = pageCount
+        self.unreadPage = unreadPage
         self.go = go
         _page = State(initialValue: currentPage)
     }
@@ -48,16 +52,20 @@ struct GoToPageView: View {
                 HStack {
                     Button("Première") { page = 1 }
                     Spacer()
-                    Button("Actuelle") { page = currentPage }
+                    if let unreadPage {
+                        Button("1re non lue") { page = unreadPage }
+                    } else {
+                        Button("Actuelle") { page = currentPage }
+                    }
                     Spacer()
                     Button("Dernière") { page = pageCount }
                 }
                 .buttonStyle(.bordered)
                 Button {
-                    go(min(max(page, 1), pageCount))
+                    go(target)
                     dismiss()
                 } label: {
-                    Text("Aller à la page \(min(max(page, 1), pageCount).formatted())")
+                    Text(target.buttonTitle)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -74,8 +82,12 @@ struct GoToPageView: View {
         }
         .presentationDetents([.medium])
     }
+
+    private var target: GoToTarget {
+        GoToTarget(number: page, pageCount: pageCount)
+    }
 }
 
 #Preview {
-    GoToPageView(currentPage: 350, pageCount: 697) { _ in }
+    GoToPageView(currentPage: 350, pageCount: 697, unreadPage: 690) { _ in }
 }

@@ -201,6 +201,10 @@ final class ReaderModel {
                 pendingNewMarker = nil
             }
             lastParseDuration = duration
+            guard topicPage.topicID == route.topic else {
+                errorMessage = "Ce message n'est pas dans ce sujet."
+                return nil
+            }
             title = topicPage.title.isEmpty ? title : topicPage.title
             if topicPage.poll != nil { hasPoll = true }
             pageCount = max(pageCount ?? 0, topicPage.pageCount)
