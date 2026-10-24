@@ -1,0 +1,30 @@
+# Corpus de pages HFR publiques (sans session). Nom de fichier puis URL.
+
+# Accueil et listes
+accueil https://forum.hardware.fr/
+liste-hardware-p1 https://forum.hardware.fr/hfr/Hardware/liste_sujet-1.htm
+liste-hardware-p2 https://forum.hardware.fr/hfr/Hardware/liste_sujet-2.htm
+liste-2d3d-p1 https://forum.hardware.fr/hfr/Hardware/2D-3D/liste_sujet-1.htm
+liste-programmation-p1 https://forum.hardware.fr/hfr/Programmation/liste_sujet-1.htm
+liste-musique-p1 https://forum.hardware.fr/hfr/Discussions/Musique/liste_sujet-1.htm
+liste-jeux-p1 https://forum.hardware.fr/hfr/JeuxVideo/liste_sujet-1.htm
+
+# Sujets
+sujet-blackwell-p1 https://forum.hardware.fr/hfr/Hardware/2D-3D/blackwell-nvidia-geforce-sujet_1061629_1.htm
+sujet-blackwell-p350 https://forum.hardware.fr/hfr/Hardware/2D-3D/blackwell-nvidia-geforce-sujet_1061629_350.htm
+sujet-blackwell-p697 https://forum.hardware.fr/hfr/Hardware/2D-3D/blackwell-nvidia-geforce-sujet_1061629_697.htm
+sujet-regles-verrouille https://forum.hardware.fr/hfr/Hardware/regles-forum-hardware-sujet_425421_1.htm
+sujet-court-p1 https://forum.hardware.fr/hfr/Hardware/2D-3D/1440p-4k-sujet_1069640_1.htm
+sujet-court-p2 https://forum.hardware.fr/hfr/Hardware/2D-3D/1440p-4k-sujet_1069640_2.htm
+
+# Pages qui demandent une session (réponse « non connecté »)
+erreur-mp-sans-session https://forum.hardware.fr/forum1.php?config=hfr.inc&cat=prive&page=1
+erreur-drapeaux-sans-session https://forum.hardware.fr/forum1f.php?config=hfr.inc&owntopic=1
+erreur-repondre-sans-session https://forum.hardware.fr/message.php?config=hfr.inc&cat=1&post=1061629
+erreur-sujet-inexistant https://forum.hardware.fr/forum2.php?config=hfr.inc&cat=1&post=999999999&page=1
+
+# Smileys
+smileys-recherche-chat https://forum.hardware.fr/message-smi-mp-aj.php?config=hfr.inc&findsmilies=chat
+
+# Service externe
+qualitay-rss https://aq.super-h.fr/rss.php

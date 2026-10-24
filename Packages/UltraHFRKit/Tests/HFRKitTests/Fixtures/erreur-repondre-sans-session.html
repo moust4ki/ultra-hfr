@@ -1,0 +1,645 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+	<head>
+	<title>FORUM HardWare.fr - Répondre / éditer un message</title><link type="text/css" rel="stylesheet" href="/include/the_style1.php?color_key=FFFFFF/DEDFDF/000080/C2C3F4/001932/FFFFFF/FFFFFF/000000/000080/000000/000080/F7F7F7/DEDFDF/F7F7F7/DEDFDF/C0C0C0/C0C0C0/FFFFFF/000000/000000/0000FF/EEEEFF/DDDDEE/000000/FFEEEE/000000/FFFFFF/FF0000/FFFFFF/0/1/https%3A%40%40forum-images.hardware.fr/NULL/&amp;abs_img_path=%40data%40sites%40forum%40www%40static%40&amp;hide_bg_onglet=0&amp;v=11102781422" /><style type="text/css">
+<!--
+.fastsearchMain{ width: 330px; }
+.fastsearchInput{ width: 70px; border: 1px solid black; }
+.fastsearchSubmit{ background-color: ; border: 0px;}
+.header2 { background-image: url(/img/forum3_1.gif);background-repeat: repeat-x; }
+.menuExt { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color:#000; }
+.menuExt a { color:#000;text-decoration:none; }
+.menuExt a:hover { color:#000;text-decoration:underline; }
+form { display: inline; }
+.header { background-image: url(//forum-images.hardware.fr/img/header-bg.gif); background-repeat: repeat-x; }
+.tdmenu { width: 1px;height: 1px;color: #000000; }
+.hfrheadmenu { font-family: Arial, Helvetica, sans-serif;font-size:13px;font-weight:bold; }
+.hfrheadmenu span {color:;}
+.hfrheadmenu a { color:;text-decoration: none; }
+.hfrheadmenu a:hover { color:;text-decoration: underline; }
+.concours { font-family: Arial, Helvetica, sans-serif;color:;font-size: 16px;text-decoration: none;font-weight: bold;}
+.concours:hover { font-family: Arial, Helvetica, sans-serif;color:;font-size: 16px;text-decoration: underline;font-weight: bold; }
+.searchmenu { font-family: Arial, Helvetica, sans-serif;color:;font-size: 13px;text-decoration: none;font-weight: bold; }
+.fastsearch { display: none; }
+.fastsearchHeader { font-family: Arial, Helvetica, sans-serif;color:;font-size: 13px;text-decoration: none;font-weight: bold; }
+.fastsearchHeader:hover { font-family: Arial, Helvetica, sans-serif;color:;font-size: 13px;text-decoration: underline;font-weight: bold; }
+-->
+</style>
+<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+<script>
+  window.googletag = window.googletag || {cmd: []};
+  googletag.cmd.push(function() {
+    googletag.defineSlot('/2172442/forum_discussions_carre_bas', [336, 280], 'div-gpt-ad-1511901001563-11').addService(googletag.pubads());
+    googletag.defineSlot('/2172442/forum_discussions_carre_haut', [336, 280], 'div-gpt-ad-1511901001563-12').addService(googletag.pubads());
+    googletag.defineSlot('/2172442/forum_discussions_carre_milieu', [336, 280], 'div-gpt-ad-1511901001563-13').addService(googletag.pubads());
+    googletag.pubads().enableSingleRequest();
+    googletag.enableServices();
+  });
+</script>
+<script type='text/javascript'>
+     (function(){
+       var loc = window.location.href;
+       var dd = document.createElement('script');
+       dd.type = 'text/javascript'; dd.src = '//static.digidip.net/hardware.js?loc=' + loc;
+       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(dd, s);
+     })();
+</script><script type="text/javascript">
+
+var hash_check = "&hash_check=";
+var _adresseRecherche = "/user/message-aj.php";
+var adresseFindSmiley = "/message-smi-mp-aj.php";
+var tempo_smilies= 0;
+
+var img_path= "https://forum-images.hardware.fr";
+
+function verif_join_form() {
+	if ((document.getElementById('submit_upload')) && (document.getElementById('submit_upload').style.fontWeight == 'bold')) {
+		return confirm('Attention : vous n\'avez pas joint l\'image que vous avez sélectionnée');
+	}
+	return true;
+}
+
+function verif_not_empty() {
+	if (document.getElementById('delete').checked == true) {
+		return true;
+	}
+	if (document.hop.sujet && trim(document.hop.sujet.value) =='') {
+		alert('Vous devez remplir tous les champs avant de poster ce message');
+		return false;
+	}
+	if (document.hop.content_form && trim(document.hop.content_form.value) == '') {
+		alert('Vous devez remplir tous les champs avant de poster ce message');
+		return false;
+	}
+	if (document.hop.codecaptcha && trim(document.hop.codecaptcha.value) == '') {
+		alert('Vous devez remplir tous les champs avant de poster ce message');
+		return false;
+	}
+	if (document.getElementById('have_sondage') && document.getElementById('have_sondage').checked == true && document.getElementById('annee').value && document.getElementById('annee').value.length != 4) {
+		alert('L\'année du sondage doit être sur 4 chiffres');
+		return false;
+	}
+
+	return true;
+}
+
+function trim(string) {
+	return string.replace(/(^\s*)|(\s*$)/g,"");
+}
+</script><script language="javascript" type="text/javascript">
+	<!--
+ var opera=0;
+	function putSmiley(tt,src) {
+TAinsert(" "+tt+" ","");}
+	//-->
+	</script><link type="text/css" rel="stylesheet" href="https://forum-images.hardware.fr/compressed/the_style.css?v=11102781422" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Cache-Control" content="no-cache, must-revalidate" />
+	<meta http-equiv="Expires" content="0" />
+	<meta http-equiv="Imagetoolbar" content="no" />
+	<meta name="Robots" content="noindex, nofollow" />
+<script language="Javascript" type="text/javascript" src="https://forum-images.hardware.fr/compressed/editPost.js?v=11102781422"></script><script language="Javascript" type="text/javascript" src="https://forum-images.hardware.fr/compressed/message.js?v=11102781422"></script><script language="Javascript" type="text/javascript" src="https://forum-images.hardware.fr/compressed/common.js?v=11102781422"></script></head><body id="category__redaction_form__form_message"  ><script language="JavaScript" type="text/javascript" src="/js/cookiechoices.js"></script>
+<script language="javascript" type="text/javascript" src="/js/jquery-1.11.1.min.js"></script>
+<script language="JavaScript" type="text/javascript" src="/js/cnil.js"></script>
+<script>
+ document.addEventListener('DOMContentLoaded', function(event) {
+    cookieChoices.showCookieConsentBar('HardWare.fr utilise des cookies pour une navigation optimale et des cookies tiers pour l\'analyse du trafic et la publicité',
+      'Fermer', 'En savoir plus', 'https://www.hardware.fr/html/donnees_personnelles/');
+  });
+</script>
+<style>
+#cookieChoiceInfo span
+,#cookieChoiceDismiss
+,#PlusCookieChoice{
+	font-family:Tahoma,Arial,Helvetica,sans-serif;
+}
+#cookieChoiceDismiss
+,#PlusCookieChoice
+{
+	color:black;
+	text-decoration:none;
+}
+#cookieChoiceDismiss:hover
+,#PlusCookieChoice:hover
+{
+	color:#cc6908;
+}
+</style>
+ <table cellspacing="0" cellpadding="0" width="98%" bgcolor="#000000" border="0" align="center" class="hfrheadmenu" style="border:1px solid #000;border-top:0;">
+        <tr>
+          <td style="vertical-align: top">
+            <table cellspacing="0" cellpadding="0" width="100%" border="0">
+              <tr>
+                <td style="width: 100%" align="left" valign="middle" colspan="2" class="header2"><span class="md_cryptlink45CBCBC0C22D1F1FCCCCCC19454AC14BCC4AC1431944C1"><img src="/img/forum_logo.gif" width="900" height="71" border="0" alt="" /></span></td>
+              </tr>
+              <tr>
+                <td style="background-color:#001932">
+                  <table cellspacing="0" cellpadding="2" width="100%" border="0">
+                    <tr>
+                      <td>&nbsp;<a class="cHeader" href="/">Forum</a>&nbsp;|&nbsp;
+<a class="cHeader" href="https://www.hardware.fr/">HardWare.fr</a>&nbsp;|&nbsp;<a class="cHeader" href="https://www.hardware.fr/html/news/">News</a>&nbsp;|&nbsp;<a class="cHeader" href="https://www.hardware.fr/html/articles/">Articles</a>&nbsp;|&nbsp;<a class="cHeader" href="https://www.hardware.fr/articles/786-1/guide-pc-hardware-fr.html">PC</a>&nbsp;|&nbsp;<span class="md_cryptlink1F484F4C464919C045C02F424F4944464C2E454AC14BCC4AC14344C119464942">S'identifier</span>&nbsp;|&nbsp;<span class="md_cryptlink1F4649C242C146C0CB464F4919C045C02F424F4944464C2E454AC14BCC4AC14344C119464942">S'inscrire</span>&nbsp;|&nbsp;<a class="cHeader" href="https://shop.hardware.fr/" target="_blank" style="position: relative; padding: 0 21px 0 0;display: inline-block;">Shop <img src="/img/shop.png" style="height: 17px; display: inline; position: absolute; right: 0; top: -2px; "></a></td>
+<td align="right"><a class="cHeader" href="/search.php?config=hardwarefr.inc&cat=1&subcat=0">Recherche <img src="//forum-images.hardware.fr/themes_static/images_forum/1/ongletsearch.gif"></a></td>
+                    </tr>
+                    </table></td></tr></table>
+</td></tr></table><div style="width: 99%" align="right">
+<span class="s2Ext menuExt"><span class="md_cryptlink1F4F494846494319C045C02F424F4944464C2E454AC14BCC4AC14344C119464942">3544 connect&eacute;s&nbsp;</span></span></div><br /><div class="container"><div class="mesdiscussions" id="mesdiscussions"><div class="arbo">
+<span  id="md_arbo_tree_1" ><img src="https://forum-images.hardware.fr/themes_static/images_forum/1/open.gif" alt="" />&nbsp;&nbsp;<a href="/" class="Ext">FORUM HardWare.fr</a></span>
+<br />
+<span  id="md_arbo_tree_2" ><img src="https://forum-images.hardware.fr/themes_static/images_forum/1/tline.gif" alt="" /><img src="https://forum-images.hardware.fr/themes_static/images_forum/1/open.gif" alt="" />&nbsp;&nbsp;<a href="/hfr/Hardware/liste_sujet-1.htm" class="Ext">Hardware</a></span>
+<br />
+<span  id="md_arbo_tree_3" ><img src="https://forum-images.hardware.fr/themes_static/images_forum/1/tline3.gif" alt="" /><img src="https://forum-images.hardware.fr/themes_static/images_forum/1/open.gif" alt="" />&nbsp;&nbsp;<a href="/hfr/Hardware/2D-3D/liste_sujet-1.htm" class="Ext">Carte graphique</a></span>
+<br />
+<h1  id="md_arbo_tree_4" ><img src="https://forum-images.hardware.fr/themes_static/images_forum/1/tline4.gif" alt="" /><img src="https://forum-images.hardware.fr/themes_static/images_forum/1/open.gif" alt="" />&nbsp;&nbsp;<a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm" class="Ext">Topic Blackwell - Nvidia Geforce RTX 5000</a></h1>
+</div><div class="rightbutton fastsearch"><table class="main fastsearchMain" cellspacing="0" cellpadding="2"><tr class="cBackHeader fondForumDescription"><th><form method="post" id="fastsearch" action="/forum1.php"><input type="hidden" name="hash_check" value="" /><label for="fastsearchinputid"><a rel="nofollow" href="/search.php?config=hfr.inc&amp;cat=1&amp;subcat=0" class="cHeader fastsearchHeader">Recherche :</a>&nbsp;<input type="text" name="search" id="fastsearchinputid" value="" class="fastsearchInput" alt="Search string" /></label><input type="hidden" name="recherches" value="1" /><input type="hidden" name="searchtype" value="1" /><input type="hidden" name="titre" value="3" /><input type="hidden" name="resSearch" value="200" /><input type="hidden" name="orderSearch" value="1" /><input type="hidden" name="config" value="hfr.inc" /><input type="hidden" name="cat" value="1" />&nbsp;<input type="image" src="https://forum-images.hardware.fr/themes_static/images_forum/1/ongletsearch.gif" class="fastsearchSubmit" title="Lancer une recherche" alt="Lancer une recherche" /></form></th></tr></table></div><div class="spacer">&nbsp;</div><br /><div></div><br /><table class="main" style="margin:auto;" cellspacing="0" cellpadding="4">
+				<tr class="cBackHeader">
+				<th colspan="2">Dernière réponse</th>
+			</tr>
+			<tr class="reponse">
+				<th colspan="2">
+					Sujet : Topic Blackwell - Nvidia Geforce RTX 5000</th>
+			</tr><tr class="reponse">
+				<td class="messCase1bis" width="160" valign="top">Agkansz</td>
+				<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_697.htm#t11492757" class="Topic">fabzwq-uagc a écrit :</a></b><br /><br /><p><br />Les italiennes sont les plus belles femmes du monde &nbsp;[:bjyovpcx:1] <br /></p></td></tr></table></div>&nbsp;<p>Elles sont plutôt canon ouais... [:bjyovpcx:1] :love: :lol:</p>&nbsp;<div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_697.htm#t11492756" class="Topic">Rp_Uheovyqhh a écrit :</a></b><br /><br />&nbsp;<p>Sympa &nbsp;:love: <br /></p></td></tr></table></div>&nbsp;<p>Merciiii :love:<div style="clear: both;"> </div></td>
+			</tr>
+			</table><br /><a name="formulaire"></a><form name="hop" id="hop" action="/bddpost.php?config=hfr.inc" method="post" onsubmit=" 
+	return verif_join_form();
+	document.hop.submit.style.visibility='hidden';"><input type="hidden" name="hash_check" value="" />	<input type="hidden" name="subcat" value="0" />
+<input type="hidden" name="parents" value="" />
+<input type="hidden" name="post" value="1061629" />
+<input type="hidden" name="stickold" value="0" />
+<input type="hidden" name="new" value="0" />
+<input type="hidden" name="cat" id="catid" value="1" />
+<input type="hidden" name="numreponse" value="" />
+<input type="hidden" name="numrep" value="" />
+<input type="hidden" name="page" value="1" />
+<input type="hidden" name="verifrequet" value="1100" />
+<input type="hidden" name="p" value="1" />
+<input type="hidden" name="sondage" value="0" />
+<input type="hidden" name="sond" value="0" />
+<input type="hidden" name="cache" value="cache" />
+<input type="hidden" name="owntopic" value="0" />
+<input type="hidden" name="config" id="configid" value="hfr.inc" />
+<input type="hidden" name="sujet" value="Topic Blackwell - Nvidia Geforce RTX 5000" /><table class="main" cellspacing="0" cellpadding="4" width="100%">
+	<tr class="cBackHeader">
+		<th colspan="2" style="text-align:center">Votre réponse</th>
+	</tr>
+	<tr class="reponse pseudoform" id="pseudoform">
+		<th class="repCase1">Nom d'utilisateur</th>
+		<td class="repCase2">
+			<input maxlength="25" accesskey="p" size="25" name="pseudo" value="" onfocus="passfocus()" />		&nbsp;&nbsp; <a href="/inscription.php?config=hfr.inc" class="Topic">Pour poster, vous devez être inscrit sur ce forum .... si ce n'est pas le cas, cliquez ici !</a>	</td>
+	</tr><tr class="reponse" style="display:none; display:none; " id="passf">
+		<th class="repCase1">Mot de passe</th>
+		<td class="repCase2">			<input type="password" maxlength="40" size="25" name="password" value="" />
+			&nbsp;&nbsp; <a href="/password.php?config=hfr.inc" class="Topic">Vous avez perdu votre mot de passe ? Cliquez ici !</a>
+		</td>
+	</tr><tr class="reponse">
+				<th class="repCase1">Le ton de votre message</th>
+					<td class="repCase2"><input id="icone1" type="radio" value="1" name="MsgIcon" checked="checked" />
+					&nbsp;<label for="icone1"><img src="https://forum-images.hardware.fr/icones/message/icon1.gif" alt="" /></label>&nbsp;<input id="icone2" type="radio" value="2" name="MsgIcon" />
+					&nbsp;<label for="icone2"><img src="https://forum-images.hardware.fr/icones/message/icon2.gif" alt="" /></label>&nbsp;<input id="icone3" type="radio" value="3" name="MsgIcon" />
+					&nbsp;<label for="icone3"><img src="https://forum-images.hardware.fr/icones/message/icon3.gif" alt="" /></label>&nbsp;<input id="icone4" type="radio" value="4" name="MsgIcon" />
+					&nbsp;<label for="icone4"><img src="https://forum-images.hardware.fr/icones/message/icon4.gif" alt="" /></label>&nbsp;<input id="icone5" type="radio" value="5" name="MsgIcon" />
+					&nbsp;<label for="icone5"><img src="https://forum-images.hardware.fr/icones/message/icon5.gif" alt="" /></label>&nbsp;<input id="icone6" type="radio" value="6" name="MsgIcon" />
+					&nbsp;<label for="icone6"><img src="https://forum-images.hardware.fr/icones/message/icon6.gif" alt="" /></label>&nbsp;<input id="icone7" type="radio" value="7" name="MsgIcon" />
+					&nbsp;<label for="icone7"><img src="https://forum-images.hardware.fr/icones/message/icon7.gif" alt="" /></label>&nbsp;<input id="icone8" type="radio" value="8" name="MsgIcon" />
+					&nbsp;<label for="icone8"><img src="https://forum-images.hardware.fr/icones/message/icon8.gif" alt="" /></label>&nbsp;<br /><input id="icone9" type="radio" value="9" name="MsgIcon" />
+					&nbsp;<label for="icone9"><img src="https://forum-images.hardware.fr/icones/message/icon9.gif" alt="" /></label>&nbsp;<input id="icone10" type="radio" value="10" name="MsgIcon" />
+					&nbsp;<label for="icone10"><img src="https://forum-images.hardware.fr/icones/message/icon10.gif" alt="" /></label>&nbsp;<input id="icone11" type="radio" value="11" name="MsgIcon" />
+					&nbsp;<label for="icone11"><img src="https://forum-images.hardware.fr/icones/message/icon11.gif" alt="" /></label>&nbsp;<input id="icone12" type="radio" value="12" name="MsgIcon" />
+					&nbsp;<label for="icone12"><img src="https://forum-images.hardware.fr/icones/message/icon12.gif" alt="" /></label>&nbsp;<input id="icone13" type="radio" value="13" name="MsgIcon" />
+					&nbsp;<label for="icone13"><img src="https://forum-images.hardware.fr/icones/message/icon13.gif" alt="" /></label>&nbsp;<input id="icone14" type="radio" value="14" name="MsgIcon" />
+					&nbsp;<label for="icone14"><img src="https://forum-images.hardware.fr/icones/message/icon14.gif" alt="" /></label>&nbsp;<input id="icone15" type="radio" value="15" name="MsgIcon" />
+					&nbsp;<label for="icone15"><img src="https://forum-images.hardware.fr/icones/message/icon15.gif" alt="" /></label>&nbsp;<input id="icone16" type="radio" value="16" name="MsgIcon" />
+					&nbsp;<label for="icone16"><img src="https://forum-images.hardware.fr/icones/message/icon16.gif" alt="" /></label>&nbsp;</td>
+			</tr><tr class="reponse">
+		<th class="repCase1">Votre réponse<br /><br /><br />
+			<div><div class="center">	<a target="_blank" href="/smilies.php?config=hfr.inc" class="s1Topic">Smilies</a>
+				<br />&nbsp;
+				<div class="smiley">
+					<div>
+						<img src="https://forum-images.hardware.fr/icones/smilies/pfff.gif" alt=":pfff:" title=":pfff:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/ange.gif" alt=":ange:" title=":ange:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/non.gif" alt=":non:" title=":non:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/bounce.gif" alt=":bounce:" title=":bounce:" onclick="putSmiley(this.alt,this.src)" />
+					</div>
+					<div>
+						<img src="https://forum-images.hardware.fr/icones/smile.gif" alt=":)" title=":)" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/frown.gif" alt=":(" title=":(" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/biggrin.gif" alt=":D" title=":D" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/wink.gif" alt=";)" title=";)" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/ouch.gif" alt=":ouch:" title=":ouch:" onclick="putSmiley(this.alt,this.src)" />
+					</div>
+					<div>
+						<img src="https://forum-images.hardware.fr/icones/redface.gif" alt=":o" title=":o" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/confused.gif" alt=":??:" title=":??:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/tongue.gif" alt=":p" title=":p" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/na.gif" alt=":na:" title=":na:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/sarcastic.gif" alt=":sarcastic:" title=":sarcastic:" onclick="putSmiley(this.alt,this.src)" />
+					</div>
+					<div>
+						<img src="https://forum-images.hardware.fr/icones/smilies/fou.gif" alt=":fou:" title=":fou:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/jap.gif" alt=":jap:" title=":jap:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/lol.gif" alt=":lol:" title=":lol:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/wahoo.gif" alt=":wahoo:" title=":wahoo:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/kaola.gif" alt=":kaola:" title=":kaola:" onclick="putSmiley(this.alt,this.src)" />
+					</div>
+					<div>
+						<img src="https://forum-images.hardware.fr/icones/smilies/love.gif" alt=":love:" title=":love:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/heink.gif" alt=":heink:" title=":heink:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/cry.gif" alt=":cry:" title=":cry:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/whistle.gif" alt=":whistle:" title=":whistle:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/sol.gif" alt=":sol:" title=":sol:" onclick="putSmiley(this.alt,this.src)" />
+					</div>
+					<div>
+						<img src="https://forum-images.hardware.fr/icones/smilies/pt1cable.gif" alt=":pt1cable:" title=":pt1cable:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/sleep.gif" alt=":sleep:" title=":sleep:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/sweat.gif" alt=":sweat:" title=":sweat:" onclick="putSmiley(this.alt,this.src)" /><br />
+						<img src="https://forum-images.hardware.fr/icones/smilies/hello.gif" alt=":hello:" title=":hello:" onclick="putSmiley(this.alt,this.src)" />
+					</div>
+				</div>
+				<div class="spacer">&nbsp;</div>
+				<br /><a href="/wikismilies.php?config=hfr.inc&amp;threecol=1" target="_blank" class="s1Topic">Liste des smilies perso</a><br /><a target="_blank" href="/wikismilies.php?config=hfr.inc" class="s1Topic">Wiki smilies</a><br /><span class="small">Chercher un smiley<br /><div id="dynamic_smilies"></div></div></div></th><td class="repCase2" valign="top">		<div class="left">
+				<img style="cursor:pointer" class="text_bold" onclick="TAinsert('[b]','[/b]');" title="Mettre en gras le texte. Syntaxe : [b]texte[/b]" alt="[b]" src="https://forum-images.hardware.fr/icones/message/bold.gif" width="27" height="28" /><img
+				style="cursor:pointer" class="text_ita" onclick="TAinsert('[i]','[/i]');" title="Mettre en italique le texte. Syntaxe : [i]texte[/i]" alt="[i]" src="https://forum-images.hardware.fr/icones/message/italic.gif" width="25" height="28" /><img
+				style="cursor:pointer" class="text_under" onclick="TAinsert('[u]','[/u]');" title="Souligner le texte. Syntaxe : [u]texte[/u]" alt="[u]" src="https://forum-images.hardware.fr/icones/message/underline.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="text_strike" onclick="TAinsert('[strike]','[/strike]');" title="Barrer le texte. Syntaxe : [strike]texte[/strike]" alt="[strike]" src="https://forum-images.hardware.fr/icones/message/strike.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="text_spoiler" onclick="TAinsert('[spoiler]','[/spoiler]');" title="Masquer le texte. Syntaxe : [spoiler]texte[/spoiler]" alt="[spoiler]" src="https://forum-images.hardware.fr/icones/message/spoiler.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="text_fixed" onclick="TAinsert('[fixed]','[/fixed]');" title="Ecrire avec une police de taille fixe. Syntaxe : [fixed]texte[/fixed]" alt="[fixed]" src="https://forum-images.hardware.fr/icones/message/fixe.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="cpp" onclick="TAinsert('[cpp]','[/cpp]');" title="Insérer du code C/C++. Syntaxe : [cpp]texte[/cpp]" alt="[cpp]" src="https://forum-images.hardware.fr/icones/message/c.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="text_url" onclick="TAinsert('[url]','[/url]');" title="Insérer une URL. Syntaxe : [url]texte[/url]" alt="[url]" src="https://forum-images.hardware.fr/icones/message/url.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="text_email" onclick="TAinsert('[email]','[/email]');" title="Insérer une adresse email. Syntaxe : [email]email@hostname.com[/email]" alt="[email]" src="https://forum-images.hardware.fr/icones/message/email.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="image" onclick="TAinsert('[img]','[/img]');" title="Insérer une image. Syntaxe : [img]http://www.exemple.com/exemple.jpg[/img]" alt="[img]" src="https://forum-images.hardware.fr/icones/message/image.gif" width="26" height="28" /><img
+				style="cursor:pointer" class="text_puce" onclick="TAinsert('[*]','');" title="Insérer une puce. Syntaxe : [*]texte" alt="[*]" src="https://forum-images.hardware.fr/icones/message/puce.gif" width="23" height="28" />
+				&nbsp;&nbsp;
+			</div>
+			<div class="left" style="width:270px;">
+				<table class="none" style="margin-top:6px; border:0px" id="ColorPanel" cellspacing="0" cellpadding="0">
+					<tr>
+						<td style="margin:0; padding:0; line-height:10px; cursor:pointer; width:15px; border:1px solid #000000" id="ColorUsed" title="Dernière couleur sélectionnée"><img src="https://forum-images.hardware.fr/icones/trans.gif" alt="" width="15" height="17" onclick="TAinsert('['+document.getElementById('ColorUsed').bgColor+']','[/'+document.getElementById('ColorUsed').bgColor+']');" style="padding:0; margin:0" /><input type="hidden" value="" name="ColorUsedMem" id="ColorUsedMem" /></td>
+						<td width="5" style="margin:0; padding:0">&nbsp;
+							<script language="JavaScript" type="text/javascript">
+								rgb(0,col0,0,'https://forum-images.hardware.fr/icones/trans.gif','Mettre du texte en couleur');
+								rgb(18,col1,50,'https://forum-images.hardware.fr/icones/trans.gif','Mettre du texte en couleur');
+								rgb(36,col2,100,'https://forum-images.hardware.fr/icones/trans.gif','Mettre du texte en couleur');
+								rgb(0,col3,150,'https://forum-images.hardware.fr/icones/trans.gif','Mettre du texte en couleur');
+							</script>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="left">
+				&nbsp;&nbsp;
+				<img style="cursor:pointer" onclick="TAinsert('[quote]','[/quote]');" title="Insérer une citation. Syntaxe : [quote]texte[/quote]" alt="[quote]" src="https://forum-images.hardware.fr/icones/message/citation.gif" width="69" height="28" />
+			</div>
+			<div class="spacer">&nbsp;</div>
+	<br /><textarea cols="75" rows="14" class="contenu" name="content_form" id="content_form" accesskey="c"></textarea><input type="hidden" name="wysiwyg" value="0" />
+<input onclick=" return verif_not_empty()" type="submit" accesskey="s" value="Valider votre message" name="submit" /><input type="button" accesskey="a" value="Aperçu" onclick="apercevoir();" />		<div id="addCommentMessage"></div>
+		</td>
+	</tr>
+	<tr class="reponse">
+		<th class="repCase1">Options</th>
+		<td class="repCase2" style="font-weight:bold">	<input class="checkbox opt" type="checkbox" value="1" name="signature" id="signature" /><label for="signature">Activer votre signature</label>
+	<br /><input class="checkbox opt" type="checkbox" value="1" name="smiley" id="smiley" /><label for="smiley">Désactiver les smilies</label>
+	<br /><input class="checkbox opt" type="checkbox" value="1" name="emaill" id="emaill" /><label for="emaill">Activer la notification par email du sujet</label>
+	&nbsp;</td></tr></table></form><table class="main" cellspacing="0" cellpadding="4" width="100%">		<tr style="display:none" id="apercu" class="reponse">
+			<th class="repCase1">Aperçu</th>
+			<th class="repCase2"><iframe name="apercu_frame" id="apercu_frame" style="border:0px" src=""></iframe></th>
+		</tr>
+	</table><form action="/apercu.php" target="apercu_frame" method="post" name="apercu_form" id="apercu_form">
+<input type="hidden" name="hash_check" value="" /><input type="hidden" name="apercu_contenu" id="apercu_contenu" value="" />
+<input type="hidden" name="apercu_smiley" id="apercu_smiley" value="" />
+<input type="hidden" name="config" value="hfr.inc" />
+</form>
+<a href="/password.php?config=hfr.inc" class="s2Ext">Vous avez perdu votre mot de passe ?</a>
+<br />
+<br />
+
+<br /><table class="main" cellspacing="0" cellpadding="4" width="100%">
+			<tr class="cBackHeader">
+				<th class="padding">Vue Rapide de la discussion</th>
+			</tr>
+		</table>		<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">Pyacxpypvx</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11255373" class="Topic">tQWtrIf25 a écrit :</a></b><br /><br /><p>Les prix non ? :o<br /></p></td></tr></table></div><p><br />&nbsp;<br />Oui bien-sûr, les prix!<br />Mais je me suis résigné, je n'ai pas l'impression qu'il y aura un effort de fait dessus et je m'y suis préparé psychologiquement en économisant bien à l'avance :o &nbsp;<br />3 nm ça va chiffrer, la &#034;pseudo&#034; nouvelle technologie également et même si les coûts seront bien inférieurs pour la fabrication, ce ne sera pas pour nous.<br />&nbsp;<br /></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11255377" class="Topic">Gqxfyakj a écrit :</a></b><br /><br /><p><br />Ca sera un investissement à long terme &nbsp;[:sekf2qc] <br /></p></td></tr></table></div><p><br />Oui voilà !<br />&nbsp;<br />En partant d'une 1060 je suis moins regardant sur le prix, j'estime qu'avec l'écart de génération je sentirais moins la carotte passée! &nbsp;<br />Même si cela ne me fera pas plaisir de sortir plus de 1000 euros, ces cartes et surtout la 5070ti devront quand même être à la hauteur.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">Gqxfyakj</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11255373" class="Topic">tQWtrIf25 a écrit :</a></b><br /><br /><p>Les prix non ? :o<br /></p></td></tr></table></div><p><br />Ca sera un investissement à long terme &nbsp;[:sekf2qc] <div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">tQWtrIf25</td>
+			<td>Les prix non ? :o<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">Pyacxpypvx</td>
+			<td>Les séries 5xxx ont l'air d'êtres alléchantes si on se réfère uniquement aux rumeurs.<br />&nbsp;<br />J'en attends plus de Nvidia sur au moins deux points; &nbsp;<br />Des consommations vraiment revues à la baisse et des efforts au niveau de la Vram.<br />&nbsp;<br />Le Path tracing a l'air d'être plus enclin à être implémenté dans bons nombres de jeux, ce qui faciliterait une large adoption de cette technologie. &nbsp;<br />&nbsp;<br />Je ne suis pas réellement convaincu, on nous a souvent vendu du rêve.<br />Dans tous les cas mon choix se portera sur une 5070ti voir 5080 (si la consommation est bien revue à la baisse et que l'on n'est pas pris pour des pigeons).<br />Pour les tarifs, il faudra s'en doute s'attendre à du très salé.<br />&nbsp;<br />Ma bonne veille 1060, est encore au taquet, mais il est enfin temps de level up!<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">ydzqn_10</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11254955" class="Topic">EER80 a écrit :</a></b><br /><br /><p>Quand je vous avais dit que la bande passante est problématique : <a rel="nofollow" href="https://hardwareand.co/actualites/breves/directstorage-prefere-les-ssd-pcie-5-0-avec-les-derniers-pilotes-nvidia" target="_blank" class="cLink">https://hardwareand.co/actualites/b [...] tes-nvidia</a><br /></p></td></tr></table></div><p><br />&nbsp;<br />Franchement le bench des poires ne sert à rien, c'est comme le test de la bande passante PCI-E dans 3Dmarks, c'est ultra synthétique et pas représentatif du monde réel. ça été codé spécifiquement pour profiter du direct storage, ce n'est pas le comportement d'un jeu vidéo.<br />&nbsp;<br />Faudra voir quand y aura un peu plus de jeux gérant la techno pour se faire un avis et des gains réels en passant d'un NVME PCI-E 3.0 à 4.0 voir 5.0 ... Tout comme l'évolution des jeux aussi dans le futur pourront peut être plus dycss besoin de bande passante élevée à ce niveau, mais pour l'instant c'est trop tôt encore.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td>Quand je vous avais dit que la bande passante est problématique : <a rel="nofollow" href="https://hardwareand.co/actualites/breves/directstorage-prefere-les-ssd-pcie-5-0-avec-les-derniers-pilotes-nvidia" target="_blank" class="cLink">https://hardwareand.co/actualites/b [...] tes-nvidia</a><div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td><br />&nbsp;<br />Je me contredis ... XD. Passer une bonne journée les copains.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11252259" class="Topic">Wtneounrng a écrit :</a></b><br /><br /><p><br />&nbsp;<br />Cela fait plaisir de voir ce genre de position sur le DirectStorage, je valide aussi ! :) <br /></p></td></tr></table></div><p><br />&nbsp;<br />Techno qui aurais pût être implémenté de différentes manières, ils ont choisi le chemin du NVME, et bien bon, à voir. Les premiers tests montrais parfois du positif, parfois du négatif ... A voir ce que cela pourra donner avec de nouveaux algorithmes de compressions. Mais c'est sûr que un jeu qui est architecturé dès le depart pour fonctionner avec cette techno aura un impact négatif si c'est pas activé. Et dsl de le redire mais cela viens d'une solution de console au depart. Mais bon ça allège au niveau de la ram et du cpu, donc bon, pourquoi pas. Moi je met ce qu'il faut en ram pour la mémoire tampon avec le gpu, mais les dernières technos montrent de plus en plus que l'on se dirige vers de la compression optimisé. Cela évolue, et bon, tant mieux. Après le commentaire précèdent est de très bonne facture. Bon je dit que ça viens des consoles, dans ce cas précis dans la sphère Microsoft, mais direct storage au départ c'est une techno de datacenter sur windows server et ça fait plus de truc que ce point précis.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">Pkvzjtj</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11252094" class="Topic">fsfq pumql a écrit :</a></b><br /><br /><p>Je veux une 5080 un peu plus puissante que la 4090 pour 280 watts. &nbsp;<br />A vous Nvidia. &nbsp;[:rm coi:1] <br /></p></td></tr></table></div><p><br />&nbsp;<br />180W comme Pascal. :o<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">Wtneounrng</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11246705" class="Topic">xolsbktk1 a écrit :</a></b><br /><br /><p><br />&nbsp;<br />Super bien expliqué, je valide !<br /></p></td></tr></table></div><p><br />&nbsp;<br />Cela fait plaisir de voir ce genre de position sur le DirectStorage, je valide aussi ! :) <div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">fsfq pumql</td>
+			<td>Je veux une 5080 un peu plus puissante que la 4090 pour 280 watts. &nbsp;<br />A vous Nvidia. &nbsp;[:rm coi:1] <div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">xolsbktk1</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11240646" class="Topic">WimmBqv a écrit :</a></b><br /><br /><p><br />&nbsp;<br />Non le Direct Storage n'est pas un truc de consoles, il est essentiel pour l'avenir du jeu PC, parce que c'est cette API qui permet sur celles-ci des temps de chargement pratiquement inexistants et qui permet d'éviter la recompilation des Shaders pendant de longues minutes dans de plus en plus de jeux.<br />&nbsp;<br />Direct Storage version GPU est une solution bien plus efficace qu'un préchargement pour le GPU sur la mémoire locale.<br />&nbsp;<br />&nbsp;<br />Sur TLOU, les temps de chargement sont extrêmement longs comparé à la version PS5 (que j'ai aussi), et pour que les PC puissent rivaliser sur ce point, Direct Storage est une pierre essentielle de l'édifice.<br />&nbsp;<br />Autre exemple, sur Returnal, l'ouverture des portes dans le monde se fait instantanément sur PS5, tandis qu'il faut compter un petit délai sur PC.<br />&nbsp;<br />Et avec les nouveaux moteurs et le développement des jeux qui se fait en priorité pour les consoles, on va voir apparaître de plus en plus souvent ce type de problèmes à mesure que la génération PS4/Xbox One sera abandonnée, et que les jeux seront développées pour la PS5/Xbox Serie X, qui elles, ont des API de type Direct Storage qui permettent d'éviter tout goulot d'étranglement.<br />&nbsp;<br />Si pour le moment ça semble anecdotique c'est parce que la plupart des jeux sont encore Cross Gén et que très peu sont vraiment développés pour tirer pleinement parti des nouvelles architectures en laissant sur le bas côté les anciennes.<br />Quand ça va devenir la norme, un PC de guerre avec les meilleurs composants possibles, chargera tout, toujours moins rapidement, que des consoles à 500 balles !<br />&nbsp;<br />Et ça, ce n'est tout simplement pas possible, on est pas passé sur des SSD Nvme et maintenant PCI-Express pour se retrouver limités d'un autre coté alors que d'un point de vue logiciel Microsoft a la solution !<br />Le seul défaut c'est que Direct Storage reste au bon vouloir du développeur et n'est en aucun cas une obligation et je ne sais pas dans quelle mesure son implémentation est simple ou non.<br />&nbsp;<br />Enfin, on peut se gausser des 16Go sur consoles, mais elles ne sont pas limités par ces derniers, surtout quand on voit la tronche des portages sur PC et la gourmandise hallucinante en Ram et en VRAM des derniers jeux sortis.<br />&nbsp;<br />Moi j'aimerai bien dycss sur PC un système similaire à celui existant sur Xbox Serie X qui permet de mettre jusqu'à 4-5 jeux en cache, pour passer de l'un à l'autre sans devoir les fermer et pouvoir les relancer là où je me suis arrêté.<br />Ca une console avec 16 Go de mémoire unifiée et un SSD y arrive, pendant que sur PC ce type de confort n'est même pas évoqué.<br />&nbsp;<br />Qu'on le veuille ou non, le monde du PC va devoir s'aligner sur ces outils sur le monde des consoles sinon on va dycss des problèmes que les développeurs, même avec une bonne optimisation ne pourront pas régler.<br />Pour de bons portages, ils ont besoin de retrouver les mêmes outils que sur consoles.<br />&nbsp;<br />&nbsp;<br />Pour voir les effets de Direct Storage sur PC il suffit de faire une recherche sur Youtube &#034;Forspoken Direct Storage&#034;, peu importe la qualité du jeu, on peut voir qu'on gagne grandement en performances avec un allégement de 20% de la charge CPU (ça n'est pas négligeable), et encore ça n'est que la version CPU de Direct Storage, la version GPU promet des gains encore plus importants.<br /></p></td></tr></table></div><p><br />&nbsp;<br />Super bien expliqué, je valide !<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">fsfq pumql</td>
+			<td> :pt1cable: Ces specs.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td>Apparemment le flagship a le même nombre d'unité que l'actuelle ce qui est une très bonne nouvelle et voudrais dire un prix contenue ou dans l'alignement des prix actuels. J'espère pour ma part que cela baissera. Donc Nvidia va se concentrer sur la monté en fréquence et l'amélioration de l'architecture.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td>Il y aurais une 4060 Ti 16 Go .. cela progresse dans le bon sens, à voir ce que donnera Blackwell pour la mémoire.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">cnjtoq</td>
+			<td>Enfin, j'espère juste que NVidia ne va pas sacrifier la sobriété énergétique des 5xxxx après dycss enfin sorti des 4xxxx qui se tienne niveau puissance / Bruit / conso (et pour les 4090, en mettant le PL à 80%, 99.1% des FPS sur les FE d'après quelques tests)<br />&nbsp;<br />La GDDR7 consommera forcément pas mal, et ces cartes embarqueront pleins de mémoire. Mouais, le temps que le milieu de gamme se décline, ce sera l'occasion de se taper tout ses anciens jeux peu gourmant ... On va pas acheter une nouvelle COnfig à chaque fois qu'un Jeux AAA mal optimisé sort.<br />&nbsp;<br />Dès que l'UE5 se démocratisera dans pleins de jeux, là ça vaudra le coup. Mais du 5xxxx pour du 5xxxx sur des jeux pourris , autant rester sur des 4080<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">Gbsaddprog</td>
+			<td><br />&nbsp;<br />&nbsp;<br />[:cr xrlpb]<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">gtaualuzp</td>
+			<td>@Sockaros : beaucoup trop tôt pour le dire , perso je crois pas forcément à un nouveau DLSS pour les RTX5000 , enfin on verra bien mais ces cartes n'arriveront pas avant second semestre 2024 au mieux , on a le temps de voir venir :D<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top"></td>
+			<td>Un dlss 4.0 ?<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">fefmzive</td>
+			<td> [:tjfzaj] <div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">qap6</td>
+			<td>Dommage j'aurais bien voulu voir du MCM sur les next gen, avec l'idée à terme d'dycss des chip qui seront dédié par exemple au RT et réduire les coûts de prod.<br />&nbsp;<br />Plutôt que d'dycss une grosse puce sur les XX90, dycss plusieurs petites qui seront les mêmes sur les XX80/70/60 mais en moindre nombre.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">dnlkpla</td>
+			<td>Drap<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">WimmBqv</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11240623" class="Topic">EER80 a écrit :</a></b><br /><br /><p>les consoles mémoire unifié d'accord, mais 16 pauvre Go. ^^' Il faut le dire quand un jeu n'est pas optimisé pour PC. Et je préfère qu'un jeu précharge pour le GPU dans la mémoire locale .. c'est plus rapide qu'un NVME, l'histoire du direct storage c'est un truc de console.<br />&nbsp;<br />&nbsp;<br /><br /></p></td></tr></table></div><p><br />&nbsp;<br />Non le Direct Storage n'est pas un truc de consoles, il est essentiel pour l'avenir du jeu PC, parce que c'est cette API qui permet sur celles-ci des temps de chargement pratiquement inexistants et qui permet d'éviter la recompilation des Shaders pendant de longues minutes dans de plus en plus de jeux.<br />&nbsp;<br />Direct Storage version GPU est une solution bien plus efficace qu'un préchargement pour le GPU sur la mémoire locale.<br />&nbsp;<br />&nbsp;<br />Sur TLOU, les temps de chargement sont extrêmement longs comparé à la version PS5 (que j'ai aussi), et pour que les PC puissent rivaliser sur ce point, Direct Storage est une pierre essentielle de l'édifice.<br />&nbsp;<br />Autre exemple, sur Returnal, l'ouverture des portes dans le monde se fait instantanément sur PS5, tandis qu'il faut compter un petit délai sur PC.<br />&nbsp;<br />Et avec les nouveaux moteurs et le développement des jeux qui se fait en priorité pour les consoles, on va voir apparaître de plus en plus souvent ce type de problèmes à mesure que la génération PS4/Xbox One sera abandonnée, et que les jeux seront développées pour la PS5/Xbox Serie X, qui elles, ont des API de type Direct Storage qui permettent d'éviter tout goulot d'étranglement.<br />&nbsp;<br />Si pour le moment ça semble anecdotique c'est parce que la plupart des jeux sont encore Cross Gén et que très peu sont vraiment développés pour tirer pleinement parti des nouvelles architectures en laissant sur le bas côté les anciennes.<br />Quand ça va devenir la norme, un PC de guerre avec les meilleurs composants possibles, chargera tout, toujours moins rapidement, que des consoles à 500 balles !<br />&nbsp;<br />Et ça, ce n'est tout simplement pas possible, on est pas passé sur des SSD Nvme et maintenant PCI-Express pour se retrouver limités d'un autre coté alors que d'un point de vue logiciel Microsoft a la solution !<br />Le seul défaut c'est que Direct Storage reste au bon vouloir du développeur et n'est en aucun cas une obligation et je ne sais pas dans quelle mesure son implémentation est simple ou non.<br />&nbsp;<br />Enfin, on peut se gausser des 16Go sur consoles, mais elles ne sont pas limités par ces derniers, surtout quand on voit la tronche des portages sur PC et la gourmandise hallucinante en Ram et en VRAM des derniers jeux sortis.<br />&nbsp;<br />Moi j'aimerai bien dycss sur PC un système similaire à celui existant sur Xbox Serie X qui permet de mettre jusqu'à 4-5 jeux en cache, pour passer de l'un à l'autre sans devoir les fermer et pouvoir les relancer là où je me suis arrêté.<br />Ca une console avec 16 Go de mémoire unifiée et un SSD y arrive, pendant que sur PC ce type de confort n'est même pas évoqué.<br />&nbsp;<br />Qu'on le veuille ou non, le monde du PC va devoir s'aligner sur ces outils sur le monde des consoles sinon on va dycss des problèmes que les développeurs, même avec une bonne optimisation ne pourront pas régler.<br />Pour de bons portages, ils ont besoin de retrouver les mêmes outils que sur consoles.<br />&nbsp;<br />&nbsp;<br />Pour voir les effets de Direct Storage sur PC il suffit de faire une recherche sur Youtube &#034;Forspoken Direct Storage&#034;, peu importe la qualité du jeu, on peut voir qu'on gagne grandement en performances avec un allégement de 20% de la charge CPU (ça n'est pas négligeable), et encore ça n'est que la version CPU de Direct Storage, la version GPU promet des gains encore plus importants.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td>les consoles mémoire unifié d'accord, mais 16 pauvre Go. ^^' Il faut le dire quand un jeu n'est pas optimisé pour PC. Et je préfère qu'un jeu précharge pour le GPU dans la mémoire locale .. c'est plus rapide qu'un NVME, l'histoire du direct storage c'est un truc de console.<br />&nbsp;<br />&nbsp;<br /><div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">Gqxfyakj</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11240593" class="Topic">WimmBqv a écrit :</a></b><br /><br /><p><br />J'ai même l'impression qu'actuellement il y a plus d'évolutions coté CPU à attendre, sachant que même les meilleurs, sont devenus un facteur limitant pour une 4090 par exemple, et hormis un 13900k épaulé par une Ram en DDR5 costaud, on se retrouve avec du CPU limited, même en 4k, et ça risque d'être pire avec la génération RTX 5000, sauf si par magie, d'ici là les développeurs apprennent à exploiter correctement un grand nombre de coeurs dans leurs jeux, mais là dessus je ne me fais aucune illusion, c'est toujours le mono-thread qui mène la danse.<br /><br /></p></td></tr></table></div><p><br />L'exploitation réelle du multithread, ça va venir dans les jeux : The Last OF Us pour PC en est un bon exemple : Il exploite bien les 16 threads disponibles d'un Ryzen 7 5800X<br />Les éditeurs de jeux vont forcément s'adapter à la limitation des perfs CPU en monothread<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">WimmBqv</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11238653" class="Topic">tQWtrIf25 a écrit :</a></b><br /><br /><p><br />L'acheteur de 4090 ne va même pas sourciller quand il mettra la 5090 dans son panier, parce qu'il l'a déjà prévu cette achat...ainsi que la série 6,7 etc... :D<br /></p></td></tr></table></div><p><br />&nbsp;<br />Non pas forcément, j'ai une 4090 Suprim X et j'ai pu me le permettre parce que sa sortie est tombée au bon moment, bonne revente de ma 3090 FE, Achat Day One à un prix de lancement, quelques économies restantes de la période Covid, et surtout le crédit de ma baraque ne commençait pas avant 1 an, du coup je ne payais plus le crédit de mon appart qui était soldé, et pas encore celui de la maison, donc un gros boost de pouvoir d'achat pendant 12 mois.<br />&nbsp;<br />Quand la 5090 sortira, son tarif sera sûrement supérieur, et je n'aurai plus la même marge de manœuvre.<br />&nbsp;<br />Après ce qui m'a clairement poussé à changer c'est le gain non négligeable vis à vis de ma 3090 dont les perfs étaient trop limite en 4k, et surtout le DLSS 3.0 et le Frame Generation qui est un game changer (on le voit avec le Path Tracing sur Cyberpunk 2077).<br />&nbsp;<br />A moins que la génération RTX 5000 soit aussi prometteuse et mettent un place un DLSS 4.0 inaccessible aux générations précédentes et une nouvelle technologie similaire au Frame Generation qui permette de gagner encore en performances de façon aussi impressionnante, la nécessité se fera moins sentir de faire le pas.<br />&nbsp;<br />Actuellement je fais tourner Cyberpunk en 4k, DLSS qualité, Mode Overdrive, et j'ai un framerate moyen qui ne descend jamais sous les 60 fps, et il va falloir sortir de sacrés jeux pour dépasser la claque visuelle que constitue désormais Cyberpunk 2077, vitrine technologique qui est le nouveau Crysis.<br />&nbsp;<br />Je n'ai rien vu qui visuellement justifie un GPU plus puissant qu'une 4090 dans les jeux qui doivent sortir dans les 2-3 ans à venir.<br />&nbsp;<br />Par contre pour ceux qui seront resté sur la génération RTX 2000 ou 3000, le gap risque d'être très intéressant dans le sens où on va atteindre une finesse de 3nm et il sera difficile de descendre sous cette barre (du moins ça prendra un petit moment à Nvidia, et on va peut être revenir à un rythme de renouvellement du GPU plus long qu'il ne l'était depuis le début de la génération RTX).<br />&nbsp;<br />J'ai même l'impression qu'actuellement il y a plus d'évolutions coté CPU à attendre, sachant que même les meilleurs, sont devenus un facteur limitant pour une 4090 par exemple, et hormis un 13900k épaulé par une Ram en DDR5 costaud, on se retrouve avec du CPU limited, même en 4k, et ça risque d'être pire avec la génération RTX 5000, sauf si par magie, d'ici là les développeurs apprennent à exploiter correctement un grand nombre de coeurs dans leurs jeux, mais là dessus je ne me fais aucune illusion, c'est toujours le mono-thread qui mène la danse.<br />&nbsp;<br />Et à coté de ça on voit apparaître d'autre facteurs limitant qui n'existaient pas avant, The Last of Us en est un bon exemple ; si on se retrouve avec des temps de compilation des shaders délirants et des temps de chargement bien plus importants que sur console, c'est parce que la où celles-ci emploient une mémoire unifiée et exploitent pleinement les capacités de leurs SSD en évitant soigneusement tout goulot d'étranglement, la technologie Direct Storage est toujours balbutiante sur PC (Windows 11 l'emploie mais uniquement sur le CPU pour le moment, et les jeux concernés se comptent sur les doigts d'une main).<br />&nbsp;<br />On voit donc apparaître sur nos PC, même très haut de gamme, des goulots d'étranglement qui viennent limiter les perfs en jeux (surtout que ces derniers sont taillées pour les consoles Next-Gen à mémoire unifiée), et maintenant chaque composant compte dans la balance, pour tirer toute la puissance d'un gros GPU, il faut désormais un CPU haut de gamme, voire le meilleur d'AMD ou d'Intel, qu'il faut épauler d'une Ram cadencée à de hautes valeurs (qui coute une fortune), avec un SSD qu'il faudra bientôt installer via PCI-Express, et malgré ça on sera de plus en plus dépendant du bon vouloir de Microsoft dans le développement de Direct Storage, et du bon vouloir des développeurs à l'exploiter.<br />&nbsp;<br />Bref désolé je me suis éloigné du sujet initial, mais c'était une vision d'avenir que je voulais développer sur le moment et je pense que prochainement on atteindra un stade où il n'aura jamais été aussi onéreux de pouvoir jouer sur PC dans les meilleures conditions, pendant que côté consoles, le rapport performance/prix n'aura jamais été aussi avantageux compte tenu des architectures et des technologies employées.<br />&nbsp;<br />En bref, mettez de coté, parce qu'on ne pourra plus changer composant par composant, sans limiter le petit nouveau, il faudra désormais changer tout le moteur ou presque pour franchir un nouveau palier.<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">awsj&#039;pxjpgtx</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11238617" class="Topic">uoh123 a écrit :</a></b><br /><br /><div class="container"><table class="quote"><tr class="none"><td><b class="s1">Citation :</b><br /><br /><p>On a aussi un très gros gap entre la 3090 et la 4090 &nbsp;<br /></p></td></tr></table></div><p><br />Oui mais vu qu'il n'y a pas de 4090TI, après je dis pas qu'il y en aura pas mais au jour d'aujourd'hui &nbsp;<br />, il faudrait comparer la 3090TI vs la 4090 (remplaçante de la 4090TI). &nbsp;<br />Et c'est la que l'on voit que le gap est pas terrible car le gap d'avant est la 2080TI vs la 3090TI.<br /><a rel="nofollow" href="https://technical.city/fr/video/GeForce-RTX-2080-Ti-vs-GeForce-RTX-3090-Ti" target="_blank" class="cLink">https://technical.city/fr/video/GeF [...] TX-3090-Ti</a> (163% de perf en plus sur fire strike graphique, un truc de malade) &nbsp;<br /><a rel="nofollow" href="https://technical.city/fr/video/GeForce-RTX-3090-Ti-vs-GeForce-RTX-4090" target="_blank" class="cLink">https://technical.city/fr/video/GeF [...] e-RTX-4090</a> La 4090 est à la ramasse, seulement 45% de perf en plus.<br />En clair si le gap de la 5090 est le même que celui de la 2080TI vs la 3090TI, cela va déchirer. <br /></p></td></tr></table></div><p><br />&nbsp;<br />&nbsp;<br />je suis d'accord. J'ai une 3090 Ti et une 4090 et cette dernière était la seule carte qui avait du sens et un gap de performance notable pour remplacer cette dernière dans mon PC principal. En dessous , c'est anecdotique (sauf DLSS 3 qui exclus la gamme 3000 mais qui pourrait redonner de la valeur à la génération des 3000 si AMD sort un équivalent générique).<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11238653" class="Topic">tQWtrIf25 a écrit :</a></b><br /><br /><p><br />L'acheteur de 4090 ne va même pas sourciller quand il mettra la 5090 dans son panier, parce qu'il l'a déjà prévu cette achat...ainsi que la série 6,7 etc... :D<br /></p></td></tr></table></div><p><br />&nbsp;Hé oui, tant mieux pour eux XD ...<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">tQWtrIf25</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11238362" class="Topic">uoh123 a écrit :</a></b><br /><br /><p>&#034;performance vs previous gen 2-2.6&#034;<br />Cela me parait quand même un peu démesuré... &nbsp;<br />Par contre si c'est vrai, les acheteurs 4090 risque d'être un peu furax, elle vaudra plus grand chose...<br /></p></td></tr></table></div><p><br />L'acheteur de 4090 ne va même pas sourciller quand il mettra la 5090 dans son panier, parce qu'il l'a déjà prévu cette achat...ainsi que la série 6,7 etc... :D<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">Pkvzjtj</td>
+			<td> [:tjfzaj] <div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">uoh123</td>
+			<td></p><div class="container"><table class="quote"><tr class="none"><td><b class="s1">Citation :</b><br /><br /><p>On a aussi un très gros gap entre la 3090 et la 4090 &nbsp;<br /></p></td></tr></table></div><p><br />Oui mais vu qu'il n'y a pas de 4090TI, après je dis pas qu'il y en aura pas mais au jour d'aujourd'hui &nbsp;<br />, il faudrait comparer la 3090TI vs la 4090 (remplaçante de la 4090TI). &nbsp;<br />Et c'est la que l'on voit que le gap est pas terrible car le gap d'avant est la 2080TI vs la 3090TI.<br /><a rel="nofollow" href="https://technical.city/fr/video/GeForce-RTX-2080-Ti-vs-GeForce-RTX-3090-Ti" target="_blank" class="cLink">https://technical.city/fr/video/GeF [...] TX-3090-Ti</a> (163% de perf en plus sur fire strike graphique, un truc de malade) &nbsp;<br /><a rel="nofollow" href="https://technical.city/fr/video/GeForce-RTX-3090-Ti-vs-GeForce-RTX-4090" target="_blank" class="cLink">https://technical.city/fr/video/GeF [...] e-RTX-4090</a> La 4090 est à la ramasse, seulement 45% de perf en plus.<br />En clair si le gap de la 5090 est le même que celui de la 2080TI vs la 3090TI, cela va déchirer. <div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">gtaualuzp</td>
+			<td></p><div class="container"><table class="citation"><tr class="none"><td><b class="s1"><a href="/hfr/Hardware/blackwell-nvidia-geforce-sujet_1061629_1.htm#t11238362" class="Topic">uoh123 a écrit :</a></b><br /><br /><p>&#034;performance vs previous gen 2-2.6&#034;<br />Cela me parait quand même un peu démesuré... &nbsp;<br />Par contre si c'est vrai, les acheteurs 4090 risque d'être un peu furax, elle vaudra plus grand chose...<br /></p></td></tr></table></div><p><br />&nbsp;<br />On a aussi un très gros gap entre la 3090 et la 4090 &nbsp;<br />Du coup à voir ce que ça donnera sur la future gen mais comme toujours je me méfie de ce genre &#034;d'annonce/rumeur&#034; surtout si longtemps avant la sortie des rtx 5000 ( il ne faut pas attendre cette gen avant l'année prochaine de toute façon)<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">Qbrwbc</td>
+			<td>On a vu le &#034;fameux gap&#034; entre les 2080 et la gamme supérieur qui s'est avéré n'être que la theorie et qui avait provoqué un rush de vente des 20x0 avant les tests indépendants...<br />&nbsp;[:unpwlum6]<br />&nbsp;<br />C'est toujours une histoire de besoin/envie/craquage et de revente si possible au meilleur moment.<br />Perso, j'aimerai bien que le HDG ait plus de VRAM, CyberPunk avec les packs de texture 4K/8K arrive proche des 24go de Vram des 4090.<br />&nbsp;<br />Après, c'est coté Tarification que ca va encore être un peu ... &#034;pénible&#034;<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">uoh123</td>
+			<td>&#034;performance vs previous gen 2-2.6&#034;<br />Cela me parait quand même un peu démesuré... &nbsp;<br />Par contre si c'est vrai, les acheteurs 4090 risque d'être un peu furax, elle vaudra plus grand chose...<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">mu9q4tm</td>
+			<td>Le contenu de ce message a été effacé par son auteur<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">sor8</td>
+			<td> [:tjfzaj] <div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">Kroma X amorK</td>
+			<td>Et qu'ils mettent du DP 2.0 :o<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">EER80</td>
+			<td>Toujours monolithique, AMD a fait le parie sur la durée, Nvidia choisi l'efficacité à court terme et donc fait du monolithique sur des nodes avancés qui coutent une blinde (là sur le 3nm, augmentation de 25% para rapport au 5nm qui est déjà au tarif de 16k dollards le wafer) ... verra t'on une nouvelle augmentation de prix ou même un nouveau décalage de gamme ou les deux. En tout cas j'espère que je pourrais prendre une 5070 Ti ou une 5080. Patience.<br />&nbsp;<br /><div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#DEDFDF">
+						<td class="messCase1bis" width="160" valign="top">Gqxfyakj</td>
+			<td>Espérons que cette fois-ci, Nvidia soit un peu plus généreux en VRAM<div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+			<table cellspacing="0" cellpadding="4" width="100%">
+					<tr class="message" style="background-color:#F7F7F7">
+						<td class="messCase1bis" width="160" valign="top">Pvytz3</td>
+			<td>Le nom de la famille 5000 “Blackwell” fait référence au mathematicien américain David Blackwell ( <a rel="nofollow" href="https://en.wikipedia.org/wiki/David_Blackwell" target="_blank" class="cLink">https://en.wikipedia.org/wiki/David_Blackwell</a> ) , &nbsp;<br />né le 24 avril 1919 et décédé le 8 juillet 2010.<br />&nbsp;<br />&nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://youtu.be/SRiV0RgHWI0?si=NeJkP_vSRp_iMYal" target="_blank" class="cLink">https://youtu.be/SRiV0RgHWI0?si=NeJkP_vSRp_iMYal</a><br />&nbsp;<br /><a rel="nofollow" href="https://blogs.nvidia.com/blog/ces-2025-jensen-huang/" target="_blank" class="cLink">https://blogs.nvidia.com/blog/ces-2025-jensen-huang/</a><br />&nbsp;<br /><a rel="nofollow" href="https://nvidianews.nvidia.com/news/nvidia-blackwell-geforce-rtx-50-series-opens-new-world-of-ai-computer-graphics" target="_blank" class="cLink">https://nvidianews.nvidia.com/news/ [...] r-graphics</a><br />&nbsp;<br /><a rel="nofollow" href="https://blogs.nvidia.com/wp-content/uploads/2025/01/GDOH4382-1280x853.jpg" target="_blank" class="cLink">https://blogs.nvidia.com/wp-content [...] 80x853.jpg</a> &nbsp;<br />&nbsp;<br />&nbsp;<br />&nbsp;<br />&nbsp;<br /><strong>Nouveautés attendues de la nouvelle série 5000 par rapport à la précédente série 4000:</strong><br />1. Mémoire vidéo GDDR7 (au lieu de la GDDR6 ou GDDR6X).<br />&nbsp;<br />2. Support du port PCIe 5.0 (au lieu du port PCIe 4.0).<br />&nbsp;<br />3. Support du display port 2.1 (attention pour la bande passante max de 80.00 Gbit/s, seul les câbles très cours de 1.2m sont supportés), au lieu du DP1.4a. <a rel="nofollow" href="https://en.wikipedia.org/wiki/DisplayPort" target="_blank" class="cLink">https://en.wikipedia.org/wiki/DisplayPort</a><br />HDMI 2.1 serait également de la partie (mais c'était déjà le cas je crois).<br />&nbsp;<br />4. Process de production en usine mis à jour, chez TSMC, toujours : &nbsp;<br />node TSMC N4P (4 nm) basé sur le TSMC 5mm ou alors le TSMC 3nm.<br />&nbsp;<br />&nbsp;<br />Le chip resterait aussi en monolitique (un chip), ce qui réduit la latence mais augmente les coûts et les soucis de dissipation thermique par rapport à un multi chip.<br />&nbsp;<br />La famille 5000 serait annoncée au CES de Las Vegas 2025 (début 2025 donc).<br />Cette fois-ci la RTX 5080 (nom de code GB203) serait annoncée avant la plus puissante RTX 5090 (nom de code GB202),<br />ce qui était l'inverse avec la série 4000.<br />&nbsp;<br />Le prix de la 5090 serait à la hauteur de la 4090, si pas plus (2000 euro TVA incluse).<br />&nbsp;<br /></p><table class="fixed"><tr class="none"><td><p>Comparaison 5090 vs 4090&#058;<br />RTX 5090 / RTX 4090<br />&nbsp;<br />Nom de code&#058; GB202 / AD102-300<br />&nbsp;<br />Interface PCIe 5.0 x16 / PCIe 4.0 x16<br />&nbsp;<br />Mémoire 32 GB GDDR7 / 24GB GDDR6X<br />&nbsp;<br />CUDA cores 24 576 / 16 384<br />&nbsp;<br />Cache L2 128MB / 72MB<br />&nbsp;<br />Boost clock 2,9GHz / 2,52GHz<br />&nbsp;<br />Architecture Blackwell / Ada Lovelace<br />&nbsp;<br />Largeur bus mem 512 bits / 256 bits<br />&nbsp;<br />Bande passante mem 1 536 GB/s / 1 008 GB/s<br />&nbsp;<br /></p></td></tr></table><p><br />&nbsp;<br />&nbsp;<br />&nbsp;<br />&nbsp;<br /><strong>Consommations attendues:</strong><br />&nbsp;<br /></p><table class="fixed"><tr class="none"><td><p><br />RTX 5090 (GB202) 600W (150W de plus que la RTX 4090)<br />&nbsp;<br />RTX 5080 (GB203) 400W (80W de plus que la RTX 4080)<br />&nbsp;<br />RTX 5070ti (GB203 cut down) 300W (50W de plus que la RTX 5070)<br />&nbsp;<br />RTX 5070 (GB205) 250W (50W de plus que la RTX 4070)<br />&nbsp;<br />RTX 5060 (GB206) 170W (55W de plus que la RTX 4060)<br />&nbsp;<br />RTX 5050 (GB207) 100W<br /></p></td></tr></table><p><br />&nbsp;<br />sources:<br /><a rel="nofollow" href="https://www.xda-developers.com/nvidia-rtx-5000-rumors/" target="_blank" class="cLink">https://www.xda-developers.com/nvidia-rtx-5000-rumors/</a><br /><a rel="nofollow" href="https://www.digitaltrends.com/computing/nvidia-rtx-50-series-rumors/" target="_blank" class="cLink">https://www.digitaltrends.com/compu [...] es-rumors/</a><br />&nbsp;<br />Pas encore de benchmark en jeu de dispo.<br />&nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://zupimages.net/viewer.php?id=24/47/c2x5.png" target="_blank" class="cLink"><a rel="nofollow" href="https://zupimages.net/up/24/47/c2x5.png" target="_blank" class="cLink">https://zupimages.net/up/24/47/c2x5.png</a></a><br />&nbsp;<br />&nbsp;<br />Le Rdna4 d'Amd pourrait ne pas dycss d'équivalent à la Rtx 5090.<br />&nbsp;<br /><a rel="nofollow" href="https://zupimages.net/viewer.php?id=24/47/0760.png" target="_blank" class="cLink"><a rel="nofollow" href="https://zupimages.net/up/24/47/0760.png" target="_blank" class="cLink">https://zupimages.net/up/24/47/0760.png</a></a><br />&nbsp;<br />Cloture premier sondage:<br /><a rel="nofollow" href="https://zupimages.net/viewer.php?id=24/42/rivo.png" target="_blank" class="cLink"><a rel="nofollow" href="https://zupimages.net/up/24/42/rivo.png" target="_blank" class="cLink">https://zupimages.net/up/24/42/rivo.png</a></a><br />&nbsp;<br />&nbsp;<br />Selon des infos de Reuters rapportées par TPU, TSMC et NVIDIA seraient en discussions actives pour produire les futurs GPU Blackwell dans la toute nouvelle usine TSMC de Phoenix, en Arizona. Une décision qui pourrait faire bouger les lignes dans le petit monde des puces dédiées à l'IA, en ramenant une partie de la production sur le territoire américain.<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94070/tsmc-et-nvidia-bientot-des-gpu-blackwell-made-in-arizona.html" target="_blank" class="cLink">https://www.cowcotland.com/news/940 [...] izona.html</a><br />&nbsp;<br />&nbsp;<br />5070ti intéressante?<br />&nbsp;<br /><a rel="nofollow" href="https://i.ibb.co/pQ03yRp/Capture-d-cran-2024-12-25-121523.png" target="_blank" class="cLink">https://i.ibb.co/pQ03yRp/Capture-d- [...] 121523.png</a> &nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://i.ibb.co/SJBWs3q/Capture-d-cran-2024-12-25-121609.png" target="_blank" class="cLink">https://i.ibb.co/SJBWs3q/Capture-d- [...] 121609.png</a> &nbsp;<br />&nbsp;<br />PCB et validation chip:<br /><a rel="nofollow" href="https://www.techpowerup.com/330230/nvidia-geforce-rtx-5090-powered-by-gb202-silicon-512-bit-gddr7-asic-pictured" target="_blank" class="cLink">https://www.techpowerup.com/330230/ [...] c-pictured</a><br />&nbsp;<br />&nbsp;<br />&nbsp;<br />&nbsp;<br />Merci à kqnggu:<br />&nbsp;<br /><a rel="nofollow" href="https://cdn.thefpsreview.com/wp-content/uploads/2025/01/nvidia-geforce-rtx-5090-performance-chart-scaled.jpg" target="_blank" class="cLink">https://cdn.thefpsreview.com/wp-con [...] scaled.jpg</a> &nbsp;<br />&nbsp;<br />&nbsp;<br />&nbsp;<br />Merci à drd-attitude:<br />&nbsp;<br />GeForce RTX 5090<br />GPU : Blackwell GB202-300-A1 avec 21760 Cuda Cores<br />Mémoire : 32 Go GDDR7, interface 512 bits, bande passante théorique de 1568 Go/s (à 28 Gbps).<br />TDP : 575 watts. &nbsp;<br />À partir de 2.349&euro; - 30 janvier &nbsp;<br />&nbsp;<br />&nbsp;<br />GeForce RTX 5080<br />GPU : Blackwell GB203-400-A1 avec 10752 Cuda Cores<br />Mémoire : 16 Go GDDR7, interface 256 bits, bande passante théorique de 784 Go/s (à 28 Gbps). &nbsp;<br />TDP : 360 watts.<br />À partir de 1.179 &euro; 30 janvier<br />&nbsp;<br />&nbsp;<br />GeForce RTX 5070 Ti<br />GPU : GB203-300 avec 70 SM et 8960 Cuda Cores<br />Mémoire : 16 Go GDDR7, interface 256 bits<br />TDP : 300 watts. &nbsp;<br />À partir de 884 &euro; début février<br />&nbsp;<br />GeForce RTX 5070<br />GPU : GB205 avec 6144 Cuda Cores<br />Mémoire : 12 Go GDDR7 interface 192 bits.<br />TDP : 250 watts.<br />À partir de 649 &euro; début février<br />&nbsp;<br />&nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://i.ibb.co/g7jmbF5/Capture-d-cran-2025-01-07-181228.jpg" target="_blank" class="cLink">https://i.ibb.co/g7jmbF5/Capture-d- [...] 181228.jpg</a> &nbsp;<br />&nbsp;<br />&nbsp;<br />RTX40x0 vs RTX50x0:<br /><a rel="nofollow" href="https://www.frandroid.com/produits-android/hardware/cartes-graphiques/2463480_comparatif-nvidia-rtx-5000-vs-4000-tout-comprendre-a-la-nouvelle-generation-de-cartes-graphiques" target="_blank" class="cLink">https://www.frandroid.com/produits- [...] graphiques</a><br />&nbsp;<br /><a rel="nofollow" href="https://images.frandroid.com/wp-content/uploads/2025/01/image-27-7.jpg" target="_blank" class="cLink">https://images.frandroid.com/wp-con [...] e-27-7.jpg</a> &nbsp;<br />&nbsp;<br />I Was The FIRST To Game On The RTX 5090 - NVIDIA 50 Series Announcement (Linus)<br /><a rel="nofollow" href="https://www.youtube.com/watch?v=3a8dScJg6O0" target="_blank" class="cLink">https://www.youtube.com/watch?v=3a8dScJg6O0</a><br />&nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://www.nvidia.com/content/dam/en-zz/Solutions/geforce/news/dlss4-multi-frame-generation-ai-innovations/nvidia-dlss-4-feature-chart-breakdown.jpg" target="_blank" class="cLink">https://www.nvidia.com/content/dam/ [...] akdown.jpg</a> &nbsp;<br />&nbsp;<br />GeForce RTX 5090, les tests le 24 janvier, GeForce RTX 5080, les tests le 30 janvier<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94475/geforce-rtx-5090-les-tests-le-24-janvier-geforce-rtx-5080-les-tests-le-30-janvier.html" target="_blank" class="cLink">https://www.cowcotland.com/news/944 [...] nvier.html</a><br />&nbsp;<br />&nbsp;<br />Un bond de 15 % à 33 % selon les jeux<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94531/nvidia-devoile-les-performances-des-rtx-5070-5070-ti-5080-et-5090.html" target="_blank" class="cLink">https://www.cowcotland.com/news/945 [...] -5090.html</a><br />&nbsp;<br />&nbsp;<br />&nbsp;<br />Petit recap de Tom:<br /><a rel="nofollow" href="https://www.youtube.com/watch?v=ka_2LD6IGuo" target="_blank" class="cLink">https://www.youtube.com/watch?v=ka_2LD6IGuo</a><br />&nbsp;<br />Protoypes coolers:<br /><a rel="nofollow" href="https://www.youtube.com/watch?v=-p0MEy8BvYY" target="_blank" class="cLink">https://www.youtube.com/watch?v=-p0MEy8BvYY</a><br />&nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://preview.redd.it/what-times-does-the-5090-msrp-review-embargo-lift-midnight-v0-xopso19uwgee1.jpeg?width=1725&amp;format=pjpg&amp;auto=webp&amp;s=1a950cf635b50d77551cf9b5809233ff563150b0" target="_blank" class="cLink">https://preview.redd.it/what-times- [...] ff563150b0</a> &nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://zupimages.net/viewer.php?id=25/04/be5b.png" target="_blank" class="cLink"><a rel="nofollow" href="https://zupimages.net/up/25/04/be5b.png" target="_blank" class="cLink">https://zupimages.net/up/25/04/be5b.png</a></a><br />&nbsp;<br /><a rel="nofollow" href="https://www.igorslab.de/wp-content/uploads/2025/01/Specs.jpg" target="_blank" class="cLink">https://www.igorslab.de/wp-content/ [...] /Specs.jpg</a> &nbsp;<br />&nbsp;<br />&nbsp;<br />Et enfin les tests 5090 FE!!!!!!!!!!!!!!!!!<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94619/carte-graphique-nvidia-geforce-rtx-5090-founders-edition-revue-de-presse-internationale.html" target="_blank" class="cLink">https://www.cowcotland.com/news/946 [...] onale.html</a><br />&nbsp;<br />NVIDIA GeForce RTX 5070 Ti : Les tests le 19 février, les ventes le 20 février:<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94681/nvidia-geforce-rtx-5070-ti-les-tests-le-29-fevrier-les-ventes-le-30-fevrier.html" target="_blank" class="cLink">https://www.cowcotland.com/news/946 [...] vrier.html</a><br />&nbsp;<br /><a rel="nofollow" href="https://zupimages.net/viewer.php?id=25/05/orh2.png" target="_blank" class="cLink"><a rel="nofollow" href="https://zupimages.net/up/25/05/orh2.png" target="_blank" class="cLink">https://zupimages.net/up/25/05/orh2.png</a></a><br />&nbsp;<br />Cartes graphiques NVIDIA GeForce RTX 5080 et RTX 5090, les tarifs en France<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94715/cartes-graphiques-nvidia-geforce-rtx-5080-et-rtx-5090-les-tarifs-en-france.html" target="_blank" class="cLink">https://www.cowcotland.com/news/947 [...] rance.html</a><br />&nbsp;<br />Cartes graphiques NVIDIA GeForce RTX 5080 : revue de presse internationale<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94714/cartes-graphiques-nvidia-geforce-rtx-5080-revue-de-presse-internationale.html" target="_blank" class="cLink">https://www.cowcotland.com/news/947 [...] onale.html</a><br />&nbsp;<br />Charge par câble pas équilibré sur 5090 -&gt; crâmage:<br /><a rel="nofollow" href="https://www.youtube.com/watch?v=Ndmoi1s0ZaY" target="_blank" class="cLink">https://www.youtube.com/watch?v=Ndmoi1s0ZaY</a><br />&nbsp;<br />Les soucis so far:<br /><a rel="nofollow" href="https://www.hardwarecooking.fr/rtx-5090-un-probleme-de-conception-mene-a-des-risques-de-surchauffe-et-de-defaillance/" target="_blank" class="cLink">https://www.hardwarecooking.fr/rtx- [...] faillance/</a><br />&nbsp;<br />NVIDIA retarde le lancement de sa carte GeForce RTX 5070 au 5 mars<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94941/nvidia-retarde-le-lancement-de-sa-carte-geforce-rtx-5070-au-5-mars.html" target="_blank" class="cLink">https://www.cowcotland.com/news/949 [...] -mars.html</a><br />&nbsp;<br />Cartes graphiques NVIDIA GeForce RTX 5070 Ti, revue de presse internationale des cartes au MSRP<br /><a rel="nofollow" href="https://www.cowcotland.com/news/94996/cartes-graphiques-nvidia-geforce-rtx-5070-ti-revue-de-presse-internationale-des-cartes-au-msrp.html" target="_blank" class="cLink">https://www.cowcotland.com/news/949 [...] -msrp.html</a><br />&nbsp;<br />Carte additionelle Physx fonctionne encore pour accélerer le physx:<br /><a rel="nofollow" href="https://www.reddit.com/r/hardware/comments/1iv2x5h/i_bought_a_3050_to_pair_with_my_5090_to_uncripple/" target="_blank" class="cLink">https://www.reddit.com/r/hardware/c [...] uncripple/</a><br />&nbsp;<br />NVIDIA GeForce RTX 5060 Ti : 180 watts de TDP<br /><a rel="nofollow" href="https://www.cowcotland.com/news/95085/nvidia-geforce-rtx-5060-ti-180-watts-de-tdp-outch.html" target="_blank" class="cLink">https://www.cowcotland.com/news/950 [...] outch.html</a><br />&nbsp;<br />Black screen fix à venir avec video BIOS update:<br /><a rel="nofollow" href="https://www.techpowerup.com/333160/nvidia-ready-with-geforce-rtx-50-series-black-screen-issue-fix" target="_blank" class="cLink">https://www.techpowerup.com/333160/ [...] -issue-fix</a><br />&nbsp;<br />la-rtx-5090-accepte-le-travail-en-3x8-mais-la-rtx-5080-ne-veut-pas-du-2x8<br /><a rel="nofollow" href="https://www.comptoir-hardware.com/actus/cartes-graphiques/47960-la-rtx-5090-accepte-le-travail-en-3x8-mais-la-rtx-5080-ne-veut-pas-du-2x8.html" target="_blank" class="cLink">https://www.comptoir-hardware.com/a [...] u-2x8.html</a><br />&nbsp;<br />Cartes graphiques NVIDIA GeForce RTX 5070, revue de presse francophone<br /><a rel="nofollow" href="https://www.cowcotland.com/news/95185/cartes-graphiques-amd-radeon-rx-9070-rx-9070-xt-revue-de-presse-francophone.html" target="_blank" class="cLink">https://www.cowcotland.com/news/951 [...] phone.html</a><br /><a rel="nofollow" href="https://www.cowcotland.com/news/95184/cartes-graphiques-nvidia-geforce-rtx-5070-revue-de-presse-francophone-partie-2.html" target="_blank" class="cLink">https://www.cowcotland.com/news/951 [...] tie-2.html</a><br />Cartes graphiques NVIDIA GeForce RTX 5070, revue de presse anglophone<br /><a rel="nofollow" href="https://www.cowcotland.com/news/95162/cartes-graphiques-nvidia-geforce-rtx-5070-revue-de-presse-internationale-partie-1.html" target="_blank" class="cLink">https://www.cowcotland.com/news/951 [...] tie-1.html</a><br />&nbsp;<br />&nbsp;<br />&nbsp;<br />Pas normal, je suis aussi en 240 hertz avec une 90 FE et aucun scintillement notable.<br />&nbsp;<br />Ames975:<br />Si vous avez des scintillement d'écran:<br />HDR de Windows qui bug en 240Hz. En le désactivant je n'ai plus de soucis sur le bureau. &nbsp;<br />Après in game je n'ai rien même si le HDR Windows est activé.<br />Pas de soucis en 120Hz sur le bureau avec le HDR Windows activé.<br />&nbsp;<br />&nbsp;<br />Tarifs enfin à la baisse:<br /><a rel="nofollow" href="https://www.cowcotland.com/news/95647/les-prix-des-cartes-graphiques-amd-intel-et-nvidia-semaine-14-2025-enfin-des-tarifs-a-la-baisse.html" target="_blank" class="cLink">https://www.cowcotland.com/news/956 [...] aisse.html</a><br />&nbsp;<br />Des NVIDIA GeForce RTX 5000 vendues sous les MSRP aux USA !!!<br /><a rel="nofollow" href="https://www.cowcotland.com/news/95732/what-des-nvidia-geforce-rtx-5000-vendues-sous-les-msrp-aux-usa.html" target="_blank" class="cLink">https://www.cowcotland.com/news/957 [...] x-usa.html</a><br />&nbsp;<br />&nbsp;<br /><a rel="nofollow" href="https://zupimages.net/viewer.php?id=25/16/n914.png" target="_blank" class="cLink"><a rel="nofollow" href="https://zupimages.net/up/25/16/n914.png" target="_blank" class="cLink">https://zupimages.net/up/25/16/n914.png</a></a><br />&nbsp;<br />Nouveau sondage, le Gsync limite t'il trop le GPU?<br />&nbsp;<br />&nbsp;<br />&nbsp;<br />NVIDIA officialise ses nouvelles cartes RTX 5060 et RTX 5060 Ti !<br /><a rel="nofollow" href="https://www.cowcotland.com/news/95779/nvidia-officialise-ses-nouvelles-cartes-rtx-5060-et-rtx-5060-ti.html" target="_blank" class="cLink">https://www.cowcotland.com/news/957 [...] 60-ti.html</a><br />&nbsp;<br />&nbsp;<br />Simple fix donc qui résout tous les soucis d'Alt-Tab:<br />&nbsp;<br />Juste ajouter cette clé DWORD 32bit<br />&nbsp;<br />Windows Registry Editor Version 5.00<br />[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\Dwm] &nbsp;<br />&#034;OverlayMinFPS&#034;=dword:00000000<br />&nbsp;<br />&nbsp;<br />&nbsp;<br />NVIDIA GeForce RTX 5090 SE : une nouvelle carte graphique Blackwell pour combler l’écart entre les RTX 5080 et RTX 5090 <a rel="nofollow" href="https://share.google/Z3TiS40to3hNbqHB5" target="_blank" class="cLink">https://share.google/Z3TiS40to3hNbqHB5</a><br />&nbsp;<br />&nbsp;<br />&nbsp;<br />DLSS5 swapper:<br /><a rel="nofollow" href="https://github.com/rakanki911/DLSS5-Swapper/releases/tag/v2.2.3" target="_blank" class="cLink">https://github.com/rakanki911/DLSS5 [...] tag/v2.2.3</a><br />&nbsp;<br />DLSS 5 : NVIDIA confirme que les GeForce RTX 4000 y auront aussi droit<br /><a rel="nofollow" href="https://www.cowcotland.com/news/102335/dlss-5-nvidia-confirme-que-les-geforce-rtx-4000-y-auront-aussi-droit.html" target="_blank" class="cLink">https://www.cowcotland.com/news/102 [...] droit.html</a><br />&nbsp;<br />jusqu’à 127 % de performances en plus grâce à une seconde GeForce RTX dédiée au Neural Rendering<br /><a rel="nofollow" href="https://www.hardwarecooking.fr/dlss-5-ressuscite-sli-neural-rendering/" target="_blank" class="cLink">https://www.hardwarecooking.fr/dlss [...] rendering/</a><div style="clear: both;"> </div></td>
+			</tr>
+		</table>
+	
+<div class="copyright">
+<br /><a href="http://www.mesdiscussions.net" target="_blank" class="copyright">Forum MesDiscussions.Net</a>, Version 2010.2 <br />(c) 2000-2011 Doctissimo<br /></div>
+</div>
+</div>
+<center><font color="#000000" size="1" face="Arial, Helvetica, sans-serif"><br />Copyright © 1997-2025 Groupe <a href="https://www.ldlc.com" title="Achat de materiel Informatique">LDLC</a> (<a href="https://www.hardware.fr/html/donnees_personnelles/">Signaler un contenu illicite / Données personnelles</a>)</font></center>
+<!-- Matomo -->
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://tracking.groupe-ldlc.com/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '26']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="https://tracking.groupe-ldlc.com/matomo.php?idsite=26&rec=1" style="border:0;" alt="" /></p></noscript>
+<!-- End Matomo Code --><script type="text/javascript">
+md_forum_decryptlink.init();
+</script>
+<script type="text/javascript">
+md_forum_decryptlink.init();
+</script>
+<script type="text/javascript">
+
+		window.onload = function(){aff_add_img_js();};
+		
+	function warning() {
+		if (alert('Vous devez spécifier une sous-catégorie !')) {
+			return false;
+		} else {
+			return false;
+		}
+	}
+	function add_join_img() {
+	var addform= 0;
+	for (i=0;i<10;i++) {
+		if ((!document.getElementById('add_image'+i)) && (addform == 0)) {
+			//var inner_add_form= document.getElementById('add_image_form').innerHTML;
+			//document.getElementById('add_image_form').innerHTML= inner_add_form+ '<br /><input type="file" name="add_image'+i+'" id="add_image'+i+'" onchange="document.join_form.sub.style.fontWeight=\'bold\'" />';
+			addform= 1;
+			var addFile=document.createElement("DIV");
+			addFile.innerHTML= '<input type="file" name="add_image'+i+'" id="add_image'+i+'" onchange="document.join_form.sub.style.fontWeight=\'bold\'" />';
+		    document.getElementById('add_image_form').appendChild(addFile)
+			if (i == 9) {
+				document.getElementById('add_img_js').style.display= 'none';
+			}
+		}
+	}
+}
+
+function aff_add_img_js() {
+	if (document.getElementById('add_img_js')) {
+		document.getElementById('add_img_js').style.display= 'block';
+	}
+}
+function message_upload_img() {
+	no_image= 1;
+	for (i=0;i<10;i++) {
+		if ((document.getElementById('add_image'+i)) && (document.getElementById('add_image'+i).value != '')) {
+			no_image= 0;
+		}
+	}
+	if (no_image == 1) {
+		alert('Vous n\'avez pas choisi d\'image à joindre');
+		return false;
+	}
+	document.getElementById('add_img_js').style.display= 'none';
+	document.getElementById('add_image_form').style.display= 'none';
+	document.getElementById('submit_upload').style.display= 'none';
+	document.getElementById('join_form').action= '/user/join_image_b.php?config=hfr.inc';
+	document.getElementById('upload_frame').style.display= '';
+	document.getElementById('join_form').target= 'upload_frame';
+	document.getElementById('img_wait_upload_img').style.display= '';
+	document.getElementById('join_form').submit();
+	document.getElementById('submit_upload').style.fontWeight= 'normal';
+}
+</script>
+</body>
+</html>

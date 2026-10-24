@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coeur:
+    name: Tests du cœur (UltraHFRKit)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode le plus récent
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+      - name: Tests
+        working-directory: Packages/UltraHFRKit
+        run: swift test
+
+  app:
+    name: Compilation de l'app
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode le plus récent
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+      - name: Compilation
+        run: |
+          xcodebuild -project UltraHFR.xcodeproj -scheme UltraHFR \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO build

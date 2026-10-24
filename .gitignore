@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+*.xcresult
+build/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/UltraHFRKit/Package.resolved
+
+# Réglages locaux (équipe de signature, identifiant)
+Config/Local.xcconfig
+
+# Pages HFR brutes, avant anonymisation : ne jamais les publier
+Corpus/raw/
+Corpus/.salt

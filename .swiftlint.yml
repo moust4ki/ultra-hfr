@@ -1,0 +1,11 @@
+included:
+  - UltraHFR
+  - Packages/UltraHFRKit/Sources
+  - Packages/UltraHFRKit/Tests
+excluded:
+  - Packages/UltraHFRKit/Tests/HFRKitTests/Fixtures
+line_length:
+  warning: 140
+  error: 200
+identifier_name:
+  excluded: [id, x, y]

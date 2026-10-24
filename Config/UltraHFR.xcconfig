@@ -1,0 +1,9 @@
+// Réglages communs de l'app.
+//
+// Pour signer avec ta propre équipe, crée Config/Local.xcconfig (ignoré par git) :
+//   DEVELOPMENT_TEAM = XXXXXXXXXX
+//   ULTRAHFR_BUNDLE_ID = com.exemple.ultrahfr
+
+ULTRAHFR_BUNDLE_ID = com.yendicohen.ultrahfr
+
+#include? "Local.xcconfig"
