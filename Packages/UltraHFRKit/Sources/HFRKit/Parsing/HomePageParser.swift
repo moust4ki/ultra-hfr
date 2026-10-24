@@ -20,7 +20,10 @@ public enum HomePageParser {
     private static func category(from row: HTMLElement) -> ForumCategory? {
         guard let number = row.attribute("id")?.integer(after: "cat"),
               let link = row.first("td.catCase1 a.cCatTopic"),
-              let path = link.attribute("href") else { return nil }
+              let linkPath = link.attribute("href") else { return nil }
+        // "Achats & Ventes" links to its first sub-forum: use the category's own list.
+        let segments = linkPath.split(separator: "/")
+        let path = segments.count == 4 ? "/\(segments[0])/\(segments[1])/liste_sujet-1.htm" : linkPath
         let subforums = row.select("td.catCase1 a.Tableau").compactMap { anchor -> Subforum? in
             guard let path = anchor.attribute("href") else { return nil }
             return Subforum(title: anchor.text, path: path)

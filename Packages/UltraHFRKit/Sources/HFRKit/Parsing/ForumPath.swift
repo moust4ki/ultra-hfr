@@ -26,6 +26,19 @@ public enum ForumPath {
         return Int(path[path.index(after: start)..<end])
     }
 
+    /// Category number from the first segment of rewritten paths (`/hfr/Discussions/…` → 13).
+    public static func categoryID(forSlug slug: String) -> CategoryID? {
+        categorySlugs[slug.lowercased()].map(CategoryID.init(rawValue:))
+    }
+
+    private static let categorySlugs: [String: Int] = [
+        "hardware": 1, "hardwareperipheriques": 16, "ordinateursportables": 15,
+        "overclockingcoolingmodding": 2, "electroniquedomotiquediy": 30, "gsmgpspda": 23, "apple": 25,
+        "videoson": 3, "photonumerique": 14, "jeuxvideo": 5, "windowssoftware": 4,
+        "reseauxpersosoho": 22, "systemereseauxpro": 21, "osalternatifs": 11, "programmation": 10,
+        "ia": 32, "graphisme": 12, "achatsventes": 6, "emploietudes": 8, "discussions": 13,
+    ]
+
     /// Message number of an anchor (`…#t11405947` → 11405947).
     public static func postNumber(in path: String) -> Int? {
         path.integer(after: "#t")

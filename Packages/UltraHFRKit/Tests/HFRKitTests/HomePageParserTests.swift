@@ -10,6 +10,8 @@ struct HomePageParserTests {
         #expect(hardware.id == 1)
         #expect(hardware.title == "Hardware")
         #expect(hardware.path == "/hfr/Hardware/liste_sujet-1.htm")
+        let sales = categories.first { $0.id == 6 }
+        #expect(sales?.path == "/hfr/AchatsVentes/liste_sujet-1.htm")
         #expect(hardware.subforums.count == 14)
         let graphicsCards = hardware.subforums.first { $0.title == "Carte graphique" }
         #expect(graphicsCards?.path == "/hfr/Hardware/2D-3D/liste_sujet-1.htm")

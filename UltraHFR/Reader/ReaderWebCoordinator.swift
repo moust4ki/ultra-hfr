@@ -103,9 +103,13 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             if let post { model.toggleQuote(post) }
         case "openQuotedPost":
             if let post { model.openQuotedPost(post, path: body["path"] as? String) }
-        case "openLink", "openImage":
+        case "openLink":
             if let address = body["url"] as? String, let url = URL(string: address) {
-                UIApplication.shared.open(url)
+                model.openLink(url)
+            }
+        case "openImage":
+            if let address = body["url"] as? String, let url = URL(string: address) {
+                model.showImage(url)
             }
         case "menus":
             placeMenuButtons(body["items"] as? [[String: Any]] ?? [])

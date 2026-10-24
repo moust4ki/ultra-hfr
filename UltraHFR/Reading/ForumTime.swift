@@ -18,6 +18,6 @@ enum ForumTime {
         if let days = calendar.dateComponents([.day], from: date, to: now).day, days < 7 {
             return date.formatted(.dateTime.weekday(.abbreviated))
         }
-        return date.formatted(.dateTime.day().month(.twoDigits).year(.twoDigits))
+        return date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year(.twoDigits))
     }
 }

@@ -26,10 +26,14 @@ final class ReaderModel {
     private(set) var lastParseDuration: Duration?
     /// Bumped to play a light haptic (swipe to quote reaching its threshold).
     private(set) var swipeHapticTrigger = 0
+    /// Image shown full screen.
+    var presentedImage: PresentedImage?
 
     @ObservationIgnored weak var driver: ReaderPageDriver?
     /// Called when the message at the top of the screen changes: page, page count, message, author.
     @ObservationIgnored var onPositionChange: ((Int, Int, PostID, String) -> Void)?
+    /// A link of a message was tapped (topics of the forum open in the app, the rest outside).
+    @ObservationIgnored var onOpenLink: ((URL) -> Void)?
     @ObservationIgnored private let client: HFRClient
     /// HTML of the loaded pages, in order, to rebuild the page when the web view is recreated
     /// (folding or unfolding the iPhone Duo switches layouts).
@@ -194,6 +198,19 @@ final class ReaderModel {
     func clearQuotes() {
         quoted = []
         Task { await driver?.setQuoted([]) }
+    }
+
+    func openLink(_ url: URL) {
+        // A link to another page of this topic stays in this reader.
+        if let link = TopicLink(url.absoluteString), link.topic == route.topic {
+            open(page: link.page, anchor: link.post)
+            return
+        }
+        onOpenLink?(url)
+    }
+
+    func showImage(_ url: URL) {
+        presentedImage = PresentedImage(url: url)
     }
 
     /// A quote header was tapped and its message is not on the loaded pages.

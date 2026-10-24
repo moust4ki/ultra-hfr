@@ -4,6 +4,7 @@
 //
 
 import HFRDesign
+import HFRKit
 import HFRReader
 import SwiftData
 import SwiftUI
@@ -25,6 +26,8 @@ private struct ReaderScreen: View {
     @Environment(\.hfrPalette) private var palette
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppNavigation.self) private var navigation
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ReaderWebView(model: model, style: style)
@@ -69,7 +72,17 @@ private struct ReaderScreen: View {
                     titled.title = model.title
                     recorder.record(topic: titled, page: page, pageCount: pageCount, post: post, author: author)
                 }
+                model.onOpenLink = { [navigation, openURL] url in
+                    if let link = TopicLink(url.absoluteString) {
+                        navigation.open(TopicRoute(title: "Sujet", category: link.category, topic: link.topic, page: link.page, anchor: link.post))
+                    } else {
+                        openURL(url)
+                    }
+                }
                 model.show(route)
+            }
+            .fullScreenCover(item: Binding(get: { model.presentedImage }, set: { model.presentedImage = $0 })) { image in
+                ImageViewer(url: image.url)
             }
     }
 

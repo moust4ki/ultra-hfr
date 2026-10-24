@@ -16,6 +16,7 @@ struct FeedView: View {
     let section: AppSection
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
     @Environment(AppNavigation.self) private var navigation
+    @Environment(QualitayStore.self) private var qualitay
 
     var body: some View {
         List {
@@ -51,6 +52,39 @@ struct FeedView: View {
                     SectionHeader("Lus récemment")
                 }
             }
+            if !qualitay.alerts.isEmpty {
+                Section {
+                    ForEach(qualitay.alerts.prefix(8)) { alert in
+                        Button {
+                            navigation.open(TopicRoute(
+                                title: alert.topicTitle,
+                                category: alert.categoryID,
+                                topic: alert.topicID,
+                                page: alert.page,
+                                anchor: alert.postID
+                            ), from: section)
+                        } label: {
+                            FeedRow(
+                                kind: .qualitay,
+                                title: alert.name.isEmpty ? alert.topicTitle : alert.name,
+                                isNew: (alert.date ?? .distantPast) > qualitay.lastSeen,
+                                badge: alert.reportCount > 1 ? alert.reportCount.formatted() : nil,
+                                detail: [alert.topicTitle, alert.initiator].compactMap(\.self).joined(separator: " · "),
+                                time: ForumTime.short(alert.date) ?? ""
+                            )
+                            .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } header: {
+                    SectionHeader(
+                        qualitay.newCount > 0 ? "Alertes Qualitay · \(qualitay.newCount)" : "Alertes Qualitay",
+                        actionTitle: qualitay.newCount > 0 ? "Tout marquer vu" : nil
+                    ) {
+                        qualitay.markAllSeen()
+                    }
+                }
+            }
             Section {
                 SignInPrompt(
                     title: "Connecte-toi pour voir tes drapeaux",
@@ -61,6 +95,8 @@ struct FeedView: View {
         .listStyle(.insetGrouped)
         .hfrGroupedBackground()
         .navigationTitle("Fil")
+        .refreshable { await qualitay.refresh(force: true) }
+        .task { await qualitay.refresh() }
     }
 
     private func route(for position: ReadingPosition) -> TopicRoute {

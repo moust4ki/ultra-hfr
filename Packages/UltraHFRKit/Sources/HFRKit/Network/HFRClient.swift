@@ -54,6 +54,12 @@ public actor HFRClient {
         return try await Self.parse { () throws(HFRParsingError) in try TopicPageParser.parse(html: html) }
     }
 
+    /// Latest Alertes Qualitay (a community service outside HFR).
+    public func qualitayAlerts() async throws(HFRClientError) -> [QualitayAlert] {
+        let xml = try await self.page(QualitayFeedParser.feedURL.absoluteString)
+        return try await Self.parse { () throws(HFRParsingError) in try QualitayFeedParser.parse(xml: xml) }
+    }
+
     /// Categories and sub-forums, from the home page.
     public func categories() async throws(HFRClientError) -> [ForumCategory] {
         let html = try await self.page("/")

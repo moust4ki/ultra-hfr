@@ -20,4 +20,13 @@ struct HTMLDocument {
             throw .invalidHTML
         }
     }
+
+    /// An XML document (RSS feeds), where `<link>` is not an empty HTML element.
+    init(xml: String) throws(HFRParsingError) {
+        do {
+            root = HTMLElement(try SwiftSoup.parse(xml, "", Parser.xmlParser()))
+        } catch {
+            throw .invalidHTML
+        }
+    }
 }
