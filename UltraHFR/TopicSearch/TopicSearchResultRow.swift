@@ -17,7 +17,7 @@ struct TopicSearchResultRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
-                HFRAvatar(pseudo: post.author, size: 24)
+                HFRAvatar(pseudo: post.author, size: 30)
                 Text(post.author)
                     .font(.subheadline)
                     .bold()

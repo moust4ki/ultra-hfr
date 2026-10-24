@@ -2,8 +2,8 @@
 //  TopicSearchView.swift
 //  UltraHFR
 //
-//  « Rechercher dans le sujet »: a word, a pseudo or both, then the messages found. Touching
-//  one goes back to the reader, on that message.
+//  « Le Fil », E2: a word in the search field, a member as a chip, then the messages found.
+//  Touching one goes back to the reader, on that message.
 //
 
 import HFRDesign
@@ -14,7 +14,8 @@ struct TopicSearchView: View {
     let title: String
     let open: (PostID) -> Void
     @State private var model: TopicSearchModel
-    @FocusState private var isWordFocused: Bool
+    @State private var isPseudoPromptShown = false
+    @State private var pseudoDraft = ""
     @Environment(\.hfrClient) private var client
     @Environment(\.dismiss) private var dismiss
 
@@ -28,32 +29,25 @@ struct TopicSearchView: View {
         NavigationStack {
             List {
                 Section {
-                    TextField("Mot ou expression", text: $model.word)
-                        .focused($isWordFocused)
-                        .submitLabel(.search)
-                        .onSubmit(search)
-                    TextField("Pseudo", text: $model.pseudo)
-                        .textContentType(.username)
-                        .submitLabel(.search)
-                        .onSubmit(search)
-                    if let start = model.start {
-                        Picker("Où chercher", selection: $model.searchesFromStart) {
-                            Text("Tout le sujet").tag(false)
-                            Text("Depuis la p. \(start.page.formatted())").tag(true)
-                        }
-                        .pickerStyle(.segmented)
-                    }
-                    Button("Rechercher", systemImage: "magnifyingglass", action: search)
-                        .disabled(model.query.isEmpty || model.isLoading)
+                    TopicSearchChips(model: model, askPseudo: {
+                        pseudoDraft = ""
+                        isPseudoPromptShown = true
+                    }, changed: search)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(Color.clear)
                 } footer: {
-                    Text("HFR répond du plus ancien au plus récent, par lots.")
+                    if model.current == nil {
+                        Text("HFR cherche dans tout le sujet, ou depuis la page lue, du plus ancien au plus récent.")
+                    }
                 }
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-
                 TopicSearchResults(model: model, open: open)
             }
+            .listSectionSpacing(.compact)
             .hfrGroupedBackground()
+            .searchable(text: $model.word, placement: .navigationBarDrawer(displayMode: .always), prompt: "Mot dans le sujet")
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .onSubmit(of: .search, search)
             .navigationTitle("Rechercher dans le sujet")
             .navigationSubtitle(title)
             .navigationBarTitleDisplayMode(.inline)
@@ -62,13 +56,18 @@ struct TopicSearchView: View {
                     Button("Fermer", systemImage: "xmark") { dismiss() }
                 }
             }
-            .onChange(of: model.searchesFromStart) {
-                if model.current != nil { search() }
+            .alert("Messages d'un membre", isPresented: $isPseudoPromptShown) {
+                TextField("Pseudo", text: $pseudoDraft)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Button("Annuler", role: .cancel) {}
+                Button("Chercher") {
+                    model.pseudo = pseudoDraft.trimmingCharacters(in: .whitespaces)
+                    search()
+                }
             }
             .task {
-                if model.pseudo.isEmpty {
-                    isWordFocused = true
-                } else {
+                if !model.pseudo.isEmpty {
                     await model.search(using: client)
                 }
             }
@@ -76,8 +75,75 @@ struct TopicSearchView: View {
     }
 
     private func search() {
-        isWordFocused = false
-        Task { await model.search(using: client) }
+        if model.query.isEmpty {
+            model.clear()
+        } else {
+            Task { await model.search(using: client) }
+        }
+    }
+}
+
+/// The member searched (accent chip with its avatar and a cross), or a chip to choose one, and
+/// where the search starts.
+private struct TopicSearchChips: View {
+    @Bindable var model: TopicSearchModel
+    let askPseudo: () -> Void
+    let changed: () -> Void
+    @Environment(\.hfrPalette) private var palette
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                if model.pseudo.isEmpty {
+                    Button(action: askPseudo) {
+                        Label("Pseudo", systemImage: "person")
+                            .chipStyle(isSelected: false, palette: palette)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Button {
+                        model.pseudo = ""
+                        changed()
+                    } label: {
+                        HStack(spacing: 6) {
+                            HFRAvatar(pseudo: model.pseudo, size: 20)
+                            Text(model.pseudo)
+                            Image(systemName: "xmark")
+                                .font(.caption.bold())
+                        }
+                        .chipStyle(isSelected: true, palette: palette)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Messages de \(model.pseudo)")
+                    .accessibilityHint("Retire le filtre sur ce membre")
+                }
+                if let start = model.start {
+                    Button {
+                        model.searchesFromStart.toggle()
+                        changed()
+                    } label: {
+                        Text("Depuis la p. \(start.page.formatted())")
+                            .chipStyle(isSelected: model.searchesFromStart, palette: palette)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(model.searchesFromStart ? .isSelected : [])
+                }
+            }
+            .padding(.horizontal, 1)
+        }
+        .scrollIndicators(.hidden)
+    }
+}
+
+private extension View {
+    /// Same capsule as the filter chips of the lists.
+    func chipStyle(isSelected: Bool, palette: HFRPalette) -> some View {
+        self
+            .font(.subheadline.weight(isSelected ? .semibold : .regular))
+            .foregroundStyle(isSelected ? palette.accent.onFill.color : palette.text.color)
+            .padding(.horizontal, 12)
+            .frame(minHeight: 34)
+            .background(isSelected ? palette.accent.fill.color : palette.cell.color, in: .capsule)
     }
 }
 

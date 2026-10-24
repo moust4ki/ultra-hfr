@@ -52,6 +52,13 @@ final class TopicSearchModel {
         await load(query, using: client)
     }
 
+    func clear() {
+        results = []
+        next = nil
+        current = nil
+        errorMessage = nil
+    }
+
     func loadMore(using client: HFRClient) async {
         guard var query = current, let next, !isLoading else { return }
         query.after = next

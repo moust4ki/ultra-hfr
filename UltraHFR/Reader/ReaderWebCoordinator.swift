@@ -193,15 +193,18 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             UIAction(title: "Alerte Qualitay", image: UIImage(systemName: "megaphone"), attributes: needsAccount) { _ in },
         ])
         let member = UIMenu(options: .displayInline, children: [
-            UIAction(title: "Messages de \(author)", image: UIImage(systemName: "text.magnifyingglass")) { [weak self] _ in
+            UIAction(title: "Envoyer un MP", image: UIImage(systemName: "envelope"), attributes: needsAccount) { _ in },
+            UIAction(
+                title: "Voir le profil",
+                image: UIImage(systemName: "person.crop.circle"),
+                attributes: model.post(id)?.profileID == nil ? .disabled : []
+            ) { [weak self] _ in
+                guard let post = self?.model.post(id), let profile = post.profileID else { return }
+                self?.model.presentedProfile = ProfileRequest(profileID: profile, pseudo: post.author)
+            },
+            UIAction(title: "Messages de \(author) ici", image: UIImage(systemName: "text.magnifyingglass")) { [weak self] _ in
                 guard let author = self?.model.post(id)?.author else { return }
                 self?.model.topicSearch = TopicSearchRequest(pseudo: author, start: self?.model.searchStart)
-            },
-            UIAction(title: "Envoyer un MP", image: UIImage(systemName: "envelope"), attributes: needsAccount) { _ in },
-            UIAction(title: "Voir le profil", image: UIImage(systemName: "person.crop.circle")) { [weak self] _ in
-                guard let profile = self?.model.post(id)?.profileID,
-                      let url = URL(string: "/hfr/profil-\(profile).htm", relativeTo: HFRKit.forumURL) else { return }
-                UIApplication.shared.open(url)
             },
         ])
         let moderation = UIMenu(options: .displayInline, children: [

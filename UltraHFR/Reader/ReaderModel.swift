@@ -32,6 +32,8 @@ final class ReaderModel {
     var isGoToPagePresented = false
     /// « Rechercher dans le sujet », open.
     var topicSearch: TopicSearchRequest?
+    /// A member's profile, open.
+    var presentedProfile: ProfileRequest?
 
     @ObservationIgnored weak var driver: ReaderPageDriver?
     /// Called when the message at the top of the screen changes: page, page count, message, author.

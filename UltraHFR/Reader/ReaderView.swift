@@ -118,6 +118,12 @@ private struct ReaderScreen: View {
                     model.show(post: post)
                 }
             }
+            .sheet(item: Binding(get: { model.presentedProfile }, set: { model.presentedProfile = $0 })) { request in
+                MemberProfileView(request: request) {
+                    model.presentedProfile = nil
+                    model.topicSearch = TopicSearchRequest(pseudo: request.pseudo, start: model.searchStart)
+                }
+            }
             .sheet(isPresented: Binding(get: { model.isGoToPagePresented }, set: { model.isGoToPagePresented = $0 })) {
                 GoToPageView(currentPage: model.visiblePage ?? 1, pageCount: model.pageCount ?? 1) { page in
                     model.jump(to: page)

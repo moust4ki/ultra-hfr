@@ -158,6 +158,12 @@ public actor HFRClient {
         return try await Self.parse { () throws(HFRParsingError) in try TopicSearchParser.parse(html: html) }
     }
 
+    /// Public profile of member number `profileID`.
+    public func profile(profileID: Int) async throws(HFRClientError) -> MemberProfile {
+        let html = try await self.page(MemberProfileParser.path(profileID: profileID))
+        return try await Self.parse { () throws(HFRParsingError) in try MemberProfileParser.parse(html: html) }
+    }
+
     /// Personal smileys whose name contains `text`.
     public func smileys(matching text: String) async throws(HFRClientError) -> [Smiley] {
         let html = try await self.page(SmileySearchParser.path(for: text))
