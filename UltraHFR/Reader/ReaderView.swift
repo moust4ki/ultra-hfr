@@ -45,16 +45,20 @@ private struct ReaderScreen: View {
                 }
             }
             .overlay(alignment: .bottom) {
-                if !model.quoted.isEmpty {
-                    QuoteTray(authors: model.quotedAuthors, clear: { model.clearQuotes() }, reply: {
-                        composer = ComposerRequest(quotes: model.quotedBBCode, authors: model.authorsOfLoadedPosts)
-                    })
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                } else if model.loadedPages != nil {
-                    ReaderBottomBar(pagesAfter: model.pagesAfterVisible, goToLastMessage: { model.openLastMessage() }, reply: {
-                        composer = ComposerRequest(quotes: "", authors: model.authorsOfLoadedPosts)
-                    })
+                Group {
+                    if !model.quoted.isEmpty {
+                        QuoteTray(authors: model.quotedAuthors, clear: { model.clearQuotes() }, reply: {
+                            composer = ComposerRequest(quotes: model.quotedBBCode, authors: model.authorsOfLoadedPosts)
+                        })
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else if model.loadedPages != nil {
+                        ReaderBottomBar(pagesAfter: model.pagesAfterVisible, goToLastMessage: { model.openLastMessage() }, reply: {
+                            composer = ComposerRequest(quotes: "", authors: model.authorsOfLoadedPosts)
+                        })
+                    }
                 }
+                // Bars stop growing at accessibility sizes, like the system ones.
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             }
             .overlay(alignment: .top) {
                 ReaderStatusBanner(model: model)

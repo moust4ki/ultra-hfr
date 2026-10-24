@@ -15,7 +15,6 @@ public struct FeedRow: View {
     let badge: String?
     let detail: String
     let time: String
-    @Environment(\.hfrPalette) private var palette
 
     public init(kind: FeedRowKind = .topic, title: String, isNew: Bool, badge: String? = nil, detail: String, time: String) {
         self.kind = kind
@@ -30,22 +29,10 @@ public struct FeedRow: View {
         HStack(alignment: .firstTextBaseline, spacing: 0) {
             RowGutter(state: isNew ? .unread : .plain)
             VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                RowHeadline(badge: badge, isBadgeMuted: !isNew) {
                     FeedRowTitle(kind: kind, title: title, isNew: isNew)
-                    Spacer(minLength: 0)
-                    if let badge {
-                        PageCountCapsule(badge, isMuted: !isNew)
-                    }
                 }
-                HStack(spacing: 8) {
-                    Text(detail)
-                        .lineLimit(1)
-                    Spacer(minLength: 0)
-                    Text(time)
-                        .monospacedDigit()
-                }
-                .font(.footnote)
-                .foregroundStyle(palette.text2.color)
+                RowFooter(detail: detail, time: time)
             }
         }
         .padding(.vertical, 2)
@@ -59,6 +46,7 @@ private struct FeedRowTitle: View {
     let title: String
     let isNew: Bool
     @Environment(\.hfrPalette) private var palette
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         Group {
@@ -70,7 +58,7 @@ private struct FeedRowTitle: View {
         }
         .font(isNew ? .headline : .body)
         .foregroundStyle(palette.text.color)
-        .lineLimit(2)
+        .lineLimit(dynamicTypeSize.rowTitleLineLimit)
     }
 }
 

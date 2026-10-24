@@ -12,6 +12,7 @@ public struct ResumeCard: View {
     let detail: String
     let resume: () -> Void
     @Environment(\.hfrPalette) private var palette
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     public init(title: String, detail: String, resume: @escaping () -> Void) {
         self.title = title
@@ -29,7 +30,7 @@ public struct ResumeCard: View {
                 Text(title)
                     .font(.headline)
                     .foregroundStyle(palette.text.color)
-                    .lineLimit(2)
+                    .lineLimit(dynamicTypeSize.rowTitleLineLimit)
                 Text(detail)
                     .font(.footnote)
                     .foregroundStyle(palette.text2.color)
