@@ -10,6 +10,7 @@ let package = Package(
         .library(name: "HFRContent", targets: ["HFRContent"]),
         .library(name: "HFRKit", targets: ["HFRKit"]),
         .library(name: "HFRReader", targets: ["HFRReader"]),
+        .library(name: "HFRDesign", targets: ["HFRDesign"]),
     ],
     dependencies: [
         // Lecture du HTML de HFR (MIT). Seule dépendance externe du projet.
@@ -29,7 +30,9 @@ let package = Package(
             dependencies: ["HFRKit", "HFRContent"],
             resources: [.copy("Resources")]
         ),
+        .target(name: "HFRDesign"),
         .testTarget(name: "HFRContentTests", dependencies: ["HFRContent"]),
+        .testTarget(name: "HFRDesignTests", dependencies: ["HFRDesign"]),
         .testTarget(name: "HFRReaderTests", dependencies: ["HFRReader", "HFRKit"]),
         .testTarget(
             name: "HFRKitTests",
