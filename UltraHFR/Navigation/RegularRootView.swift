@@ -63,6 +63,7 @@ private struct ColumnScreen: ViewModifier {
             .safeAreaBar(edge: .top) {
                 SectionPicker()
             }
+            .environment(\.isInNavigationColumn, true)
     }
 }
 

@@ -151,11 +151,11 @@ private struct TopicListRow: View {
     let row: TopicRowModel
     let open: (TopicRowModel, Int?) -> Void
     @Environment(AppNavigation.self) private var navigation
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.isInNavigationColumn) private var isInNavigationColumn
     @Environment(\.hfrPalette) private var palette
 
     private var isOpen: Bool {
-        horizontalSizeClass == .regular && navigation.openTopic?.topic == row.topic.id
+        isInNavigationColumn && navigation.openTopic?.topic == row.topic.id
     }
 
     var body: some View {
