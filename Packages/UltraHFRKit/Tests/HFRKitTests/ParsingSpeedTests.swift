@@ -3,7 +3,8 @@ import Testing
 @testable import HFRKit
 
 /// Lot 0, S2: time to read a full topic page (40 messages). Target on the iPhone Duo: < 30 ms.
-@Suite("Vitesse d'analyse")
+/// Skipped on CI: shared runners in debug builds are too slow and too irregular for a timing.
+@Suite("Vitesse d'analyse", .enabled(if: ProcessInfo.processInfo.environment["CI"] == nil))
 struct ParsingSpeedTests {
     @Test func topicPageSpeed() throws {
         let html = try Fixture.html("sujet-blackwell-p350")

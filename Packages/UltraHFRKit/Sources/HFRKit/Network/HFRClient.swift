@@ -50,9 +50,29 @@ public actor HFRClient {
 
     /// A topic page. Asking for a page beyond the last one returns the last one.
     public func topicPage(category: CategoryID, topic: TopicID, page: Int) async throws(HFRClientError) -> TopicPage {
-        let html = try await self.page("/forum2.php?config=hfr.inc&cat=\(category)&post=\(topic)&page=\(page)&p=1")
+        let html = try await self.page(ForumPath.topic(category: category, topic: topic, page: page))
+        return try await Self.parse { () throws(HFRParsingError) in try TopicPageParser.parse(html: html) }
+    }
+
+    /// Categories and sub-forums, from the home page.
+    public func categories() async throws(HFRClientError) -> [ForumCategory] {
+        let html = try await self.page("/")
+        return try await Self.parse { () throws(HFRParsingError) in try HomePageParser.parse(html: html) }
+    }
+
+    /// Page `page` of a category or sub-forum topic list.
+    public func topicList(path: String, page: Int) async throws(HFRClientError) -> TopicListPage {
+        let html = try await self.page(ForumPath.topicList(path, page: page))
+        return try await Self.parse { () throws(HFRParsingError) in try TopicListParser.parse(html: html) }
+    }
+
+    /// Parsing runs off the client actor so that one slow page never holds other requests.
+    @concurrent
+    private static func parse<Value: Sendable>(
+        _ work: @Sendable () throws(HFRParsingError) -> Value
+    ) async throws(HFRClientError) -> Value {
         do {
-            return try TopicPageParser.parse(html: html)
+            return try work()
         } catch {
             throw .parsing(error)
         }

@@ -160,6 +160,8 @@ let pseudoSources: [NSRegularExpression] = [
     regex(#"Message édité par ([^<]+?) le \d"#),
     regex(#"<b>([^<]+?) \(initiateur\)</b>"#),
     regex(#"<li>\[le [^\]]+\] <b>([^<]+?)</b>"#),
+    // Last poster of a category on the home page ("par X").
+    regex(#"<b>par ([^<]+)</b>"#),
     // Links "send a private message" and member profiles (moderators, birthdays…).
     regex(##"[?&;](?:dest|pseudo|spseudo)=([^&"#]+)"##),
 ]
