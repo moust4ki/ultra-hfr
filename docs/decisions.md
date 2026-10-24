@@ -47,3 +47,23 @@ Les analyseurs sont testés sur de vraies pages HFR.
 
 - **Anonymisation** : les pages sont anonymisées avant publication (textes des messages, pseudos, smileys persos, profils, images), avec un sel secret. Même pseudo → même remplaçant dans tout le corpus.
 - **Pages brutes** : elles ne quittent pas la machine qui les télécharge.
+
+## D8 · Lecture hors ligne : seulement ce qui a été lu
+
+Les pages de sujets et de listes déjà affichées sont gardées sur l'appareil (compressées, 400 au plus, dans les caches d'iOS qui peut les vider).
+
+- **Rien n'est téléchargé pour le hors-ligne** : pas de préchargement de sujets entiers, pour rester poli avec HFR.
+- **Sans connexion**, l'app montre la copie gardée avec sa date (« Hors ligne · copie de 01:25 »).
+- **Les profils ne sont pas gardés** : ils contiennent des données personnelles.
+
+## D9 · Position de lecture : elle n'avance que vers l'avant
+
+Sans compte, l'app retient sur l'appareil le dernier message lu de chaque sujet : celui qui a passé le milieu de l'écran.
+
+- **Comme un drapeau HFR**, elle n'avance que vers l'avant : relire une vieille page ou ouvrir un résultat de recherche ne fait pas perdre les nouveaux messages.
+- **À l'ouverture** depuis une liste ou le Fil, le sujet s'ouvre sur ce message, suivi du repère « Nouveau ».
+- **Avec un compte** (lot 1), le drapeau de HFR prendra le relais ; la position locale restera la référence hors ligne.
+
+## D10 · Recherches : une requête à la validation, jamais à la frappe
+
+La recherche sur le forum, la recherche dans un sujet et la recherche de smileys n'envoient une requête que lorsque l'on valide. Pendant la frappe, l'app ne cherche que dans ce qu'elle sait déjà (forums, sujets lus). Les résultats suivants d'un sujet se demandent avec un bouton, jamais automatiquement ; une liste filtrée ne charge pas non plus ses pages suivantes toute seule.
