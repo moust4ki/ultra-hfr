@@ -26,6 +26,8 @@ final class ReaderModel {
     /// When the page on screen was saved, if HFR could not be reached and the copy kept on the
     /// device is shown.
     private(set) var offlineSince: Date?
+    /// The topic has a poll (shown at the top of page 1).
+    private(set) var hasPoll = false
     /// Time to read the last page (essay S2 on the device).
     private(set) var lastParseDuration: Duration?
     /// Bumped to play a light haptic (swipe to quote reaching its threshold).
@@ -97,7 +99,9 @@ final class ReaderModel {
             renderedPages = [(topicPage.page, html)]
             loadedPages = topicPage.page...topicPage.page
             visiblePage = topicPage.page
-            await driver?.replace(html: html, anchor: anchor)
+            // On the first message of page 1, show the top of the page: the poll is above it.
+            let isTopicStart = topicPage.page == 1 && anchor == topicPage.posts.first?.id
+            await driver?.replace(html: html, anchor: isTopicStart ? nil : anchor)
         }
     }
 
@@ -142,6 +146,7 @@ final class ReaderModel {
             let (topicPage, rendered, duration) = try await Self.parseAndRender(html: html, quoted: Set(quoted), excluding: excluding)
             lastParseDuration = duration
             title = topicPage.title.isEmpty ? title : topicPage.title
+            if topicPage.poll != nil { hasPoll = true }
             pageCount = max(pageCount ?? 0, topicPage.pageCount)
             for post in topicPage.posts {
                 posts[post.id] = post
@@ -298,6 +303,11 @@ final class ReaderModel {
         return max(0, pageCount - visiblePage)
     }
 
+
+    /// Address of the page on screen, to copy or share.
+    var pageURL: URL? {
+        URL(string: ForumPath.topic(category: route.category, topic: route.topic, page: visiblePage ?? route.page), relativeTo: HFRKit.forumURL)?.absoluteURL
+    }
 
     /// Address of a message on the forum, for "Copier le lien".
     func permalink(of post: PostID) -> URL? {

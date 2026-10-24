@@ -77,11 +77,12 @@ private struct ReaderScreen: View {
                     .disabled(model.pageCount == nil)
                     .accessibilityHint("Aller à une autre page")
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button("Rechercher dans le sujet", systemImage: "magnifyingglass") {
                         model.topicSearch = TopicSearchRequest(start: model.searchStart)
                     }
                     .disabled(model.loadedPages == nil)
+                    TopicMenu(model: model)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
