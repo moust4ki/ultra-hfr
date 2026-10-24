@@ -55,7 +55,14 @@ private struct ReaderScreen: View {
             .sensoryFeedback(.impact(weight: .light), trigger: model.swipeHapticTrigger)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    ReaderTitle(title: model.title, page: model.visiblePage, pageCount: model.pageCount)
+                    Button {
+                        model.isGoToPagePresented = true
+                    } label: {
+                        ReaderTitle(title: model.title, page: model.visiblePage, pageCount: model.pageCount)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(model.pageCount == nil)
+                    .accessibilityHint("Aller à une autre page")
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -83,6 +90,11 @@ private struct ReaderScreen: View {
             }
             .fullScreenCover(item: Binding(get: { model.presentedImage }, set: { model.presentedImage = $0 })) { image in
                 ImageViewer(url: image.url)
+            }
+            .sheet(isPresented: Binding(get: { model.isGoToPagePresented }, set: { model.isGoToPagePresented = $0 })) {
+                GoToPageView(currentPage: model.visiblePage ?? 1, pageCount: model.pageCount ?? 1) { page in
+                    model.jump(to: page)
+                }
             }
     }
 

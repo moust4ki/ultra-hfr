@@ -28,6 +28,7 @@ final class ReaderModel {
     private(set) var swipeHapticTrigger = 0
     /// Image shown full screen.
     var presentedImage: PresentedImage?
+    var isGoToPagePresented = false
 
     @ObservationIgnored weak var driver: ReaderPageDriver?
     /// Called when the message at the top of the screen changes: page, page count, message, author.
