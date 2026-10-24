@@ -26,10 +26,9 @@
       nearEndSent = false;
       nearStartSent = false;
       changed();
-      if (anchorPost) {
-        reader.scrollToPost(anchorPost);
-      } else {
+      if (!anchorPost || !reader.scrollToPost(anchorPost)) {
         window.scrollTo(0, 0);
+        captureAnchor();
       }
       // Fresh content: allow loading the previous page once the reader moves.
       requestAnimationFrame(() => { nearStartSent = false; });
@@ -59,6 +58,7 @@
       if (!element) return false;
       const top = element.getBoundingClientRect().top + window.scrollY - topInset();
       window.scrollTo(0, Math.max(0, top));
+      anchor = { element, top: element.getBoundingClientRect().top };
       return true;
     },
 
@@ -167,7 +167,37 @@
     send({ type: "menus", items });
   }
 
-  new ResizeObserver(scheduleLayoutReport).observe(document.body);
+  // MARK: Scroll anchoring
+  // WebKit does not keep the content still when something above the screen changes size
+  // (images loading, a page added above). The first element on screen is remembered at each
+  // scroll and put back in place when the layout changes.
+
+  let anchor = null;
+  let isAdjusting = false;
+
+  function captureAnchor() {
+    const element = visibleElement();
+    anchor = element ? { element, top: element.getBoundingClientRect().top } : null;
+  }
+
+  function restoreAnchor() {
+    if (!anchor || !anchor.element.isConnected) return;
+    const delta = anchor.element.getBoundingClientRect().top - anchor.top;
+    if (Math.abs(delta) > 1) {
+      isAdjusting = true;
+      window.scrollBy(0, delta);
+      isAdjusting = false;
+    }
+  }
+
+  window.addEventListener("scroll", () => {
+    if (!isAdjusting) captureAnchor();
+  }, { passive: true });
+
+  new ResizeObserver(() => {
+    restoreAnchor();
+    scheduleLayoutReport();
+  }).observe(document.body);
   document.addEventListener("load", (event) => {
     if (event.target.tagName === "IMG") scheduleLayoutReport();
   }, true);

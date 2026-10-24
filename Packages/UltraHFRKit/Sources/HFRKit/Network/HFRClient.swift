@@ -48,6 +48,80 @@ public actor HFRClient {
         return String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) ?? ""
     }
 
+    /// A request with an account's cookies; the response carries the cookies after it.
+    public func request(
+        _ path: String,
+        method: String = "GET",
+        body: String? = nil,
+        cookies: CookieJar
+    ) async throws(HFRClientError) -> HFRResponse {
+        guard let url = URL(string: path, relativeTo: HFRKit.forumURL)?.absoluteURL else { throw .httpStatus(0) }
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        if let body {
+            request.httpBody = Data(body.utf8)
+            request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        }
+        request.setValue(cookies.header(for: url), forHTTPHeaderField: "Cookie")
+
+        let redirects = RedirectCookies(cookies: cookies)
+        await limiter.acquire()
+        let result: (Data, URLResponse)
+        do {
+            result = try await session.data(for: request, delegate: redirects)
+        } catch {
+            await limiter.release()
+            throw .network((error as? URLError)?.code.rawValue ?? URLError.Code.unknown.rawValue)
+        }
+        await limiter.release()
+
+        let (data, response) = result
+        var jar = redirects.cookies
+        let http = response as? HTTPURLResponse
+        let finalURL = http?.url ?? url
+        if let headers = http?.allHeaderFields as? [String: String] {
+            jar.store(responseHeaders: headers, for: finalURL)
+        }
+        let html = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) ?? ""
+        return HFRResponse(html: html, url: finalURL, statusCode: http?.statusCode ?? 0, cookies: jar)
+    }
+
+    /// Signs in. The password is only sent to HFR; the account keeps the session cookies.
+    public func login(pseudo: String, password: String) async throws(HFRLoginError) -> HFRAccount {
+        let form = HTMLForm(action: "/login_validation.php?config=hfr.inc", fields: [
+            HTMLFormField(name: "pseudo", value: pseudo),
+            HTMLFormField(name: "password", value: password),
+            HTMLFormField(name: "action", value: "send"),
+            HTMLFormField(name: "login", value: "Se connecter"),
+        ])
+        do {
+            let answer = try await request(form.action, method: "POST", body: form.urlEncodedBody, cookies: CookieJar())
+            // A successful sign-in answers with a refresh towards login_redirection.php.
+            guard answer.html.contains("login_redirection.php"),
+                  let memberKey = answer.cookies.value(named: "md_user"), !memberKey.isEmpty else {
+                throw HFRLoginError.wrongCredentials
+            }
+            let profile = try await request("/user/editprofil.php?config=hfr.inc&page=5", cookies: answer.cookies)
+            guard let details = ProfilePageParser.signedInProfile(in: profile.html) else {
+                throw HFRLoginError.unexpectedAnswer
+            }
+            return HFRAccount(
+                pseudo: pseudo,
+                memberKey: memberKey,
+                cookies: profile.cookies,
+                hashCheck: details.hashCheck,
+                avatarURL: details.avatarURL
+            )
+        } catch let error as HFRLoginError {
+            throw error
+        } catch let error as HFRClientError {
+            if case .network(let code) = error { throw .network(code) }
+            throw .unexpectedAnswer
+        } catch {
+            throw .unexpectedAnswer
+        }
+    }
+
     /// A topic page. Asking for a page beyond the last one returns the last one.
     public func topicPage(category: CategoryID, topic: TopicID, page: Int) async throws(HFRClientError) -> TopicPage {
         let html = try await self.page(ForumPath.topic(category: category, topic: topic, page: page))

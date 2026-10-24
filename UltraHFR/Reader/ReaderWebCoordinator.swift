@@ -5,12 +5,14 @@
 
 import HFRKit
 import HFRReader
+import OSLog
 import UIKit
 import WebKit
 
 /// Bridge between the reader model and the page: runs `window.reader.*`, receives the page's
 /// messages and keeps a native menu button over each message's "•••".
 final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate, ReaderPageDriver {
+    private static let logger = Logger(subsystem: "com.yendicohen.ultrahfr", category: "reader")
     private let model: ReaderModel
     private weak var webView: WKWebView?
     private var style = ReaderStyle()
@@ -111,6 +113,8 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             if let address = body["url"] as? String, let url = URL(string: address) {
                 model.showImage(url)
             }
+        case "log":
+            Self.logger.debug("\(body["message"] as? String ?? "", privacy: .public)")
         case "menus":
             placeMenuButtons(body["items"] as? [[String: Any]] ?? [])
         default:

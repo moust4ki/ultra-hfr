@@ -7,8 +7,8 @@ html { scroll-behavior: auto; }
 body { padding-bottom: 120px; -webkit-touch-callout: none; }
 .thread { overflow-x: hidden; }
 
-/* Les pages éloignées ne sont pas calculées tant qu'elles ne sont pas visibles. */
-.topic-page { content-visibility: auto; contain-intrinsic-size: auto 4000px; }
+/* Pas de content-visibility sur les pages : une page fraîchement insérée serait mesurée à sa
+   taille estimée et le défilement vers un message serait faux. */
 
 /* Un message suit le geste horizontal (glisser pour citer), le défilement reste vertical. */
 .post { touch-action: pan-y; transition: transform .25s cubic-bezier(.2, .8, .2, 1); background: var(--bg); }

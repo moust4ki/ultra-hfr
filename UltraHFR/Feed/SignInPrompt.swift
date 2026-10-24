@@ -12,6 +12,8 @@ struct SignInPrompt: View {
     let detail: String
     @Environment(\.hfrPalette) private var palette
     @Environment(\.openURL) private var openURL
+    @Environment(AccountStore.self) private var accounts
+    @State private var isSigningIn = false
 
     var body: some View {
         VStack(spacing: 12) {
@@ -26,9 +28,8 @@ struct SignInPrompt: View {
                 .foregroundStyle(palette.text2.color)
                 .multilineTextAlignment(.center)
             HStack {
-                Button("Se connecter") {}
+                Button("Se connecter") { isSigningIn = true }
                     .buttonStyle(.borderedProminent)
-                    .disabled(true)
                 Button("Créer un compte") {
                     if let url = URL(string: "https://forum.hardware.fr/inscription.php?config=hfr.inc") {
                         openURL(url)
@@ -36,11 +37,11 @@ struct SignInPrompt: View {
                 }
                 .buttonStyle(.bordered)
             }
-            Text("La connexion arrive avec le lot 1.")
-                .font(.footnote)
-                .foregroundStyle(palette.text3.color)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
+        .sheet(isPresented: $isSigningIn) {
+            SignInView()
+        }
     }
 }
