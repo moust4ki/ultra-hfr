@@ -54,3 +54,6 @@ pre.code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: ca
 
 /* Liens des signatures : discrets, dans la couleur de la signature (la maquette ne les prévoit pas). */
 .signature a { color: inherit; text-decoration: underline; text-decoration-color: var(--separator); text-underline-offset: 3px; }
+
+/* Sondage : une réponse longue passe à la ligne au lieu d'être rognée (hauteur fixe dans la maquette). */
+.poll-result { height: auto; min-height: 44px; padding: 8px 0; box-sizing: border-box; line-height: 1.3; }
