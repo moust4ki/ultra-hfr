@@ -292,7 +292,7 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
         $0[1] + scrambleText($0[2]) + $0[3]
     }
     // Personal smileys: image path and code.
-    page = replaceMatches(in: page, regex(#"(images/perso/(?:\d+/)?)([^"'/\s]+?)(\.(?:gif|png|jpe?g))"#)) {
+    page = replaceMatches(in: page, regex(#"(images/perso/(?:\d+/)?)([^"/<>]+?)(\.(?:gif|png|jpe?g))"#)) {
         $0[1] + scrambleText($0[2]) + $0[3]
     }
     page = replaceMatches(in: page, regex(#"\[:([^\]:"<]+)((?::\d+)?)\]"#)) {

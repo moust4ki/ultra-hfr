@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import HFRContent
 
 /// HTTP access to forum.hardware.fr.
 ///
@@ -149,6 +150,12 @@ public actor HFRClient {
             // "Aucune réponse" pages are messages, not errors.
             return []
         }
+    }
+
+    /// Personal smileys whose name contains `text`.
+    public func smileys(matching text: String) async throws(HFRClientError) -> [Smiley] {
+        let html = try await self.page(SmileySearchParser.path(for: text))
+        return try await Self.parse { () throws(HFRParsingError) in try SmileySearchParser.parse(html: html) }
     }
 
     /// Page `page` of a category or sub-forum topic list.
