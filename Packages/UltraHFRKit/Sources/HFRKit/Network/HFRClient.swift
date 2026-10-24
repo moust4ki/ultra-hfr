@@ -152,6 +152,12 @@ public actor HFRClient {
         }
     }
 
+    /// Messages of a topic matching a word or a pseudo, a batch at a time.
+    public func search(in search: TopicSearch) async throws(HFRClientError) -> TopicSearchPage {
+        let html = try await self.page(search.path)
+        return try await Self.parse { () throws(HFRParsingError) in try TopicSearchParser.parse(html: html) }
+    }
+
     /// Personal smileys whose name contains `text`.
     public func smileys(matching text: String) async throws(HFRClientError) -> [Smiley] {
         let html = try await self.page(SmileySearchParser.path(for: text))

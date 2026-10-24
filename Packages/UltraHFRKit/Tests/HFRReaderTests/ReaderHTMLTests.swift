@@ -1,3 +1,4 @@
+import Foundation
 import HFRContent
 import HFRKit
 import Testing
@@ -21,6 +22,15 @@ struct ReaderHTMLTests {
         let html = ReaderHTML.blocks([.paragraph([link])])
         #expect(html.contains("class=\"video\""))
         #expect(html.contains("i.ytimg.com/vi/abc123/"))
+    }
+
+    @Test func olderMessagesShowTheirYear() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 25)))
+        let thisYear = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 9, hour: 17, minute: 34)))
+        let older = try #require(calendar.date(from: DateComponents(year: 2013, month: 4, day: 3, hour: 11, minute: 1)))
+        #expect(!ReaderHTML.postDate(thisYear, now: now, calendar: calendar).contains("2026"))
+        #expect(ReaderHTML.postDate(older, now: now, calendar: calendar).contains("2013"))
     }
 
     @Test func avatarHueIsStable() {

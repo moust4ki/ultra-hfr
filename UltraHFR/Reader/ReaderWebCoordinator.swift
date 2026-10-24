@@ -67,6 +67,10 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         await run("reader.setQuoted(ids)", ["ids": posts.map(\.rawValue)])
     }
 
+    func scrollTo(post: PostID) async {
+        await run("reader.scrollToPost(id)", ["id": post.rawValue])
+    }
+
     /// The page measures what is "visible" below the navigation bar; the bar's height changes
     /// with the orientation and the folding of the iPhone Duo.
     private func updateTopInset() async {
@@ -189,6 +193,10 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             UIAction(title: "Alerte Qualitay", image: UIImage(systemName: "megaphone"), attributes: needsAccount) { _ in },
         ])
         let member = UIMenu(options: .displayInline, children: [
+            UIAction(title: "Messages de \(author)", image: UIImage(systemName: "text.magnifyingglass")) { [weak self] _ in
+                guard let author = self?.model.post(id)?.author else { return }
+                self?.model.topicSearch = TopicSearchRequest(pseudo: author, start: self?.model.searchStart)
+            },
             UIAction(title: "Envoyer un MP", image: UIImage(systemName: "envelope"), attributes: needsAccount) { _ in },
             UIAction(title: "Voir le profil", image: UIImage(systemName: "person.crop.circle")) { [weak self] _ in
                 guard let profile = self?.model.post(id)?.profileID,

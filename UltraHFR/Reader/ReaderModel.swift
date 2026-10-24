@@ -30,6 +30,8 @@ final class ReaderModel {
     /// Image shown full screen.
     var presentedImage: PresentedImage?
     var isGoToPagePresented = false
+    /// « Rechercher dans le sujet », open.
+    var topicSearch: TopicSearchRequest?
 
     @ObservationIgnored weak var driver: ReaderPageDriver?
     /// Called when the message at the top of the screen changes: page, page count, message, author.
@@ -83,7 +85,7 @@ final class ReaderModel {
             return
         }
         Task {
-            guard let (topicPage, html) = await load(page, excluding: []) else { return }
+            guard let (topicPage, html) = await load(page, excluding: [], anchor: anchor) else { return }
             renderedPosts = Set(topicPage.posts.map(\.id))
             renderedPages = [(topicPage.page, html)]
             loadedPages = topicPage.page...topicPage.page
@@ -118,11 +120,16 @@ final class ReaderModel {
         }
     }
 
-    private func load(_ page: Int, excluding: Set<PostID>) async -> (TopicPage, String)? {
+    private func load(_ page: Int, excluding: Set<PostID>, anchor: PostID? = nil) async -> (TopicPage, String)? {
         loadingPages.insert(page)
         defer { loadingPages.remove(page) }
+        let path = if page == TopicRoute.pageOfAnchor, let anchor {
+            ForumPath.post(category: route.category, topic: route.topic, post: anchor)
+        } else {
+            ForumPath.topic(category: route.category, topic: route.topic, page: page)
+        }
         do {
-            let html = try await client.page(ForumPath.topic(category: route.category, topic: route.topic, page: page))
+            let html = try await client.page(path)
             let (topicPage, rendered, duration) = try await Self.parseAndRender(html: html, quoted: Set(quoted), excluding: excluding)
             lastParseDuration = duration
             title = topicPage.title.isEmpty ? title : topicPage.title
@@ -243,6 +250,16 @@ final class ReaderModel {
         open(page: page)
     }
 
+    /// A message found by the topic search: scrolled to when it is on the loaded pages,
+    /// otherwise its page is opened.
+    func show(post id: PostID) {
+        if renderedPosts.contains(id) {
+            Task { await driver?.scrollTo(post: id) }
+        } else {
+            open(page: postPages[id] ?? TopicRoute.pageOfAnchor, anchor: id)
+        }
+    }
+
     /// The last message of the topic (the last page may have grown since it was loaded).
     func openLastMessage() {
         guard isReady else {
@@ -257,6 +274,13 @@ final class ReaderModel {
             visiblePage = topicPage.page
             await driver?.replace(html: html, anchor: topicPage.posts.last?.id)
         }
+    }
+
+    /// The page on screen and its first message, for « Rechercher dans le sujet ».
+    var searchStart: TopicSearchStart? {
+        guard let visiblePage, visiblePage > 1,
+              let first = postPages.filter({ $0.value == visiblePage }).keys.min(by: { $0.rawValue < $1.rawValue }) else { return nil }
+        return TopicSearchStart(page: visiblePage, firstPost: first)
     }
 
     /// Pages after the one on screen.

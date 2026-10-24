@@ -15,4 +15,6 @@ struct TopicRoute: Hashable {
     var anchor: PostID?
 
     static let lastPage = 99_999
+    /// The page holding `anchor`, found by HFR (it redirects a message's address to its page).
+    static let pageOfAnchor = 0
 }

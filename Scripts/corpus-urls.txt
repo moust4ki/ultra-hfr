@@ -40,3 +40,7 @@ sujet-switch-images https://forum.hardware.fr/hfr/JeuxVideo/Consoles/nintendo-sw
 # Recherche (une seule requête GET, sans session ; la catégorie est obligatoire)
 recherche-titres-5090 https://forum.hardware.fr/forum1.php?recherches=1&cat=1&orderSearch=0&config=hfr.inc&pseud=&search=5090&titre=1&resSearch=200&daterange=2&subcat=0&searchtype=1
 recherche-contenu-undervolt https://forum.hardware.fr/forum1.php?recherches=1&cat=1&orderSearch=0&config=hfr.inc&pseud=&search=undervolt&titre=0&resSearch=200&daterange=2&subcat=0&searchtype=1
+
+# Recherche dans un sujet (filtre par mot ; le filtre par pseudo donne la même page)
+sujet-filtre-mot https://forum.hardware.fr/forum2.php?config=hfr.inc&cat=1&post=1069640&page=1&p=1&sondage=0&owntopic=0&trash=0&trash_post=0&print=0&numreponse=0&quote_only=0&new=0&nojs=0&word=4k&spseudo=&filter=1
+sujet-filtre-fin https://forum.hardware.fr/forum2.php?config=hfr.inc&cat=1&post=1069640&page=1&p=1&sondage=0&owntopic=0&trash=0&trash_post=0&print=0&numreponse=0&quote_only=0&new=0&nojs=0&word=4k&spseudo=&filter=1&currentnum=11489777

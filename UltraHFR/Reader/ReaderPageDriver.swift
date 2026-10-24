@@ -11,4 +11,5 @@ protocol ReaderPageDriver: AnyObject {
     func append(html: String) async
     func prepend(html: String) async
     func setQuoted(_ posts: [PostID]) async
+    func scrollTo(post: PostID) async
 }

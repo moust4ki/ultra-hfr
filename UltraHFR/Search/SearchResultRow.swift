@@ -44,17 +44,7 @@ struct SearchResultRow: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// The searched words on the highlight colour of the mockup.
     private func highlighted(_ text: String) -> AttributedString {
-        var attributed = AttributedString(text)
-        for word in query.split(separator: " ") where word.count >= 2 {
-            var searchStart = attributed.startIndex
-            while searchStart < attributed.endIndex,
-                  let range = attributed[searchStart...].range(of: String(word), options: [.caseInsensitive, .diacriticInsensitive]) {
-                attributed[range].backgroundColor = palette.highlight.color
-                searchStart = range.upperBound
-            }
-        }
-        return attributed
+        SearchHighlight.text(text, query: query, color: palette.highlight.color)
     }
 }

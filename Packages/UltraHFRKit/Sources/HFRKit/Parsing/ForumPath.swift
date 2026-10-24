@@ -19,6 +19,11 @@ public enum ForumPath {
         "/forum2.php?config=hfr.inc&cat=\(category)&post=\(topic)&page=\(page)&p=1"
     }
 
+    /// The page holding message `post`: HFR redirects to it, whatever the page number asked.
+    public static func post(category: CategoryID, topic: TopicID, post: PostID) -> String {
+        "/forum2.php?config=hfr.inc&cat=\(category)&post=\(topic)&page=1&p=1&numreponse=\(post)"
+    }
+
     /// Page number in a rewritten topic path (`/hfr/…-sujet_1061629_348.htm#t11405947` → 348).
     public static func topicPageNumber(in path: String) -> Int? {
         guard let end = path.range(of: ".htm")?.lowerBound,

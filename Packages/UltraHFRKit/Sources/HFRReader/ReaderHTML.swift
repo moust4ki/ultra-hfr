@@ -58,11 +58,20 @@ public enum ReaderHTML {
 
     // MARK: - Message
 
+    /// "9 juil. à 17:34" this year, "3 avr. 2013 à 11:01" before.
+    static func postDate(_ date: Date, now: Date = .now, calendar: Calendar = .current) -> String {
+        let style = Date.FormatStyle.dateTime.day().month(.abbreviated).hour().minute().locale(french)
+        if calendar.component(.year, from: date) == calendar.component(.year, from: now) {
+            return date.formatted(style)
+        }
+        return date.formatted(style.year())
+    }
+
     static func post(_ post: Post, page: Int, isQuoted: Bool) -> String {
         var classes = ["post"]
         if isQuoted { classes.append("quoted") }
         let initial = post.author.first.map { String($0).uppercased() } ?? "?"
-        var meta = post.postedAt.map { $0.formatted(.dateTime.day().month(.abbreviated).hour().minute().locale(french)) } ?? ""
+        var meta = post.postedAt.map { postDate($0) } ?? ""
         if post.edit != nil { meta += " · modifié" }
 
         var html = "<article class=\"\(classes.joined(separator: " "))\" id=\"t\(post.id)\" data-post=\"\(post.id)\" data-page=\"\(page)\" data-author=\"\(escape(post.author))\">"

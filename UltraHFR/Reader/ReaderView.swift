@@ -72,6 +72,12 @@ private struct ReaderScreen: View {
                     .disabled(model.pageCount == nil)
                     .accessibilityHint("Aller à une autre page")
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Rechercher dans le sujet", systemImage: "magnifyingglass") {
+                        model.topicSearch = TopicSearchRequest(start: model.searchStart)
+                    }
+                    .disabled(model.loadedPages == nil)
+                }
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .tabBar)
@@ -105,6 +111,12 @@ private struct ReaderScreen: View {
                     quotedText: request.quotes,
                     quoteAuthors: request.authors
                 )
+            }
+            .sheet(item: Binding(get: { model.topicSearch }, set: { model.topicSearch = $0 })) { request in
+                TopicSearchView(category: route.category, topic: route.topic, title: model.title, request: request) { post in
+                    model.topicSearch = nil
+                    model.show(post: post)
+                }
             }
             .sheet(isPresented: Binding(get: { model.isGoToPagePresented }, set: { model.isGoToPagePresented = $0 })) {
                 GoToPageView(currentPage: model.visiblePage ?? 1, pageCount: model.pageCount ?? 1) { page in
