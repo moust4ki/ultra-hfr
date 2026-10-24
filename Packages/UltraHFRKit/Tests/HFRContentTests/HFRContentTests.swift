@@ -1,6 +1,10 @@
 import Testing
 @testable import HFRContent
 
-@Test func moduleLoads() {
-    #expect(String(describing: HFRContent.self) == "HFRContent")
+@Suite("Smileys")
+struct SmileyTests {
+    @Test func personalSmileysUseBrackets() {
+        #expect(Smiley(code: "[:atom1ck]", imageURL: "").isPersonal)
+        #expect(!Smiley(code: ":sleep:", imageURL: "").isPersonal)
+    }
 }

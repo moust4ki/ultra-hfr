@@ -28,3 +28,11 @@ smileys-recherche-chat https://forum.hardware.fr/message-smi-mp-aj.php?config=hf
 
 # Service externe
 qualitay-rss https://aq.super-h.fr/rss.php
+
+# Contenus particuliers : code, spoilers, vidéos, images
+sujet-scripts-code https://forum.hardware.fr/hfr/Programmation/Divers-6/scripts-extensions-2026-sujet_148758_325.htm
+sujet-ada-code https://forum.hardware.fr/hfr/Programmation/ADA/topic-source-peter-sujet_126571_1.htm
+sujet-cyberpunk-spoilers https://forum.hardware.fr/hfr/JeuxVideo/PC/unique-cyberpunk-2077-sujet_173921_533.htm
+sujet-blindtest https://forum.hardware.fr/hfr/Discussions/Musique/blindtest-nouveau-inedit-sujet_45986_7953.htm
+sujet-musique-videos https://forum.hardware.fr/hfr/Discussions/Musique/musique-ecoutez-moment-sujet_8177_1477.htm
+sujet-switch-images https://forum.hardware.fr/hfr/JeuxVideo/Consoles/nintendo-switch-switch-sujet_185457_7140.htm
