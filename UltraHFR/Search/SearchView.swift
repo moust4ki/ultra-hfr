@@ -28,6 +28,10 @@ struct SearchView: View {
                     .listRowBackground(Color.clear)
             }
             if query.isEmpty, forumSearch.searchedText == nil {
+                RecentSearches(model: forumSearch) { text in
+                    query = text
+                    Task { await forumSearch.search(text, using: client) }
+                }
                 Section {
                     ContentUnavailableView(
                         "Chercher dans HFR",
@@ -37,7 +41,10 @@ struct SearchView: View {
                 }
             } else {
                 LocalResults(query: query, positions: positions, forums: forums.categories, section: section)
-                RemoteResults(model: forumSearch, query: query, section: section)
+                RemoteResults(model: forumSearch, query: query, section: section) {
+                    forumSearch.scope = .both
+                    Task { await forumSearch.search(query, using: client) }
+                }
             }
         }
         .listStyle(.insetGrouped)
@@ -144,11 +151,46 @@ private struct LocalResults: View {
     }
 }
 
+/// The last searches, to run again in one touch (« Le Fil », E1 before typing).
+private struct RecentSearches: View {
+    let model: ForumSearchModel
+    let run: (String) -> Void
+    @Environment(\.hfrPalette) private var palette
+
+    var body: some View {
+        if !model.recents.isEmpty {
+            Section {
+                ForEach(model.recents, id: \.self) { text in
+                    Button {
+                        run(text)
+                    } label: {
+                        Label(text, systemImage: "clock.arrow.circlepath")
+                            .foregroundStyle(palette.text.color)
+                    }
+                    .swipeActions {
+                        Button("Oublier", systemImage: "trash", role: .destructive) { model.forget(text) }
+                    }
+                }
+            } header: {
+                HStack {
+                    Text("Recherches récentes")
+                    Spacer()
+                    Button("Effacer") { model.forgetAll() }
+                        .font(.subheadline)
+                        .textCase(nil)
+                }
+            }
+        }
+    }
+}
+
 /// Results from forum.hardware.fr.
 private struct RemoteResults: View {
     let model: ForumSearchModel
     let query: String
     let section: AppSection
+    /// « Chercher aussi dans les messages », when only titles were searched.
+    let widen: () -> Void
     @Environment(AppNavigation.self) private var navigation
 
     var body: some View {
@@ -166,6 +208,9 @@ private struct RemoteResults: View {
                 if model.results.isEmpty {
                     Text("Aucun résultat pour « \(searched) » dans cette catégorie.")
                         .foregroundStyle(.secondary)
+                    if model.scope == .titles {
+                        Button("Chercher aussi dans les messages", systemImage: "text.magnifyingglass", action: widen)
+                    }
                 }
                 ForEach(model.results) { topic in
                     Button {
