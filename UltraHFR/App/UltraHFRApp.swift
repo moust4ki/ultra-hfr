@@ -38,6 +38,6 @@ struct UltraHFRApp: App {
                 .environment(accounts)
                 .hfrTheme(mode: settings.themeMode, accent: settings.accent)
         }
-        .modelContainer(for: ReadingPosition.self)
+        .modelContainer(for: [ReadingPosition.self, Draft.self])
     }
 }

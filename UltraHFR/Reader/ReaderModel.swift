@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import HFRContent
 import HFRKit
 import HFRReader
 import Observation
@@ -41,6 +42,7 @@ final class ReaderModel {
     @ObservationIgnored private var renderedPages: [(page: Int, html: String)] = []
     @ObservationIgnored private(set) var lastVisiblePost: PostID?
     @ObservationIgnored private var posts: [PostID: Post] = [:]
+    @ObservationIgnored private var postPages: [PostID: Int] = [:]
     /// Messages in the page, so that HFR's repeat of a page's last message is not shown twice.
     @ObservationIgnored private var renderedPosts: Set<PostID> = []
     @ObservationIgnored private var isReady = false
@@ -127,6 +129,7 @@ final class ReaderModel {
             pageCount = max(pageCount ?? 0, topicPage.pageCount)
             for post in topicPage.posts {
                 posts[post.id] = post
+                postPages[post.id] = postPages[post.id] ?? topicPage.page
             }
             errorMessage = nil
             return (topicPage, rendered)
@@ -194,6 +197,22 @@ final class ReaderModel {
         }
         let quoted = quoted
         Task { await driver?.setQuoted(quoted) }
+    }
+
+    /// Authors of the messages loaded so far, by message number.
+    var authorsOfLoadedPosts: [Int: String] {
+        Dictionary(posts.map { ($0.key.rawValue, $0.value.author) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    /// BBCode of the quoted messages, in the order of the topic, each followed by an empty line.
+    var quotedBBCode: String {
+        quoted
+            .sorted { $0.rawValue < $1.rawValue }
+            .compactMap { id -> String? in
+                guard let post = posts[id] else { return nil }
+                return "[quotemsg=\(id),\(postPages[id] ?? 1),0]" + BBCodeWriter.write(post.body) + "[/quotemsg]\n"
+            }
+            .joined(separator: "\n")
     }
 
     func clearQuotes() {

@@ -10,6 +10,7 @@ import SwiftUI
 struct QuoteTray: View {
     let authors: [String]
     let clear: () -> Void
+    let reply: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -26,9 +27,8 @@ struct QuoteTray: View {
             Spacer(minLength: 8)
             Button("Vider", systemImage: "xmark", action: clear)
                 .labelStyle(.iconOnly)
-            Button("Répondre") {}
+            Button("Répondre", action: reply)
                 .buttonStyle(.borderedProminent)
-                .disabled(true)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

@@ -11,6 +11,7 @@ import SwiftUI
 struct ReaderBottomBar: View {
     let pagesAfter: Int
     let goToLastMessage: () -> Void
+    let reply: () -> Void
     @Environment(\.hfrPalette) private var palette
 
     var body: some View {
@@ -26,14 +27,12 @@ struct ReaderBottomBar: View {
             }
             .buttonStyle(.glass)
             Spacer()
-            Button("Répondre", systemImage: "square.and.pencil") {}
+            Button("Répondre", systemImage: "square.and.pencil", action: reply)
                 .labelStyle(.iconOnly)
                 .font(.title3)
                 .frame(width: 52, height: 52)
                 .foregroundStyle(palette.accent.onFill.color)
-                .background(palette.accent.fill.color.opacity(0.45), in: .circle)
-                .disabled(true)
-                .accessibilityHint("Arrive avec la connexion")
+                .background(palette.accent.fill.color, in: .circle)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 8)

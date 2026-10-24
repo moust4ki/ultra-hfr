@@ -28,6 +28,7 @@ private struct ReaderScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.openURL) private var openURL
+    @State private var composer: ComposerRequest?
 
     var body: some View {
         ReaderWebView(model: model, style: style)
@@ -39,15 +40,20 @@ private struct ReaderScreen: View {
                         model.jump(to: page)
                     }
                     .frame(width: 24)
-                    .padding(.vertical, 24)
+                    .padding(.top, 24)
+                    .padding(.bottom, 84)
                 }
             }
             .overlay(alignment: .bottom) {
                 if !model.quoted.isEmpty {
-                    QuoteTray(authors: model.quotedAuthors) { model.clearQuotes() }
+                    QuoteTray(authors: model.quotedAuthors, clear: { model.clearQuotes() }, reply: {
+                        composer = ComposerRequest(quotes: model.quotedBBCode, authors: model.authorsOfLoadedPosts)
+                    })
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else if model.loadedPages != nil {
-                    ReaderBottomBar(pagesAfter: model.pagesAfterVisible) { model.openLastMessage() }
+                    ReaderBottomBar(pagesAfter: model.pagesAfterVisible, goToLastMessage: { model.openLastMessage() }, reply: {
+                        composer = ComposerRequest(quotes: "", authors: model.authorsOfLoadedPosts)
+                    })
                 }
             }
             .overlay(alignment: .top) {
@@ -92,6 +98,13 @@ private struct ReaderScreen: View {
             }
             .fullScreenCover(item: Binding(get: { model.presentedImage }, set: { model.presentedImage = $0 })) { image in
                 ImageViewer(url: image.url)
+            }
+            .sheet(item: $composer) { request in
+                ComposerView(
+                    topic: TopicRoute(title: model.title, category: route.category, topic: route.topic, page: model.visiblePage ?? route.page),
+                    quotedText: request.quotes,
+                    quoteAuthors: request.authors
+                )
             }
             .sheet(isPresented: Binding(get: { model.isGoToPagePresented }, set: { model.isGoToPagePresented = $0 })) {
                 GoToPageView(currentPage: model.visiblePage ?? 1, pageCount: model.pageCount ?? 1) { page in

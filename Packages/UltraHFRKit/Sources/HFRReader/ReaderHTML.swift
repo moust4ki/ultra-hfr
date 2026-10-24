@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import HFRContent
+public import HFRContent
 public import HFRKit
 
 public enum ReaderHTML {
@@ -45,6 +45,15 @@ public enum ReaderHTML {
         }
         html += "</section>"
         return html
+    }
+
+    /// A full page showing one message, for the composer's preview.
+    public static func preview(of body: MessageBody, author: String, style: ReaderStyle) -> String {
+        let post = Post(id: PostID(rawValue: 0), author: author, postedAt: .now, body: body)
+        return document(style: style).replacing(
+            "<main class=\"thread\" id=\"thread\"></main>",
+            with: "<main class=\"thread\" id=\"thread\">\(self.post(post, page: 0, isQuoted: false))</main>"
+        )
     }
 
     // MARK: - Message
