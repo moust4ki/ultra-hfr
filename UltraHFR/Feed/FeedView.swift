@@ -105,7 +105,8 @@ struct FeedView: View {
             category: CategoryID(rawValue: position.categoryID),
             topic: TopicID(rawValue: position.topicID),
             page: position.page,
-            anchor: PostID(rawValue: position.postID)
+            anchor: PostID(rawValue: position.postID),
+            newAfter: PostID(rawValue: position.postID)
         )
     }
 }

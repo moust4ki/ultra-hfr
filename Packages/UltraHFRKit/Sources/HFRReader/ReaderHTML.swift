@@ -32,15 +32,21 @@ public enum ReaderHTML {
     }
 
     /// One HFR page: a divider, then its messages. `excluding`: messages already shown (HFR
-    /// repeats the last message of a page at the top of the next one).
-    public static func page(_ page: TopicPage, quoted: Set<PostID> = [], excluding: Set<PostID> = []) -> String {
+    /// repeats the last message of a page at the top of the next one). `newAfter`: the last
+    /// message read; the « Nouveau » marker goes before the first message after it.
+    public static func page(_ page: TopicPage, quoted: Set<PostID> = [], excluding: Set<PostID> = [], newAfter: PostID? = nil) -> String {
         var html = "<section class=\"topic-page\" data-page=\"\(page.page)\">"
         let date = page.posts.first?.postedAt.map { $0.formatted(.dateTime.day().month(.abbreviated).year().locale(french)) } ?? ""
         html += "<div class=\"page-divider\"><span class=\"page\">Page \(page.page.formatted(.number.locale(french)))</span><span class=\"date\">\(escape(date))</span></div>"
         if page.page == 1, let poll = page.poll {
             html += self.poll(poll)
         }
+        var newAfter = newAfter
         for post in page.posts where !excluding.contains(post.id) {
+            if let last = newAfter, post.id.rawValue > last.rawValue {
+                html += "<div class=\"new-marker\" id=\"new-marker\">Nouveau</div>"
+                newAfter = nil
+            }
             html += self.post(post, page: page.page, isQuoted: quoted.contains(post.id))
         }
         html += "</section>"

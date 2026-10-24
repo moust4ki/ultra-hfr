@@ -114,7 +114,26 @@
     return null;
   }
 
-  let reportedPost = null;
+  /** Last message whose top went past the middle of the screen: read, or being read. */
+  function lastSeenPost() {
+    const list = posts();
+    const limit = window.innerHeight * 0.6;
+    let low = 0;
+    let high = list.length - 1;
+    let found = null;
+    while (low <= high) {
+      const middle = (low + high) >> 1;
+      if (list[middle].getBoundingClientRect().top < limit) {
+        found = list[middle];
+        low = middle + 1;
+      } else {
+        high = middle - 1;
+      }
+    }
+    return found;
+  }
+
+  let reported = null;
   let scrollScheduled = false;
 
   function onScroll() {
@@ -133,9 +152,15 @@
         send({ type: "nearStart" });
       }
       const post = visiblePost();
-      if (post && post.dataset.post !== reportedPost) {
-        reportedPost = post.dataset.post;
-        send({ type: "visible", post: Number(post.dataset.post), page: Number(post.dataset.page) });
+      const seen = lastSeenPost() || post;
+      const key = post ? post.dataset.post + "/" + seen.dataset.post : null;
+      if (key && key !== reported) {
+        reported = key;
+        send({
+          type: "visible",
+          post: Number(post.dataset.post), page: Number(post.dataset.page),
+          seen: Number(seen.dataset.post), seenPage: Number(seen.dataset.page),
+        });
       }
     });
   }

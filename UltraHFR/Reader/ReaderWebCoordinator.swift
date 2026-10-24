@@ -101,7 +101,9 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             model.loadPrevious()
         case "visible":
             if let post, let page = (body["page"] as? NSNumber)?.intValue {
-                model.didShow(post: post, page: page)
+                let seen = (body["seen"] as? NSNumber).map { PostID(rawValue: $0.intValue) } ?? post
+                let seenPage = (body["seenPage"] as? NSNumber)?.intValue ?? page
+                model.didShow(post: post, page: page, seen: seen, seenPage: seenPage)
             }
         case "haptic":
             model.swipeReachedThreshold()

@@ -24,6 +24,24 @@ struct ReaderHTMLTests {
         #expect(html.contains("i.ytimg.com/vi/abc123/"))
     }
 
+    @Test func marksTheFirstNewMessageOnce() {
+        let posts = (1...4).map { Post(id: PostID(rawValue: 100 + $0), author: "m\($0)", body: MessageBody(blocks: [.paragraph([.text("message \($0)")])])) }
+        let page = TopicPage(topicID: 1, categoryID: 1, title: "Sujet", page: 3, pageCount: 3, posts: posts)
+        let html = ReaderHTML.page(page, newAfter: 102)
+        let marker = html.range(of: "class=\"new-marker\"")
+        let firstNew = html.range(of: "id=\"t103\"")
+        let lastRead = html.range(of: "id=\"t102\"")
+        #expect(html.ranges(of: "new-marker\" id").count == 1)
+        if let marker, let firstNew, let lastRead {
+            #expect(lastRead.lowerBound < marker.lowerBound)
+            #expect(marker.lowerBound < firstNew.lowerBound)
+        } else {
+            Issue.record("Marqueur ou messages absents")
+        }
+        // Nothing new on this page: no marker.
+        #expect(!ReaderHTML.page(page, newAfter: 104).contains("new-marker\" id"))
+    }
+
     @Test func olderMessagesShowTheirYear() throws {
         let calendar = Calendar(identifier: .gregorian)
         let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 25)))

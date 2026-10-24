@@ -41,7 +41,8 @@ final class ReaderModel {
     var presentedProfile: ProfileRequest?
 
     @ObservationIgnored weak var driver: ReaderPageDriver?
-    /// Called when the message at the top of the screen changes: page, page count, message, author.
+    /// Called when the last message read changes: its page, the page count, the message and
+    /// its author.
     @ObservationIgnored var onPositionChange: ((Int, Int, PostID, String) -> Void)?
     /// A link of a message was tapped (topics of the forum open in the app, the rest outside).
     @ObservationIgnored var onOpenLink: ((URL) -> Void)?
@@ -57,6 +58,8 @@ final class ReaderModel {
     @ObservationIgnored private var renderedPosts: Set<PostID> = []
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var pendingOpen: (page: Int, anchor: PostID?)?
+    /// Last message read when the topic was opened, until the page with the next one is shown.
+    @ObservationIgnored private var pendingNewMarker: PostID?
 
     init(route: TopicRoute, client: HFRClient, cache: HTMLPageCache) {
         self.route = route
@@ -69,6 +72,7 @@ final class ReaderModel {
     func show(_ newRoute: TopicRoute) {
         if loadedPages != nil, newRoute == route { return }
         route = newRoute
+        pendingNewMarker = newRoute.newAfter
         open(page: newRoute.page, anchor: newRoute.anchor)
     }
 
@@ -143,7 +147,10 @@ final class ReaderModel {
             let answer = try await client.page(path, cache: cache)
             let html = answer.content
             offlineSince = answer.savedAt
-            let (topicPage, rendered, duration) = try await Self.parseAndRender(html: html, quoted: Set(quoted), excluding: excluding)
+            let (topicPage, rendered, duration) = try await Self.parseAndRender(html: html, quoted: Set(quoted), excluding: excluding, newAfter: pendingNewMarker)
+            if let marker = pendingNewMarker, topicPage.posts.contains(where: { $0.id.rawValue > marker.rawValue }) {
+                pendingNewMarker = nil
+            }
             lastParseDuration = duration
             title = topicPage.title.isEmpty ? title : topicPage.title
             if topicPage.poll != nil { hasPoll = true }
@@ -162,14 +169,14 @@ final class ReaderModel {
 
     /// Off the main actor: reading the page and building its HTML.
     @concurrent
-    private nonisolated static func parseAndRender(html: String, quoted: Set<PostID>, excluding: Set<PostID>) async throws -> (TopicPage, String, Duration) {
+    private nonisolated static func parseAndRender(html: String, quoted: Set<PostID>, excluding: Set<PostID>, newAfter: PostID?) async throws -> (TopicPage, String, Duration) {
         let clock = ContinuousClock()
         var page: TopicPage?
         let duration = try clock.measure {
             page = try TopicPageParser.parse(html: html)
         }
         guard let page else { throw HFRParsingError.unexpectedPage }
-        return (page, ReaderHTML.page(page, quoted: quoted, excluding: excluding), duration)
+        return (page, ReaderHTML.page(page, quoted: quoted, excluding: excluding, newAfter: newAfter), duration)
     }
 
     private static func message(for error: any Error) -> String {
@@ -198,11 +205,12 @@ final class ReaderModel {
         }
     }
 
-    func didShow(post: PostID, page: Int) {
+    /// `post`: the message at the top of the screen; `seen`: the last message read.
+    func didShow(post: PostID, page: Int, seen: PostID, seenPage: Int) {
         visiblePage = page
         lastVisiblePost = post
-        if let author = posts[post]?.author {
-            onPositionChange?(page, pageCount ?? page, post, author)
+        if let author = posts[seen]?.author {
+            onPositionChange?(seenPage, pageCount ?? seenPage, seen, author)
         }
     }
 
@@ -261,6 +269,7 @@ final class ReaderModel {
     }
 
     func jump(to page: Int) {
+        pendingNewMarker = nil
         open(page: page)
     }
 

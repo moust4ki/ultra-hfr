@@ -1,0 +1,44 @@
+import Foundation
+import HFRKit
+import SwiftData
+import Testing
+@testable import UltraHFR
+
+@MainActor
+@Suite("Position de lecture")
+struct ReadingPositionRecorderTests {
+    private let route = TopicRoute(title: "Blackwell", category: 1, topic: 1061629, page: 1)
+
+    private func positions(in context: ModelContext) throws -> [ReadingPosition] {
+        try context.fetch(FetchDescriptor<ReadingPosition>())
+    }
+
+    @Test func onlyMovesForwardLikeAFlag() throws {
+        let container = try ModelContainer(for: ReadingPosition.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = ModelContext(container)
+        let recorder = ReadingPositionRecorder(context: context)
+
+        recorder.record(topic: route, page: 350, pageCount: 697, post: 11_405_000, author: "Kaiju")
+        // Going back to an older page keeps the last message read.
+        recorder.record(topic: route, page: 2, pageCount: 697, post: 11_000_000, author: "Grumly")
+        var saved = try #require(try positions(in: context).first)
+        #expect(saved.page == 350)
+        #expect(saved.postID == 11_405_000)
+        #expect(saved.postAuthor == "Kaiju")
+
+        recorder.record(topic: route, page: 351, pageCount: 698, post: 11_405_100, author: "Xixou2")
+        saved = try #require(try positions(in: context).first)
+        #expect(saved.page == 351)
+        #expect(saved.pageCount == 698)
+        #expect(try positions(in: context).count == 1)
+    }
+
+    @Test func listsOpenOnTheLastMessageReadWithTheMarkerWhenThereIsMore() throws {
+        let position = ReadingPosition(topicID: 1061629, categoryID: 1, title: "Blackwell", page: 350, pageCount: 350, postID: 11_405_000, postAuthor: "Kaiju")
+        let topic = TopicSummary(id: 1061629, title: "Blackwell", path: "/hfr/Hardware/2D-3D/blackwell-sujet_1061629_1.htm", pageCount: 352, author: "Xixou2")
+        let route = TopicRowModel(topic: topic, position: position).route(category: 1)
+        #expect(route.page == 350)
+        #expect(route.anchor == 11_405_000)
+        #expect(route.newAfter == 11_405_000)
+    }
+}

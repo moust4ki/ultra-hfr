@@ -13,6 +13,8 @@ struct TopicRoute: Hashable {
     /// `TopicRoute.lastPage` opens the last page (HFR redirects to it).
     var page: Int
     var anchor: PostID?
+    /// Last message read: the « Nouveau » marker goes after it.
+    var newAfter: PostID?
 
     static let lastPage = 99_999
     /// The page holding `anchor`, found by HFR (it redirects a message's address to its page).
