@@ -33,6 +33,7 @@ private struct ReaderScreen: View {
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.openURL) private var openURL
     @Environment(ConnectivityStore.self) private var connectivity
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
 
     var body: some View {
@@ -112,10 +113,19 @@ private struct ReaderScreen: View {
                 model.onOpenTopic = { [navigation] topic in
                     navigation.open(topic)
                 }
-                model.onOpenLink = { [navigation, openURL] url in
-                    if let link = TopicLink(url.absoluteString) {
+                model.onOpenLink = { [navigation, openURL, model, horizontalSizeClass] url in
+                    switch ForumLink(url.absoluteString) {
+                    case .topic(let link):
                         navigation.open(TopicRoute(title: "Sujet", category: link.category, topic: link.topic, page: link.page, anchor: link.post))
-                    } else {
+                    case .profile(let profile):
+                        model.presentedProfile = ProfileRequest(profileID: profile, pseudo: "Profil")
+                    case .topicList(let path):
+                        let section = navigation.openTopicSection ?? navigation.section
+                        // In compact width the reading sits on top of its section: it gives way
+                        // to the list, as a link to another topic replaces it.
+                        if horizontalSizeClass != .regular { navigation.closeTopic() }
+                        navigation.push(.topicList(TopicListRoute(title: "Sujets", path: path)), in: section)
+                    case nil:
                         openURL(url)
                     }
                 }
@@ -155,9 +165,9 @@ private struct ReaderScreen: View {
                 }
             }
             .sheet(item: Binding(get: { model.presentedProfile }, set: { model.presentedProfile = $0 })) { request in
-                MemberProfileView(request: request) {
+                MemberProfileView(request: request) { pseudo in
                     model.presentedProfile = nil
-                    model.topicSearch = TopicSearchRequest(pseudo: request.pseudo, start: model.searchStart)
+                    model.topicSearch = TopicSearchRequest(pseudo: pseudo, start: model.searchStart)
                 } openTopic: { topic in
                     model.presentedProfile = nil
                     if topic.topic == route.topic, let post = topic.anchor {

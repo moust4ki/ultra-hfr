@@ -19,6 +19,11 @@ final class MemberProfileModel {
         self.profile = profile
     }
 
+    /// The member's pseudo, from the profile once loaded (a link only gives the number).
+    var pseudo: String {
+        profile?.pseudo ?? request.pseudo
+    }
+
     func load(using client: HFRClient) async {
         do {
             profile = try await client.profile(profileID: request.profileID)

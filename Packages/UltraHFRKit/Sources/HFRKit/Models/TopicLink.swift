@@ -27,7 +27,8 @@ public struct TopicLink: Sendable, Hashable {
         if let host = components.host, !host.hasSuffix("forum.hardware.fr") { return nil }
         let post = components.fragment.flatMap { $0.integer(after: "t") }.map(PostID.init(rawValue:))
 
-        if components.path.hasSuffix("forum2.php") {
+        // Messages of the 2000s still link to forum2.php3, which HFR serves the same way.
+        if components.path.hasSuffix("forum2.php") || components.path.hasSuffix("forum2.php3") {
             let items = components.queryItems ?? []
             func value(_ name: String) -> Int? { items.first { $0.name == name }?.value.flatMap(Int.init) }
             guard let category = value("cat"), let topic = value("post") else { return nil }

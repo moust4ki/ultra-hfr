@@ -11,8 +11,8 @@ import HFRKit
 import SwiftUI
 
 struct MemberProfileView: View {
-    /// « Messages de … ici », when the profile was opened from a topic.
-    let searchMessages: (() -> Void)?
+    /// « Messages de … ici », with the member's pseudo, when the profile was opened from a topic.
+    let searchMessages: ((String) -> Void)?
     /// Opens a topic found among the member's messages.
     let openTopic: (TopicRoute) -> Void
     @State private var model: MemberProfileModel
@@ -20,7 +20,7 @@ struct MemberProfileView: View {
     @Environment(\.hfrPalette) private var palette
     @Environment(\.dismiss) private var dismiss
 
-    init(request: ProfileRequest, searchMessages: (() -> Void)? = nil, openTopic: @escaping (TopicRoute) -> Void) {
+    init(request: ProfileRequest, searchMessages: ((String) -> Void)? = nil, openTopic: @escaping (TopicRoute) -> Void) {
         self.searchMessages = searchMessages
         self.openTopic = openTopic
         _model = State(initialValue: MemberProfileModel(request: request))
@@ -38,10 +38,12 @@ struct MemberProfileView: View {
                 }
                 Section {
                     if let searchMessages {
-                        Button("Messages de \(model.request.pseudo) ici", systemImage: "text.magnifyingglass", action: searchMessages)
+                        Button("Messages de \(model.pseudo) ici", systemImage: "text.magnifyingglass") {
+                            searchMessages(model.pseudo)
+                        }
                     }
                     NavigationLink {
-                        MemberMessagesView(pseudo: model.request.pseudo, open: openTopic)
+                        MemberMessagesView(pseudo: model.pseudo, open: openTopic)
                     } label: {
                         Label("Tous ses messages", systemImage: "text.bubble")
                     }
@@ -59,7 +61,7 @@ struct MemberProfileView: View {
                 }
             }
             .hfrGroupedBackground()
-            .navigationTitle(model.request.pseudo)
+            .navigationTitle(model.pseudo)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -89,8 +91,8 @@ private struct ProfileHeader: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            HFRAvatar(pseudo: model.request.pseudo, imageURL: model.profile?.avatarURL, size: 88)
-            Text(model.request.pseudo)
+            HFRAvatar(pseudo: model.pseudo, imageURL: model.profile?.avatarURL, size: 88)
+            Text(model.pseudo)
                 .font(.title2)
                 .bold()
                 .foregroundStyle(palette.text.color)
