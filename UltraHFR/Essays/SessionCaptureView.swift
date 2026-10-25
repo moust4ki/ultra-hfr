@@ -46,7 +46,7 @@ struct SessionCaptureView: View {
                 } header: {
                     Text("2 · Un sujet suivi, déjà lu")
                 } footer: {
-                    Text("Seuls les sujets sans nouveau message sont proposés : recharger la page où tu t'es arrêté ne fait pas bouger ton drapeau. Un sujet avec sondage (icône de graphique) est le plus utile. Le formulaire de réponse est seulement lu, jamais envoyé.")
+                    Text("Sujets que tu suis dans la liste Hardware et qui n'ont rien de nouveau : recharger la page où tu t'es arrêté ne fait pas bouger ton drapeau. Un sujet avec sondage (icône de graphique) est le plus utile. Le formulaire de réponse est seulement lu, jamais envoyé.")
                 }
             }
             if !model.readConversations.isEmpty {

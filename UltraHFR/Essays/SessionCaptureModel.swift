@@ -34,7 +34,7 @@ final class SessionCaptureModel {
     /// nothing on HFR.
     private(set) var readTopics: [TopicSummary] = []
     /// Conversations already read.
-    private(set) var readConversations: [TopicSummary] = []
+    private(set) var readConversations: [ConversationSummary] = []
     private(set) var isRunning = false
     /// Pages saved in the folder, from this run or an earlier one.
     private(set) var savedCount = 0
@@ -56,8 +56,15 @@ final class SessionCaptureModel {
             ("connecte-mp-liste", "Liste des MP", "/forum1.php?config=hfr.inc&cat=prive&page=1"),
             ("connecte-liste-hardware", "Liste de sujets Hardware", "/hfr/Hardware/liste_sujet-1.htm"),
         ], account: account, client: client)
-        readTopics = Self.readTopics(Self.topics(in: savedPage("connecte-drapeaux")))
-        readConversations = Self.readConversations(Self.topics(in: savedPage("connecte-mp-liste")))
+        // « Mes drapeaux » only lists the followed topics with something new: a flagged topic of
+        // the list that is not there is read to the end. Without that page, nothing is offered.
+        if let flags = savedPage("connecte-drapeaux").flatMap({ try? FollowedTopicsParser.parse(html: $0) }),
+           let list = savedPage("connecte-liste-hardware").flatMap({ try? TopicListParser.parse(html: $0) }) {
+            readTopics = Self.readTopics(listed: list.topics, unread: flags.topics)
+        }
+        if let conversations = savedPage("connecte-mp-liste").flatMap({ try? ConversationListParser.parse(html: $0) }) {
+            readConversations = Self.readConversations(conversations.conversations)
+        }
     }
 
     /// A followed topic already read: the page where the member stopped, and its reply form.
@@ -71,7 +78,7 @@ final class SessionCaptureModel {
     }
 
     /// A conversation already read, and its reply form.
-    func capture(conversation: TopicSummary, with account: HFRAccount, using client: HFRClient) async {
+    func capture(conversation: ConversationSummary, with account: HFRAccount, using client: HFRClient) async {
         let name = "connecte-mp-\(conversation.id.rawValue)"
         await run([
             (name, "MP « \(conversation.title) »", conversation.path),
@@ -90,19 +97,16 @@ final class SessionCaptureModel {
 
     // MARK: - Choosing pages without side effects
 
-    /// Flagged topics without new messages, where the flag gives the page to reload.
-    static func readTopics(_ topics: [TopicSummary]) -> [TopicSummary] {
-        topics.filter { $0.flag != nil && $0.flagPath != nil && !$0.hasNewMessages }
+    /// Flagged topics of a list that « Mes drapeaux » does not show (nothing new there), where
+    /// the flag gives the page to reload.
+    static func readTopics(listed: [TopicSummary], unread: [TopicSummary]) -> [TopicSummary] {
+        let unreadIDs = Set(unread.map(\.id))
+        return listed.filter { $0.flag != nil && $0.flagPath != nil && !unreadIDs.contains($0.id) }
     }
 
-    /// Conversations without new messages and whose title does not start with « [non lu] ».
-    static func readConversations(_ conversations: [TopicSummary]) -> [TopicSummary] {
-        conversations.filter { !$0.hasNewMessages && !$0.title.localizedStandardContains("[non lu]") }
-    }
-
-    private static func topics(in html: String?) -> [TopicSummary] {
-        guard let html, let list = try? TopicListParser.parse(html: html) else { return [] }
-        return list.topics
+    /// Conversations without « [non lu] ».
+    static func readConversations(_ conversations: [ConversationSummary]) -> [ConversationSummary] {
+        conversations.filter { !$0.isUnread }
     }
 
     // MARK: - Saving

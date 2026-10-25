@@ -71,7 +71,8 @@ public enum TopicListParser {
 
     // MARK: - Rows
 
-    private static func topic(from row: HTMLElement) -> TopicSummary? {
+    /// One row (`tr.sujet`), also used for followed topics and conversations.
+    static func topic(from row: HTMLElement) -> TopicSummary? {
         guard let link = row.first("td.sujetCase3 a.cCatTopic") ?? row.first("td.sujetCase3 a"),
               let path = link.attribute("href"),
               let number = (link.attribute("title")?.integer(after: "n°")) ?? path.integer(after: "sujet_")

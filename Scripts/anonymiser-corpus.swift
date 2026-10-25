@@ -8,7 +8,8 @@
 //   - les pseudos, partout où ils apparaissent (même pseudo → même remplaçant, dans tout le corpus) ;
 //   - les smileys persos, les numéros de profil, les statuts ;
 //   - les adresses des images et des liens externes des messages (hôte gardé, chemin haché) ;
-//   - les jetons hash_check.
+//   - les jetons hash_check et codehex, le numéro de membre (id_user) ;
+//   - sur les pages vues connecté, les titres des listes personnelles (sujets suivis, MP).
 // Le remplacement dépend d'un sel secret (Corpus/.salt, ignoré par git) : on ne peut pas
 // retrouver un mot à partir de sa version brouillée.
 //
@@ -163,7 +164,7 @@ let pseudoSources: [NSRegularExpression] = [
     // Last poster of a category on the home page ("par X").
     regex(#"<b>par ([^<]+)</b>"#),
     // Links "send a private message" and member profiles (moderators, birthdays…).
-    regex(##"[?&;](?:dest|pseudo|spseudo)=([^&"#]+)"##),
+    regex(##"[?&;](?:dest|pseudo|spseudo|auteur)=([^&"#]+)"##),
 ]
 
 func collectPseudos(in html: String) -> Set<String> {
@@ -283,6 +284,18 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
     var page = scrambleMessageBodies(html)
     page = scrambleQualitayReports(page)
 
+    // Pages seen signed in (their hash_check is filled in): the titles of the member's lists
+    // (topics followed, conversations) say what one follows and whom one writes to.
+    let isSignedIn = !captures(in: html, regex(#"name="hash_check"[^>]*value="([^"]+)""#)).isEmpty
+    if isSignedIn {
+        // Title links of the title cells (the page-number links, same class, are elsewhere).
+        page = replaceMatches(in: page, regex(#"(<td[^>]*class="sujetCase3"[^>]*>.*?</td>)"#, [.dotMatchesLineSeparators])) { cell in
+            replaceMatches(in: cell[1], regex(#"(<a [^>]*class="cCatTopic"[^>]*>)([^<]*)(</a>)"#)) {
+                $0[1] + scrambleText($0[2]) + $0[3]
+            }
+        }
+    }
+
     // The first message's opening words, repeated in the page description.
     page = replaceMatches(in: page, regex(#"(<meta name="[Dd]escription" content=")([^"]*)(")"#)) {
         $0[1] + scrambleText($0[2]) + $0[3]
@@ -311,6 +324,11 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
     page = replaceMatches(in: page, regex(#"(hash_check=)([0-9a-fA-F]+)"#)) {
         $0[1] + String(repeating: "0", count: $0[2].count)
     }
+    // Personal links of a signed-in page: the token that clears one's flags, one's number.
+    page = replaceMatches(in: page, regex(#"(codehex=)([0-9a-fA-F]+)"#)) {
+        $0[1] + String(repeating: "0", count: $0[2].count)
+    }
+    page = replaceMatches(in: page, regex(#"(id_user=)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
 
     // Pseudos, longest first so that "Tom" never cuts "Tomtom_44".
     for pseudo in pseudos.sorted(by: { $0.count > $1.count }) {
