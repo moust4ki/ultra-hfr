@@ -36,7 +36,11 @@ private struct ReaderScreen: View {
             .background(palette.background.color)
             .overlay(alignment: .trailing) {
                 if let pageCount = model.pageCount, pageCount > 1 {
-                    PageScrubber(currentPage: model.visiblePage ?? 1, pageCount: pageCount) { page in
+                    PageScrubber(
+                        currentPage: model.visiblePage ?? 1,
+                        pageCount: pageCount,
+                        unreadPage: route.newAfter != nil ? route.page : nil
+                    ) { page in
                         model.jump(to: page)
                     }
                     .frame(width: 24)

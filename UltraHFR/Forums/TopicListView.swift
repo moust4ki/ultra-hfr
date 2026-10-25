@@ -53,9 +53,11 @@ struct TopicListView: View {
             }
             if model.filter != .all, !model.pages.isEmpty, pageRows.allSatisfy({ $0.1.isEmpty }) {
                 ContentUnavailableView {
-                    Label("Aucun sujet non lu", systemImage: "checkmark.circle")
+                    Label(model.filter == .read ? "Aucun sujet lu à jour" : "Aucun sujet non lu", systemImage: "checkmark.circle")
                 } description: {
-                    Text(model.pages.count == 1 ? "Rien de nouveau sur la première page." : "Rien de nouveau sur les \(model.pages.count) pages chargées.")
+                    Text(model.filter == .read
+                         ? "Les sujets lus jusqu'au bout sur cet appareil apparaissent ici."
+                         : (model.pages.count == 1 ? "Rien de nouveau sur la première page." : "Rien de nouveau sur les \(model.pages.count) pages chargées."))
                 } actions: {
                     Button("Afficher tous les sujets") { model.filter = .all }
                         .buttonStyle(.bordered)
@@ -112,7 +114,8 @@ struct TopicListView: View {
                 switch model.filter {
                 case .all: true
                 case .unread: row.state == .unread
-                case .flags, .favorites, .read: false
+                case .read: row.state == .followed
+                case .flags, .favorites: false
                 }
             }
     }

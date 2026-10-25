@@ -61,6 +61,23 @@ struct FeedView: View {
                             .tint(palette.destructive.color)
                         }
                         .contextMenu {
+                            Button("Reprendre p. \(position.page.formatted())", systemImage: "bookmark") {
+                                navigation.open(route(for: position), from: section)
+                            }
+                            Button("Dernière page", systemImage: "arrow.down.to.line") {
+                                var last = route(for: position)
+                                last.page = TopicRoute.lastPage
+                                last.anchor = nil
+                                navigation.open(last, from: section)
+                            }
+                            Button("Première page", systemImage: "arrow.up.to.line") {
+                                var first = route(for: position)
+                                first.page = 1
+                                first.anchor = nil
+                                first.newAfter = nil
+                                navigation.open(first, from: section)
+                            }
+                            Divider()
                             Button("Retirer de l'historique", systemImage: "eye.slash", role: .destructive) {
                                 modelContext.delete(position)
                             }

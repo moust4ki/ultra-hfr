@@ -3,6 +3,7 @@
 //  UltraHFR
 //
 //  Page cursor on the right edge (« Le Fil », C3): drag to choose a page, release to go there.
+//  A mark shows where the unread messages start; the cursor sticks to it while dragging.
 //
 
 import SwiftUI
@@ -10,6 +11,8 @@ import SwiftUI
 struct PageScrubber: View {
     let currentPage: Int
     let pageCount: Int
+    /// Page of the first unread message, when the topic was opened on it.
+    var unreadPage: Int?
     let jump: (Int) -> Void
 
     @State private var draggedPage: Int?
@@ -19,7 +22,11 @@ struct PageScrubber: View {
     private var isDragging: Bool { draggedPage != nil }
 
     private var thumbOffset: CGFloat {
-        let progress = pageCount > 1 ? Double(shownPage - 1) / Double(pageCount - 1) : 0
+        offset(of: shownPage)
+    }
+
+    private func offset(of page: Int) -> CGFloat {
+        let progress = pageCount > 1 ? Double(page - 1) / Double(pageCount - 1) : 0
         return progress * max(trackHeight - 36, 0)
     }
 
@@ -29,12 +36,19 @@ struct PageScrubber: View {
                 .fill(.secondary.opacity(0.25))
                 .frame(width: isDragging ? 6 : 3)
                 .frame(maxHeight: .infinity)
+            if let unreadPage, unreadPage > 1, unreadPage < pageCount {
+                Circle()
+                    .fill(.tint)
+                    .frame(width: 7, height: 7)
+                    .offset(y: offset(of: unreadPage) + 14)
+                    .accessibilityHidden(true)
+            }
             Capsule()
                 .fill(.tint)
                 .frame(width: isDragging ? 14 : 9, height: isDragging ? 36 : 28)
                 .offset(y: thumbOffset)
             if let draggedPage {
-                Text("p. \(draggedPage.formatted())")
+                Text(draggedPage == unreadPage ? "p. \(draggedPage.formatted()) · non lus" : "p. \(draggedPage.formatted())")
                     .font(.title3.bold().monospacedDigit())
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
@@ -50,7 +64,8 @@ struct PageScrubber: View {
             DragGesture(minimumDistance: 0)
                 .onChanged { value in
                     let fraction = min(max(value.location.y / trackHeight, 0), 1)
-                    draggedPage = 1 + Int((fraction * Double(pageCount - 1)).rounded())
+                    let page = 1 + Int((fraction * Double(pageCount - 1)).rounded())
+                    draggedPage = PageScrubber.snapped(page, to: unreadPage, pageCount: pageCount)
                 }
                 .onEnded { _ in
                     if let draggedPage, draggedPage != currentPage { jump(draggedPage) }
@@ -62,6 +77,9 @@ struct PageScrubber: View {
         .animation(.snappy(duration: 0.15), value: isDragging)
         .accessibilityElement()
         .accessibilityLabel("Page \(currentPage) sur \(pageCount)")
+        .accessibilityAction(named: "Premier message non lu") {
+            if let unreadPage { jump(unreadPage) }
+        }
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: jump(min(currentPage + 1, pageCount))
@@ -69,5 +87,14 @@ struct PageScrubber: View {
             @unknown default: break
             }
         }
+    }
+}
+
+extension PageScrubber {
+    /// Within 2 % of the topic from the unread mark, the cursor goes to the mark.
+    static func snapped(_ page: Int, to mark: Int?, pageCount: Int) -> Int {
+        guard let mark else { return page }
+        let reach = max(pageCount / 50, 1)
+        return abs(page - mark) <= reach ? mark : page
     }
 }

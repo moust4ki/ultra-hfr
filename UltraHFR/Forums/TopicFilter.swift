@@ -10,6 +10,7 @@ enum TopicFilter: Hashable, CaseIterable {
     case unread
     case flags
     case favorites
+    /// Topics read up to their last page, also computed on the device.
     case read
 
     var title: String {
@@ -25,8 +26,8 @@ enum TopicFilter: Hashable, CaseIterable {
     /// Filters that come from HFR's own flags need an account.
     var needsAccount: Bool {
         switch self {
-        case .all, .unread: false
-        case .flags, .favorites, .read: true
+        case .all, .unread, .read: false
+        case .flags, .favorites: true
         }
     }
 }
