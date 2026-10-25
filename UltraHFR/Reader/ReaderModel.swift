@@ -32,6 +32,8 @@ final class ReaderModel {
     private(set) var lastParseDuration: Duration?
     /// Bumped to play a light haptic (swipe to quote reaching its threshold).
     private(set) var swipeHapticTrigger = 0
+    /// Bumped each time the reading moves to another page while scrolling (a detent is felt).
+    private(set) var pageCrossings = 0
     /// Image shown full screen.
     var presentedImage: PresentedImage?
     var isGoToPagePresented = false
@@ -373,6 +375,9 @@ final class ReaderModel {
 
     /// `post`: the message at the top of the screen; `seen`: the last message read.
     func didShow(post: PostID, page: Int, seen: PostID, seenPage: Int) {
+        if let visiblePage, visiblePage != page {
+            pageCrossings += 1
+        }
         visiblePage = page
         lastVisiblePost = post
         if let author = posts[seen]?.author {

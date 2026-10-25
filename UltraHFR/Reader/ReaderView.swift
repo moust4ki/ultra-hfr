@@ -113,6 +113,8 @@ private struct ReaderScreen: View {
             .animation(.smooth, value: model.quoted.isEmpty)
             .animation(.smooth, value: model.searchSelection == nil)
             .sensoryFeedback(.impact(weight: .light), trigger: model.swipeHapticTrigger)
+            // A detent at each page passed while scrolling.
+            .sensoryFeedback(.selection, trigger: model.pageCrossings)
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Button {

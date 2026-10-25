@@ -78,6 +78,23 @@ struct ReaderModelTests {
         #expect(firstPage.contains("id=\"t\(page1.posts[0].id)\""))
     }
 
+    @Test func aDetentAtEachPagePassed() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        let (model, driver) = makeReader()
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+        let post = try #require(try TopicPageParser.parse(html: Corpus.page("sujet-court-p1")).posts.first?.id)
+
+        // Opening the topic is not a page passed.
+        model.didShow(post: post, page: 1, seen: post, seenPage: 1)
+        #expect(model.pageCrossings == 0)
+        model.didShow(post: post, page: 2, seen: post, seenPage: 2)
+        model.didShow(post: post, page: 2, seen: post, seenPage: 2)
+        #expect(model.pageCrossings == 1)
+        model.didShow(post: post, page: 1, seen: post, seenPage: 1)
+        #expect(model.pageCrossings == 2)
+    }
+
     @Test func neverRemovesThePageOnScreen() async throws {
         StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
         StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
