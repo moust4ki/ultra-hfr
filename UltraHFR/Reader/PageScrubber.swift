@@ -72,8 +72,8 @@ struct PageScrubber: View {
                     draggedPage = nil
                 }
         )
-        // A tick every 5 % of the topic while dragging.
-        .sensoryFeedback(.selection, trigger: (draggedPage ?? 0) / max(pageCount / 20, 1))
+        // A tick every 100 pages while dragging (« Le Fil », C3), every 5 % of a smaller topic.
+        .sensoryFeedback(.selection, trigger: (draggedPage ?? 0) / max(min(100, pageCount / 20), 1))
         .animation(.snappy(duration: 0.15), value: isDragging)
         .accessibilityElement()
         .accessibilityLabel("Page \(currentPage) sur \(pageCount)")
