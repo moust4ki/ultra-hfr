@@ -140,14 +140,6 @@ struct FeedView: View {
     }
 
     private func route(for position: ReadingPosition) -> TopicRoute {
-        TopicRoute(
-            title: position.title,
-            category: CategoryID(rawValue: position.categoryID),
-            topic: TopicID(rawValue: position.topicID),
-            page: position.page,
-            anchor: PostID(rawValue: position.postID),
-            newAfter: PostID(rawValue: position.postID),
-            isLocked: position.isLocked
-        )
+        position.resumeRoute
     }
 }

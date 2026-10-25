@@ -1,3 +1,4 @@
+import Foundation
 import HFRKit
 import Testing
 @testable import UltraHFR
@@ -53,5 +54,47 @@ struct AppNavigationTests {
         navigation.push(list, in: .forums)
         navigation.select(.feed)
         #expect(navigation.columnPath(for: .forums) == [list])
+    }
+}
+
+@MainActor
+@Suite("Reprise au lancement")
+struct NavigationSnapshotTests {
+    private let topic = TopicRoute(title: "Blackwell", category: 1, topic: 1061629, page: 697)
+
+    @Test func keepsTheSectionAndTheTopic() throws {
+        let navigation = AppNavigation()
+        navigation.select(.feed)
+        navigation.open(topic, from: .feed)
+        let data = try JSONEncoder().encode(navigation.snapshot)
+
+        let restored = AppNavigation()
+        let snapshot = try JSONDecoder().decode(NavigationSnapshot.self, from: data)
+        restored.restore(snapshot) { _ in nil }
+        #expect(restored.section == .feed)
+        #expect(restored.openTopic?.topic == 1061629)
+        #expect(restored.openTopic?.page == 1)
+        #expect(restored.compactPath(for: .feed).last == .topic(try #require(restored.openTopic)))
+    }
+
+    @Test func reopensOnTheLastMessageRead() throws {
+        let navigation = AppNavigation()
+        navigation.open(topic, from: .forums)
+        var resumed = topic
+        resumed.anchor = 11_405_947
+        resumed.newAfter = 11_405_947
+        let restored = AppNavigation()
+        restored.restore(navigation.snapshot) { _ in resumed }
+        #expect(restored.openTopic?.anchor == 11_405_947)
+        #expect(restored.openTopic?.newAfter == 11_405_947)
+    }
+
+    @Test func withoutATopicOnlyTheSection() {
+        let navigation = AppNavigation()
+        navigation.select(.search)
+        let restored = AppNavigation()
+        restored.restore(navigation.snapshot) { _ in nil }
+        #expect(restored.section == .search)
+        #expect(restored.openTopic == nil)
     }
 }
