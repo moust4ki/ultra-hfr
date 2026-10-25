@@ -26,6 +26,7 @@ struct CompactRootView: View {
                 SectionStack(section: .search)
             }
         }
+        // Folds while scrolling down, comes back up; it stays available while reading too.
         .tabBarMinimizeBehavior(.onScrollDown)
     }
 }

@@ -96,7 +96,6 @@ private struct ReaderScreen: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .tabBar)
             .focusedSceneValue(\.reader, model.isCoveredBySheet ? nil : model)
             .background {
                 ContentPopGestureDisabler()
