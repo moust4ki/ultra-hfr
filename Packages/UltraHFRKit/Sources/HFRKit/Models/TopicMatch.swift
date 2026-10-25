@@ -9,6 +9,11 @@ public struct TopicMatch: Sendable, Hashable, Codable {
     public var path: String
     public var excerpt: String
 
+    /// Number of the message found (`numreponse`), message numbers grow with time.
+    public var postID: PostID? {
+        path.integer(after: "numreponse=").map(PostID.init(rawValue:))
+    }
+
     public init(path: String, excerpt: String) {
         self.path = path
         self.excerpt = excerpt

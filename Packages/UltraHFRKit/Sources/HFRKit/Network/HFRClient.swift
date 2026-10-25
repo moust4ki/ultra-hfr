@@ -187,6 +187,29 @@ public actor HFRClient {
         return try await Self.parse { () throws(HFRParsingError) in try SmileySearchParser.parse(html: html) }
     }
 
+    /// The topics a member posted in, most recent message first; topics without a message
+    /// found (the ones they started) come after, by last activity.
+    public func messages(of pseudo: String) async throws(HFRClientError) -> [TopicSummary] {
+        let html = try await self.page(ForumSearchQuery.memberMessagesPath(pseudo: pseudo))
+        do {
+            let topics = try await Self.parse { () throws(HFRParsingError) in try TopicListParser.parse(html: html) }.topics
+            return Self.newestFirst(topics)
+        } catch .parsing(.forumMessage) {
+            return []
+        }
+    }
+
+    static func newestFirst(_ topics: [TopicSummary]) -> [TopicSummary] {
+        topics.sorted { first, second in
+            switch (first.match?.postID, second.match?.postID) {
+            case let (one?, two?): one.rawValue > two.rawValue
+            case (.some, nil): true
+            case (nil, .some): false
+            case (nil, nil): (first.lastPost?.date ?? .distantPast) > (second.lastPost?.date ?? .distantPast)
+            }
+        }
+    }
+
     /// Page `page` of a category or sub-forum topic list.
     public func topicList(path: String, page: Int) async throws(HFRClientError) -> TopicListPage {
         let html = try await self.page(ForumPath.topicList(path, page: page))

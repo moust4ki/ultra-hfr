@@ -27,6 +27,12 @@ public struct ForumSearchQuery: Sendable, Hashable {
         self.matchesAllWords = matchesAllWords
     }
 
+    /// A member's messages in every category, as the profile's « Accéder à la liste de tous
+    /// ses messages » shows them (HFR redirects this address to a search).
+    public static func memberMessagesPath(pseudo: String) -> String {
+        "/hfr/recherche/pseudo-\(FormEncoding.encode(pseudo)).htm"
+    }
+
     /// Results page, readable without a session and in one request.
     public var path: String {
         "/forum1.php?recherches=1&cat=\(category)&orderSearch=0&config=hfr.inc&pseud=&search=\(FormEncoding.encode(text))"

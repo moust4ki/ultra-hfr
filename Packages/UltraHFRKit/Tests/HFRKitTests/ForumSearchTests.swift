@@ -18,6 +18,14 @@ struct ForumSearchTests {
         #expect(!first.excerpt.contains("[...]"))
     }
 
+    @Test func memberMessagesComeNewestFirst() throws {
+        let list = try TopicListParser.parse(html: Fixture.html("recherche-contenu-undervolt"))
+        let sorted = HFRClient.newestFirst(list.topics)
+        let ids = sorted.compactMap { $0.match?.postID?.rawValue }
+        #expect(ids == ids.sorted(by: >))
+        #expect(!ids.isEmpty)
+    }
+
     @Test func buildsTheQuery() {
         let query = ForumSearchQuery(text: "rtx 5090", category: 1, scope: .content, matchesAllWords: false)
         #expect(query.path.contains("search=rtx+5090"))
@@ -26,5 +34,6 @@ struct ForumSearchTests {
         #expect(query.path.hasSuffix("&searchtype=2"))
         #expect(query.path.contains("&subcat=0&"))
         #expect(ForumSearchQuery(text: "5090", category: 1, subcategory: 109).path.contains("&subcat=109&"))
+        #expect(ForumSearchQuery.memberMessagesPath(pseudo: "Exemple Test") == "/hfr/recherche/pseudo-Exemple+Test.htm")
     }
 }

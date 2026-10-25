@@ -133,6 +133,13 @@ private struct ReaderScreen: View {
                 MemberProfileView(request: request) {
                     model.presentedProfile = nil
                     model.topicSearch = TopicSearchRequest(pseudo: request.pseudo, start: model.searchStart)
+                } openTopic: { topic in
+                    model.presentedProfile = nil
+                    if topic.topic == route.topic, let post = topic.anchor {
+                        model.show(TopicSearchSelection(posts: [post], index: 0, words: ""))
+                    } else {
+                        navigation.open(topic)
+                    }
                 }
             }
             .sheet(isPresented: Binding(get: { model.isGoToPagePresented }, set: { model.isGoToPagePresented = $0 })) {
