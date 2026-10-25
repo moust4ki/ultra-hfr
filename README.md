@@ -2,7 +2,7 @@
 
 Client iOS libre et non officiel de [forum.hardware.fr](https://forum.hardware.fr) (HFR), pour iPhone, iPhone Duo et iPad.
 
-> **État : lot 0, essais.** L'app se lit déjà sans compte ; la connexion est prête à être essayée, l'envoi de messages viendra au lot 1. Pas encore de version publique à installer.
+> **État : lot 1 en cours.** L'app se lit sans compte. Avec un compte, la lecture, le Fil, les listes et les MP sont en essai ; l'envoi de messages vient ensuite. Pas encore de version publique à installer.
 
 ## Ce qui marche déjà, sans compte
 
@@ -16,6 +16,14 @@ Client iOS libre et non officiel de [forum.hardware.fr](https://forum.hardware.f
 - **iPad** : réponse avec aperçu en direct à côté, raccourcis clavier (J, K, Q, R, ⌘F).
 - **Réglages** : thème clair, sombre ou noir OLED, huit couleurs, messages compacts, signatures, taille des smileys ; Dynamic Type jusqu'aux tailles d'accessibilité.
 - **iPhone, iPhone Duo plié et déplié, iPad** : onglets en largeur compacte, colonne et lecture côte à côte en largeur régulière.
+
+## Avec un compte (en essai)
+
+- **Connexion** : le mot de passe n'est envoyé qu'à HFR et n'est pas gardé ; seule la session l'est, dans le trousseau. Une session expirée est repérée et l'app propose de se reconnecter.
+- **Lecture** : seule la page lue est chargée avec la session, pour que ton drapeau avance comme sur le site ; les pages préchargées le sont sans session ([D6](docs/decisions.md)).
+- **Le Fil** : une section « Nouveau » avec les sujets de « Mes drapeaux » qui ont du nouveau (pages en plus, ouverture à ton drapeau) et les MP qui t'attendent.
+- **Listes de sujets** : tes drapeaux HFR, les filtres « Drapeaux » et « Favoris ».
+- **MP** : la liste de tes conversations ; leur lecture arrive ensuite.
 
 ## Ce que sera l'app
 
@@ -72,6 +80,8 @@ Les analyseurs sont testés sur de vraies pages HFR publiques, téléchargées p
 
 - **Remplacés** : les textes des messages, les pseudos, les smileys persos, les numéros de profil et les adresses des images.
 - **Gardé intact** : la structure HTML, à la balise près.
+
+Le corpus contient aussi quelques pages vues connecté (listes, un sujet, un MP et leurs formulaires), enregistrées depuis l'app (Moi › Essais du lot 0 › Pages vues connecté, une fois connecté) et copiées par câble. Le script y brouille en plus les titres des sujets suivis et des MP, les jetons (`hash_check`, `codehex`) et le numéro de membre. Ce que ces pages ont appris sur HFR est décrit dans [docs/pages-connecte.md](docs/pages-connecte.md).
 
 Les pages brutes restent sur la machine de celui qui les télécharge (`Corpus/raw/`, ignoré par git). Seules les pages anonymisées sont publiées.
 
