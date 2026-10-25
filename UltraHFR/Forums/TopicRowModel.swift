@@ -7,24 +7,46 @@ import Foundation
 import HFRDesign
 import HFRKit
 
-/// A topic of a list combined with the reader's own position in it.
+/// A topic of a list combined with where the member stopped: HFR's flag (lists loaded with the
+/// session) and the reading position kept on the device. Both only move forward, so the one
+/// further ahead wins.
 struct TopicRowModel: Identifiable {
     let topic: TopicSummary
     let position: ReadingPosition?
+    /// For a topic « Mes drapeaux » can list (blue flag or star), once that page is loaded:
+    /// whether it lists it, that is whether something is new after the flag.
+    let isListedAsNew: Bool?
+
+    /// `listedAsNew`: the topics of « Mes drapeaux », when loaded.
+    init(topic: TopicSummary, position: ReadingPosition?, listedAsNew: Set<TopicID>? = nil) {
+        self.topic = topic
+        self.position = position
+        isListedAsNew = topic.flag == .blue || topic.flag == .favorite ? listedAsNew?.contains(topic.id) : nil
+    }
 
     var id: TopicID { topic.id }
 
-    /// Pages added since the reader last stopped.
+    /// The member's flag on HFR: its page and the last message read.
+    var flag: TopicLink? {
+        guard topic.flag != nil else { return nil }
+        return topic.flagPath.flatMap(TopicLink.init)
+    }
+
+    /// Pages added since the member last stopped.
     var unreadPages: Int? {
-        guard let position else { return nil }
-        return max(0, topic.pageCount - position.page)
+        let pages = [flag?.page, position?.page].compactMap(\.self).filter { $0 > 0 }
+        guard let readPage = pages.max() else { return nil }
+        return max(0, topic.pageCount - readPage)
     }
 
     var state: TopicRowState {
-        guard let position else { return .plain }
-        if (unreadPages ?? 0) > 0 { return .unread }
-        if let date = topic.lastPost?.date, date > position.updatedAt { return .unread }
-        return .followed
+        guard let unreadPages else { return .plain }
+        if unreadPages > 0 { return .unread }
+        if let position, let date = topic.lastPost?.date {
+            // A message after this device's reading, unless HFR says it was read elsewhere.
+            return date > position.updatedAt && isListedAsNew != false ? .unread : .followed
+        }
+        return isListedAsNew == true ? .unread : .followed
     }
 
     var detail: String {
@@ -33,20 +55,25 @@ struct TopicRowModel: Identifiable {
         return "\(pages) · \(author)"
     }
 
-    /// Where to open: where the reader stopped, else the first page.
+    /// Where to open: where the member stopped, else the first page.
     func route(category: CategoryID) -> TopicRoute {
-        if let position {
-            let lastRead = position.lastReadPost
-            return TopicRoute(
-                title: topic.title,
-                category: category,
-                topic: topic.id,
-                page: position.page,
-                anchor: lastRead,
-                newAfter: state == .unread ? lastRead : nil,
-                isLocked: topic.isLocked
-            )
+        let unread = state == .unread
+        let fromFlag = flag.map { (page: $0.page, post: $0.post, category: $0.category) }
+        let fromDevice = position.map { (page: $0.page, post: $0.lastReadPost, category: category) }
+        let stop = [fromFlag, fromDevice].compactMap(\.self).max { first, second in
+            (first.page, first.post?.rawValue ?? 0) < (second.page, second.post?.rawValue ?? 0)
         }
-        return TopicRoute(title: topic.title, category: category, topic: topic.id, page: 1, isLocked: topic.isLocked)
+        guard let stop else {
+            return TopicRoute(title: topic.title, category: category, topic: topic.id, page: 1, isLocked: topic.isLocked)
+        }
+        return TopicRoute(
+            title: topic.title,
+            category: stop.category,
+            topic: topic.id,
+            page: stop.page,
+            anchor: stop.post,
+            newAfter: unread ? stop.post : nil,
+            isLocked: topic.isLocked
+        )
     }
 }

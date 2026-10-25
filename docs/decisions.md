@@ -62,7 +62,8 @@ Sans compte, l'app retient sur l'appareil le dernier message lu de chaque sujet 
 
 - **Comme un drapeau HFR**, elle n'avance que vers l'avant : relire une vieille page ou ouvrir un résultat de recherche ne fait pas perdre les nouveaux messages.
 - **À l'ouverture** depuis une liste ou le Fil, le sujet s'ouvre sur ce message, suivi du repère « Nouveau ».
-- **Avec un compte** (lot 1), le drapeau de HFR prendra le relais ; la position locale restera la référence hors ligne.
+- **Avec un compte** (lot 1), les listes de sujets sont chargées avec la session et montrent le drapeau HFR de chaque sujet suivi. Le drapeau et la position locale n'avançant que vers l'avant, c'est le plus avancé des deux qui compte, pour les pages en plus comme pour l'ouverture. Un sujet lu jusqu'à sa dernière page est dit non lu si « Mes drapeaux » le liste (drapeau bleu ou favori) ; un drapeau rouge marque seulement un sujet commencé.
+- **Les filtres « Drapeaux » et « Favoris »** des listes reprennent ceux de HFR : « Drapeaux » montre les drapeaux bleus et les favoris, comme « Mes drapeaux ».
 
 ## D10 · Recherches : une requête à la validation, jamais à la frappe
 

@@ -239,12 +239,13 @@ public actor HFRClient {
         return try await Self.parse { () throws(HFRParsingError) in try TopicListParser.parse(html: html) }
     }
 
-    /// Page `page` of a topic list, from the device when HFR cannot be reached.
-    public func topicList(path: String, page: Int, cache: HTMLPageCache) async throws(HFRClientError) -> OfflineAwarePage<TopicListPage> {
-        let answer = try await self.page(ForumPath.topicList(path, page: page), cache: cache)
+    /// Page `page` of a topic list, from the device when HFR cannot be reached. With `cookies`,
+    /// the list shows the member's flags; reading it moves none.
+    public func topicList(path: String, page: Int, cache: HTMLPageCache, cookies: CookieJar? = nil) async throws(HFRClientError) -> OfflineAwarePage<TopicListPage> {
+        let answer = try await self.page(ForumPath.topicList(path, page: page), cache: cache, cookies: cookies)
         let html = answer.content
         let list = try await Self.parse { () throws(HFRParsingError) in try TopicListParser.parse(html: html) }
-        return OfflineAwarePage(content: list, savedAt: answer.savedAt)
+        return OfflineAwarePage(content: list, savedAt: answer.savedAt, isSessionExpired: answer.isSessionExpired)
     }
 
     /// « Mes drapeaux » (or the favorites only), with the account's session. Reading this list

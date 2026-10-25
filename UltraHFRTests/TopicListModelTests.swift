@@ -39,6 +39,27 @@ struct TopicListModelTests {
         #expect(model.offlineSince == nil)
     }
 
+    @Test func showsTheFlagsWithTheAccount() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("connecte-liste-hardware")), when: onPage(1))
+        let (client, cache) = makeClient()
+        let model = TopicListModel(route: route)
+        let cookies = CookieJar(cookies: [StoredCookie(name: "md_user", value: "membre", domain: ".hardware.fr")])
+        model.session = { cookies }
+        var expired = false
+        model.onSessionExpired = { expired = true }
+
+        await model.loadFirstPage(using: client, cache: cache)
+        #expect(StubURLProtocol.requestCookies == ["md_user=membre"])
+        #expect(model.pages.first?.topics.contains { $0.flag != nil } == true)
+        #expect(!expired)
+
+        // HFR answers as to a visitor: the list stays, the session is said expired.
+        StubURLProtocol.answer(.success(try Corpus.page("liste-hardware-p1")), when: onPage(1))
+        await model.refresh(using: client, cache: cache)
+        #expect(expired)
+        #expect(model.pages.count == 1)
+    }
+
     @Test func retriesTheNextPageThatFailed() async throws {
         StubURLProtocol.answer(.success(try Corpus.page("liste-hardware-p1")), when: onPage(1))
         StubURLProtocol.answer(.failure(URLError(.timedOut)), when: onPage(2))

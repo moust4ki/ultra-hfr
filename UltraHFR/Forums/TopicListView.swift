@@ -25,6 +25,8 @@ struct TopicListView: View {
     @Environment(ForumsStore.self) private var forums
     @Environment(\.modelContext) private var modelContext
     @Environment(ConnectivityStore.self) private var connectivity
+    @Environment(AccountStore.self) private var accounts
+    @Environment(AccountFeedStore.self) private var accountFeed
     @Environment(\.isInNavigationColumn) private var isInNavigationColumn
 
     init(route: TopicListRoute, section: AppSection, model: TopicListModel) {
@@ -35,9 +37,14 @@ struct TopicListView: View {
 
     var body: some View {
         let positionsByTopic = Dictionary(positions.map { ($0.topicID, $0) }, uniquingKeysWith: { first, _ in first })
+        let listedAsNew = accountFeed.hasLoaded ? Set(accountFeed.followed.map(\.id)) : nil
+        let isSignedIn = accounts.current.map { !accounts.isExpired($0) } ?? false
         List {
             Section {
-                FilterChips(filterChips(positionsByTopic: positionsByTopic), selection: $model.filter)
+                FilterChips(
+                    filterChips(positionsByTopic: positionsByTopic, listedAsNew: listedAsNew, isSignedIn: isSignedIn),
+                    selection: $model.filter
+                )
                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -46,7 +53,7 @@ struct TopicListView: View {
                     Text(pages)
                 }
             }
-            let pageRows = model.pages.map { ($0, rows(of: $0, positionsByTopic: positionsByTopic)) }
+            let pageRows = model.pages.map { ($0, rows(of: $0, positionsByTopic: positionsByTopic, listedAsNew: listedAsNew)) }
             ForEach(pageRows, id: \.0.page) { page, rows in
                 TopicListPageSection(
                     page: page,
@@ -57,11 +64,9 @@ struct TopicListView: View {
             }
             if model.filter != .all, !model.pages.isEmpty, pageRows.allSatisfy({ $0.1.isEmpty }) {
                 ContentUnavailableView {
-                    Label(model.filter == .read ? "Aucun sujet lu à jour" : "Aucun sujet non lu", systemImage: "checkmark.circle")
+                    Label(TopicListEmptyFilter.title(model.filter), systemImage: model.filter == .favorites ? "star" : "checkmark.circle")
                 } description: {
-                    Text(model.filter == .read
-                         ? "Les sujets lus jusqu'au bout sur cet appareil apparaissent ici."
-                         : (model.pages.count == 1 ? "Rien de nouveau sur la première page." : "Rien de nouveau sur les \(model.pages.count) pages chargées."))
+                    Text(TopicListEmptyFilter.detail(model.filter, loadedPages: model.pages.count))
                 } actions: {
                     Button("Afficher tous les sujets") { model.filter = .all }
                         .buttonStyle(.bordered)
@@ -125,32 +130,30 @@ struct TopicListView: View {
         }
         .refreshable { await model.refresh(using: client, cache: pageCache) }
         .task {
+            // Lists loaded with the session show the member's flags; reading them moves none.
+            model.session = { [accounts] in
+                accounts.current.flatMap { accounts.isExpired($0) ? nil : $0.cookies }
+            }
+            model.onSessionExpired = { [accounts] in accounts.markCurrentSessionExpired() }
             forums.noteVisit(route)
             await model.loadFirstPage(using: client, cache: pageCache)
             await model.refreshIfStale(using: client, cache: pageCache)
         }
     }
 
-    private func filterChips(positionsByTopic: [Int: ReadingPosition]) -> [FilterChip<TopicFilter>] {
+    private func filterChips(positionsByTopic: [Int: ReadingPosition], listedAsNew: Set<TopicID>?, isSignedIn: Bool) -> [FilterChip<TopicFilter>] {
         let unread = model.pages.flatMap(\.topics).count { topic in
-            TopicRowModel(topic: topic, position: positionsByTopic[topic.id.rawValue]).state == .unread
+            TopicRowModel(topic: topic, position: positionsByTopic[topic.id.rawValue], listedAsNew: listedAsNew).state == .unread
         }
         return TopicFilter.allCases.map { filter in
-            FilterChip(filter, title: filter.title, count: filter == .unread ? unread : nil, isEnabled: !filter.needsAccount)
+            FilterChip(filter, title: filter.title, count: filter == .unread ? unread : nil, isEnabled: isSignedIn || !filter.needsAccount)
         }
     }
 
-    private func rows(of page: TopicListPage, positionsByTopic: [Int: ReadingPosition]) -> [TopicRowModel] {
+    private func rows(of page: TopicListPage, positionsByTopic: [Int: ReadingPosition], listedAsNew: Set<TopicID>?) -> [TopicRowModel] {
         page.topics
-            .map { TopicRowModel(topic: $0, position: positionsByTopic[$0.id.rawValue]) }
-            .filter { row in
-                switch model.filter {
-                case .all: true
-                case .unread: row.state == .unread
-                case .read: row.state == .followed
-                case .flags, .favorites: false
-                }
-            }
+            .map { TopicRowModel(topic: $0, position: positionsByTopic[$0.id.rawValue], listedAsNew: listedAsNew) }
+            .filter { model.filter.includes($0) }
     }
 
     private func open(_ row: TopicRowModel, page: Int?) {

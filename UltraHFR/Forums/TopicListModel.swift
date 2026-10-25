@@ -28,6 +28,9 @@ final class TopicListModel {
     nonisolated static let staleAfter: TimeInterval = 300
     var filter: TopicFilter = .all
     var showsReadStickies = false
+    /// The account's session: lists then show its flags (reading a list moves none).
+    @ObservationIgnored var session: (() -> CookieJar?)?
+    @ObservationIgnored var onSessionExpired: (() -> Void)?
 
     @ObservationIgnored private var seenTopics: Set<TopicID> = []
 
@@ -93,7 +96,8 @@ final class TopicListModel {
         isLoading = true
         defer { isLoading = false }
         do {
-            let answer = try await client.topicList(path: route.path, page: page, cache: cache)
+            let answer = try await client.topicList(path: route.path, page: page, cache: cache, cookies: session?())
+            if answer.isSessionExpired { onSessionExpired?() }
             var list = answer.content
             if page == 1 {
                 offlineSince = answer.savedAt
