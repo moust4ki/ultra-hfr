@@ -18,7 +18,7 @@ struct TopicRoute: Hashable {
     /// Known from the topic list (a page read without an account does not say it).
     var isLocked = false
 
-    static let lastPage = 99_999
+    nonisolated static let lastPage = 99_999
     /// The page holding `anchor`, found by HFR (it redirects a message's address to its page).
-    static let pageOfAnchor = 0
+    nonisolated static let pageOfAnchor = 0
 }

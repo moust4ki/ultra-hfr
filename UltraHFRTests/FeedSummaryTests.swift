@@ -23,4 +23,17 @@ struct FeedSummaryTests {
         let old = position(3, page: 1, pageCount: 9, daysAgo: 8)
         #expect(FeedSummary.resume(in: [finished, old]) == nil)
     }
+
+    @Test func markingReadEndsTheNews() {
+        let unfinished = position(2, page: 3, pageCount: 5, daysAgo: 1)
+        unfinished.lastPostAt = Date.now.addingTimeInterval(3600)
+        #expect(unfinished.hasNews)
+        unfinished.markRead()
+        #expect(!unfinished.hasNews)
+        #expect(unfinished.lastReadPost == nil)
+        // Reopened on the last page, without a marker.
+        #expect(unfinished.resumeRoute.page == TopicRoute.lastPage)
+        #expect(unfinished.resumeRoute.newAfter == nil)
+        #expect(FeedSummary.resume(in: [unfinished]) == nil)
+    }
 }

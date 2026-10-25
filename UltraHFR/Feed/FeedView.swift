@@ -81,6 +81,12 @@ struct FeedView: View {
                                 forget(position)
                             }
                             .tint(palette.destructive.color)
+                            if position.hasNews {
+                                Button("Lu", systemImage: "checkmark.message") {
+                                    position.markRead()
+                                }
+                                .tint(palette.accent.fill.color)
+                            }
                         }
                         .contextMenu {
                             Button("Reprendre p. \(position.page.formatted())", systemImage: "bookmark") {
@@ -91,6 +97,11 @@ struct FeedView: View {
                                 last.page = TopicRoute.lastPage
                                 last.anchor = nil
                                 navigation.open(last, from: section)
+                            }
+                            if position.hasNews {
+                                Button("Marquer lu", systemImage: "checkmark.message") {
+                                    position.markRead()
+                                }
                             }
                             Button("Première page", systemImage: "arrow.up.to.line") {
                                 var first = route(for: position)
@@ -153,6 +164,16 @@ struct FeedView: View {
         .hfrGroupedBackground()
         .navigationTitle("Fil")
         .navigationSubtitle(visits.previousVisit.map { ForumTime.sinceVisit($0) } ?? "")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Tout marquer lu", systemImage: "checkmark.circle") {
+                    for position in positions where position.hasNews {
+                        position.markRead()
+                    }
+                }
+                .disabled(!positions.contains(where: \.hasNews))
+            }
+        }
         .refreshable { await qualitay.refresh(force: true) }
         .task { await qualitay.refresh() }
     }

@@ -142,7 +142,7 @@ private struct LocalResults: View {
                             category: CategoryID(rawValue: position.categoryID),
                             topic: TopicID(rawValue: position.topicID),
                             page: position.page,
-                            anchor: PostID(rawValue: position.postID)
+                            anchor: position.lastReadPost
                         ), from: section)
                     }
                 }

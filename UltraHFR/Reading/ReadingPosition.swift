@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import HFRKit
 import SwiftData
 
 @Model
@@ -23,6 +24,19 @@ final class ReadingPosition {
     var isLocked = false
     /// Last message of the topic as seen in a list, to tell what is new without asking HFR.
     var lastPostAt: Date?
+
+    /// The last message read; nil once the topic was marked read from a list (the last
+    /// message is then not known).
+    var lastReadPost: PostID? {
+        postID > 0 ? PostID(rawValue: postID) : nil
+    }
+
+    /// « Marquer lu »: up to date with what the lists said, without opening the topic.
+    func markRead(at date: Date = .now) {
+        page = max(page, pageCount)
+        postID = 0
+        updatedAt = max(date, lastPostAt ?? date)
+    }
 
     /// Pages posted after the one where the reader stopped.
     var unreadPages: Int { max(0, pageCount - page) }

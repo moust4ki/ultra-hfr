@@ -36,7 +36,7 @@ struct TopicRowModel: Identifiable {
     /// Where to open: where the reader stopped, else the first page.
     func route(category: CategoryID) -> TopicRoute {
         if let position {
-            let lastRead = PostID(rawValue: position.postID)
+            let lastRead = position.lastReadPost
             return TopicRoute(
                 title: topic.title,
                 category: category,
