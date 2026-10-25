@@ -216,7 +216,9 @@ private struct RemoteResults: View {
         } else if let searched = model.searchedText {
             Section(model.results.isEmpty ? "Sur forum.hardware.fr" : "Sur forum.hardware.fr · \(model.results.count) sujets") {
                 if model.results.isEmpty {
-                    Text("Aucun résultat pour « \(searched) » dans cette catégorie.")
+                    Text(model.category == .everywhere
+                         ? "Aucun résultat pour « \(searched) » dans tout HFR."
+                         : "Aucun résultat pour « \(searched) » dans cette catégorie.")
                         .foregroundStyle(.secondary)
                     if model.scope == .titles {
                         Button("Chercher aussi dans les messages", systemImage: "text.magnifyingglass", action: widen)

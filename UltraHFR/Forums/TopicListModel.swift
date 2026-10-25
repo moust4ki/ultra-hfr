@@ -57,10 +57,10 @@ final class TopicListModel {
         await load(page: 1, using: client, cache: cache)
     }
 
+    /// Loads the first page again. What is shown stays in place until the new page arrives, and
+    /// stays if it cannot be loaded.
     func refresh(using client: HFRClient, cache: HTMLPageCache) async {
-        pages = []
-        seenTopics = []
-        await load(page: 1, using: client, cache: cache)
+        await load(page: 1, using: client, cache: cache, replacing: true)
     }
 
     func loadNextPage(using client: HFRClient, cache: HTMLPageCache) async {
@@ -74,7 +74,8 @@ final class TopicListModel {
         await load(page: failedPage, using: client, cache: cache)
     }
 
-    private func load(page: Int, using client: HFRClient, cache: HTMLPageCache) async {
+    /// One load at a time: a refresh during a load is dropped rather than mixing two lists.
+    private func load(page: Int, using client: HFRClient, cache: HTMLPageCache, replacing: Bool = false) async {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
@@ -82,6 +83,11 @@ final class TopicListModel {
             let answer = try await client.topicList(path: route.path, page: page, cache: cache)
             var list = answer.content
             if page == 1 { offlineSince = answer.savedAt }
+            if replacing {
+                pages = []
+                seenTopics = []
+                failedPage = nil
+            }
             // Lists move while reading: a topic may come back on the next page.
             list.topics = list.topics.filter { seenTopics.insert($0.id).inserted }
             if list.page == page {
@@ -89,6 +95,7 @@ final class TopicListModel {
             }
             errorMessage = nil
         } catch {
+            if replacing, !pages.isEmpty { return }
             failedPage = page
             if page > 1 {
                 errorMessage = "Page \(page) non chargée."
