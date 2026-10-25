@@ -13,13 +13,16 @@ public struct ForumSearchQuery: Sendable, Hashable {
 
     public var text: String
     public var category: CategoryID
+    /// A sub-forum of the category (`subcat` of HFR), or the whole category.
+    public var subcategory: Int?
     public var scope: Scope
     /// All the words (`true`) or any of them.
     public var matchesAllWords: Bool
 
-    public init(text: String, category: CategoryID, scope: Scope = .titles, matchesAllWords: Bool = true) {
+    public init(text: String, category: CategoryID, subcategory: Int? = nil, scope: Scope = .titles, matchesAllWords: Bool = true) {
         self.text = text
         self.category = category
+        self.subcategory = subcategory
         self.scope = scope
         self.matchesAllWords = matchesAllWords
     }
@@ -27,6 +30,6 @@ public struct ForumSearchQuery: Sendable, Hashable {
     /// Results page, readable without a session and in one request.
     public var path: String {
         "/forum1.php?recherches=1&cat=\(category)&orderSearch=0&config=hfr.inc&pseud=&search=\(FormEncoding.encode(text))"
-            + "&titre=\(scope.rawValue)&resSearch=200&daterange=2&subcat=0&searchtype=\(matchesAllWords ? 1 : 2)"
+            + "&titre=\(scope.rawValue)&resSearch=200&daterange=2&subcat=\(subcategory ?? 0)&searchtype=\(matchesAllWords ? 1 : 2)"
     }
 }

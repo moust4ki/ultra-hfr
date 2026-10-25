@@ -16,6 +16,7 @@ struct TopicListView: View {
     let section: AppSection
 
     @State private var model: TopicListModel
+    @State private var isSearchPresented = false
     @Query private var positions: [ReadingPosition]
     @Environment(\.hfrClient) private var client
     @Environment(\.pageCache) private var pageCache
@@ -73,6 +74,21 @@ struct TopicListView: View {
         .background(palette.background.color)
         .navigationTitle(model.title)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Rechercher dans ce forum", systemImage: "magnifyingglass") {
+                    isSearchPresented = true
+                }
+                .disabled(model.searchScope == nil)
+            }
+        }
+        .sheet(isPresented: $isSearchPresented) {
+            if let scope = model.searchScope {
+                ListSearchView(title: model.title, category: scope.category, subcategory: scope.subcategory) { route in
+                    navigation.open(route, from: section)
+                }
+            }
+        }
         .toolbarTitleMenu {
             ForEach(model.subforums) { subforum in
                 Button(subforum.title) {

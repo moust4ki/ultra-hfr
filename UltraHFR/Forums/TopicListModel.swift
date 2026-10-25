@@ -36,6 +36,11 @@ final class TopicListModel {
 
     var subforums: [Subforum] { pages.first?.subforums ?? [] }
 
+    /// Category and sub-forum of the list, known once its first page is loaded.
+    var searchScope: (category: CategoryID, subcategory: Int?)? {
+        pages.first.map { ($0.categoryID, $0.subcategoryID) }
+    }
+
     var pageCountDescription: String? {
         guard let first = pages.first else { return nil }
         let count = first.pageCount.formatted()

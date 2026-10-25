@@ -24,5 +24,7 @@ struct ForumSearchTests {
         #expect(query.path.contains("&cat=1&"))
         #expect(query.path.contains("&titre=0&"))
         #expect(query.path.hasSuffix("&searchtype=2"))
+        #expect(query.path.contains("&subcat=0&"))
+        #expect(ForumSearchQuery(text: "5090", category: 1, subcategory: 109).path.contains("&subcat=109&"))
     }
 }

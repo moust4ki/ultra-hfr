@@ -14,8 +14,12 @@ import Observation
 final class ForumSearchModel {
     var scope: ForumSearchQuery.Scope = .titles
     var category: CategoryID {
-        didSet { defaults.set(category.rawValue, forKey: Self.categoryKey) }
+        didSet { if subcategory == nil, !isScoped { defaults.set(category.rawValue, forKey: Self.categoryKey) } }
     }
+    /// Searching one sub-forum (from its topic list).
+    let subcategory: Int?
+    /// Searching from a topic list: the category is the list's, not the saved preference.
+    private let isScoped: Bool
     /// Last searches sent to HFR, most recent first (kept on the device).
     private(set) var recents: [String]
     private(set) var results: [TopicSummary] = []
@@ -32,6 +36,17 @@ final class ForumSearchModel {
         self.defaults = defaults
         let saved = defaults.integer(forKey: Self.categoryKey)
         category = CategoryID(rawValue: saved == 0 ? 13 : saved)
+        subcategory = nil
+        isScoped = false
+        recents = defaults.stringArray(forKey: Self.recentsKey) ?? []
+    }
+
+    /// A search limited to one list's category and sub-forum; the saved category is untouched.
+    init(category: CategoryID, subcategory: Int?, defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        self.category = category
+        self.subcategory = subcategory
+        isScoped = true
         recents = defaults.stringArray(forKey: Self.recentsKey) ?? []
     }
 
@@ -41,7 +56,7 @@ final class ForumSearchModel {
         isSearching = true
         defer { isSearching = false }
         do {
-            results = try await client.search(ForumSearchQuery(text: trimmed, category: category, scope: scope))
+            results = try await client.search(ForumSearchQuery(text: trimmed, category: category, subcategory: subcategory, scope: scope))
             searchedText = trimmed
             errorMessage = nil
             remember(trimmed)
