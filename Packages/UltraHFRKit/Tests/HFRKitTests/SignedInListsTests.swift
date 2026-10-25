@@ -46,4 +46,23 @@ struct SignedInListsTests {
         #expect(flagged.contains { $0.flag == .favorite })
         #expect(flagged.contains { $0.flag == .red })
     }
+
+    @Test func aTopicSeenSignedInOffersTheVote() throws {
+        let page = try TopicPageParser.parse(html: Fixture.html("connecte-sujet"))
+        #expect(page.posts.count == 41)
+        let poll = try #require(page.poll)
+        #expect(poll.canVote)
+        #expect(poll.options.count == 4)
+        #expect(poll.formFields["hash_check"] != nil)
+    }
+
+    @Test func replyFormsCarryTheirFields() throws {
+        for (name, category) in [("connecte-sujet-repondre", "1"), ("connecte-mp-repondre", "prive")] {
+            let form = try #require(try HTMLFormParser.form(in: Fixture.html(name), named: "hop"))
+            let names = Set(form.fields.map(\.name))
+            #expect(names.isSuperset(of: ["content_form", "hash_check", "post", "cat", "sujet"]))
+            #expect(form.fields.first { $0.name == "cat" }?.value == category)
+            #expect(form.action.contains("bddpost.php"))
+        }
+    }
 }

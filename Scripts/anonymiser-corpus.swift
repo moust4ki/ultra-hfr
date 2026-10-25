@@ -165,6 +165,9 @@ let pseudoSources: [NSRegularExpression] = [
     regex(#"<b>par ([^<]+)</b>"#),
     // Links "send a private message" and member profiles (moderators, birthdays…).
     regex(##"[?&;](?:dest|pseudo|spseudo|auteur)=([^&"#]+)"##),
+    // Reply forms: the member's own pseudo, and the authors of the last messages shown.
+    regex(#"name="pseudo"[^>]*value="([^"]+)""#),
+    regex(#"class="messCase1bis"[^>]*>([^<]+)<"#),
 ]
 
 func collectPseudos(in html: String) -> Set<String> {
@@ -259,6 +262,41 @@ func scrambleMessageBodies(_ html: String) -> String {
     return output
 }
 
+/// The message cell next to each `td.messCase1bis` (author) of a reply form: every text node
+/// up to the cell's end, nested quote tables included; external addresses hashed.
+func scramblePreviewCells(_ html: String) -> String {
+    var output = ""
+    var index = html.startIndex
+    while let author = html[index...].range(of: #"<td class="messCase1bis""#),
+          let authorEnd = html[author.upperBound...].range(of: "</td>"),
+          let cellStart = html[authorEnd.upperBound...].range(of: "<td") {
+        output += html[index..<cellStart.lowerBound]
+        var cursor = cellStart.lowerBound
+        var depth = 0
+        while cursor < html.endIndex {
+            if html[cursor] == "<", let tagEnd = html[cursor...].firstIndex(of: ">") {
+                let tag = String(html[cursor...tagEnd])
+                let lowered = tag.lowercased()
+                if lowered.hasPrefix("<td") {
+                    depth += 1
+                } else if lowered.hasPrefix("</td") {
+                    depth -= 1
+                }
+                output += replaceMatches(in: tag, urlAttribute) { $0[1] + anonymizedURL($0[2]) + $0[3] }
+                cursor = html.index(after: tagEnd)
+                if depth == 0 { break }
+            } else {
+                let textEnd = html[cursor...].firstIndex(of: "<") ?? html.endIndex
+                output += scrambleText(html[cursor..<textEnd])
+                cursor = textEnd
+            }
+        }
+        index = cursor
+    }
+    output += html[index...]
+    return output
+}
+
 // MARK: - Qualitay feed
 
 /// Feed items: pseudos and comments of each report (`<li>`), dates and labels kept.
@@ -284,10 +322,28 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
     var page = scrambleMessageBodies(html)
     page = scrambleQualitayReports(page)
 
-    // Pages seen signed in (their hash_check is filled in): the titles of the member's lists
-    // (topics followed, conversations) say what one follows and whom one writes to.
+    // Reply forms show the last messages of the topic (or conversation) in rows of their own,
+    // outside the `div id="para…"` blocks: their text is scrambled the same way.
+    page = scramblePreviewCells(page)
+
+    // Pages seen signed in (their hash_check is filled in) say what the member follows and
+    // whom they write to: the topic or conversation title (page title, heading, reply form)
+    // and the titles of the member's lists are scrambled.
     let isSignedIn = !captures(in: html, regex(#"name="hash_check"[^>]*value="([^"]+)""#)).isEmpty
     if isSignedIn {
+        // The title, wherever it is shown as text (page title, heading) and in the reply form;
+        // never inside addresses or class names.
+        let titles = Set(captures(in: html, regex(#"<h3>([^<]+)</h3>"#)) + captures(in: html, regex(#"name="sujet" value="([^"]+)""#)))
+        for title in titles.filter({ $0.count >= 3 }).sorted(by: { $0.count > $1.count }) {
+            let scrambled = scrambleText(title)
+            page = replaceMatches(in: page, regex(#"(>[^<]*<)"#)) { $0[1].replacingOccurrences(of: title, with: scrambled) }
+            page = page.replacingOccurrences(of: #"name="sujet" value="\#(title)""#, with: #"name="sujet" value="\#(scrambled)""#)
+        }
+        // The page title rearranges it (« [Topic Unique] » moves to the end): everything
+        // before « - Page : N ».
+        page = replaceMatches(in: page, regex(#"(<title>)([^<]*?)( - Page : \d+ - [^<]*</title>)"#)) {
+            $0[1] + scrambleText($0[2]) + $0[3]
+        }
         // Title links of the title cells (the page-number links, same class, are elsewhere).
         page = replaceMatches(in: page, regex(#"(<td[^>]*class="sujetCase3"[^>]*>.*?</td>)"#, [.dotMatchesLineSeparators])) { cell in
             replaceMatches(in: cell[1], regex(#"(<a [^>]*class="cCatTopic"[^>]*>)([^<]*)(</a>)"#)) {
@@ -315,8 +371,9 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
     page = replaceMatches(in: page, regex(#"\[:([^\]:"<]+)((?::\d+)?)\]"#)) {
         "[:" + scrambleText($0[1]) + $0[2] + "]"
     }
-    // Profile numbers.
+    // Profile numbers, also in the file names of avatars.
     page = replaceMatches(in: page, regex(#"(profil-)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
+    page = replaceMatches(in: page, regex(#"(mesdiscussions-)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
     // Tokens.
     page = replaceMatches(in: page, regex(#"(name="hash_check"[^>]*value=")([^"]*)(")"#)) {
         $0[1] + String(repeating: "0", count: $0[2].count) + $0[3]
@@ -329,6 +386,7 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
         $0[1] + String(repeating: "0", count: $0[2].count)
     }
     page = replaceMatches(in: page, regex(#"(id_user=)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
+    page = replaceMatches(in: page, regex(#"(_smilies_timer\('hfr\.inc',)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
 
     // Pseudos, longest first so that "Tom" never cuts "Tomtom_44".
     for pseudo in pseudos.sorted(by: { $0.count > $1.count }) {
