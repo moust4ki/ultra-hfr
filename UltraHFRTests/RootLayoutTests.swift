@@ -15,4 +15,14 @@ struct RootLayoutTests {
         // A large iPhone on its side is wide, but not tall enough.
         #expect(RootLayout(sizeClass: .regular, size: CGSize(width: 956, height: 440)) == .tabs)
     }
+
+    @MainActor
+    @Test func theColumnIsAsWideAsWhatsAppsList() {
+        // Unfolded Duo in landscape (867 points once its status strip is set aside), iPad.
+        #expect(RegularRootView.columnWidth(for: 867) == 375)
+        #expect(RegularRootView.columnWidth(for: 1210) == 375)
+        // A narrower window keeps 45 %, never below 300.
+        #expect(RegularRootView.columnWidth(for: 800) == 360)
+        #expect(RegularRootView.columnWidth(for: 600) == 300)
+    }
 }

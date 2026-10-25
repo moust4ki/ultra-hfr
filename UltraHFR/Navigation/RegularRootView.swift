@@ -13,13 +13,21 @@ struct RegularRootView: View {
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.hfrPalette) private var palette
 
+    /// 375 points, the width of WhatsApp's list on the unfolded Duo (a system split view caps
+    /// its column at 320 there); less on a narrower window, never below 300. `width` is the room
+    /// left by the safe areas (the Duo's status bar takes a strip on the right in landscape).
+    static func columnWidth(for width: CGFloat) -> CGFloat {
+        min(375, max(300, width * 0.45))
+    }
+
     var body: some View {
-        NavigationSplitView(columnVisibility: .constant(.all)) {
+        HStack(spacing: 0) {
             SectionColumn()
-                // The width of Messages' and WhatsApp's list on the unfolded Duo.
-                .navigationSplitViewColumnWidth(375)
-                .toolbar(removing: .sidebarToggle)
-        } detail: {
+                .containerRelativeFrame(.horizontal) { width, _ in Self.columnWidth(for: width) }
+            Rectangle()
+                .fill(palette.separator.color)
+                .frame(width: 1 / 3)
+                .ignoresSafeArea()
             NavigationStack {
                 Group {
                     if navigation.section == .me {
@@ -37,8 +45,8 @@ struct RegularRootView: View {
                     RouteDestination(route: route, section: navigation.section)
                 }
             }
+            .frame(maxWidth: .infinity)
         }
-        .navigationSplitViewStyle(.balanced)
     }
 }
 
@@ -64,11 +72,10 @@ private struct SectionColumn: View {
     }
 }
 
-/// Every screen of the column: no sidebar toggle, sections on top.
+/// Every screen of the column: sections on top.
 private struct ColumnScreen: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .toolbar(removing: .sidebarToggle)
             .safeAreaBar(edge: .top) {
                 SectionPicker()
             }
