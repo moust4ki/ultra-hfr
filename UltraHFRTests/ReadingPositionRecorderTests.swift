@@ -33,6 +33,29 @@ struct ReadingPositionRecorderTests {
         #expect(try positions(in: context).count == 1)
     }
 
+    @Test func listsTellTheFilWhatIsNew() throws {
+        let container = try ModelContainer(for: ReadingPosition.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = ModelContext(container)
+        let recorder = ReadingPositionRecorder(context: context)
+        recorder.record(topic: route, page: 350, pageCount: 350, post: 11_405_000, author: "Kaiju")
+        var saved = try #require(try positions(in: context).first)
+        #expect(!saved.hasNews)
+
+        let later = Date.now.addingTimeInterval(3600)
+        let listed = TopicSummary(
+            id: 1061629, title: "Blackwell", path: "/hfr/Hardware/2D-3D/blackwell-sujet_1061629_1.htm",
+            pageCount: 352, author: "Xixou2", lastPost: LastPost(author: "Grumly", date: later, path: "/hfr/Hardware/2D-3D/blackwell-sujet_1061629_352.htm")
+        )
+        let other = TopicSummary(id: 42, title: "Autre", path: "/hfr/Hardware/autre-sujet_42_1.htm", pageCount: 9, author: "x")
+        recorder.noteListed([listed, other])
+        saved = try #require(try positions(in: context).first)
+        #expect(saved.unreadPages == 2)
+        #expect(saved.lastPostAt == later)
+        #expect(saved.hasNews)
+        // Topics never read are not added.
+        #expect(try positions(in: context).count == 1)
+    }
+
     @Test func remembersTheLockForTheFil() throws {
         let container = try ModelContainer(for: ReadingPosition.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         let context = ModelContext(container)

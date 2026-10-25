@@ -28,6 +28,7 @@ struct FeedView: View {
                     ResumeCard(
                         title: latest.title,
                         detail: "Message de \(latest.postAuthor), p. \(latest.page.formatted())"
+                            + (latest.unreadPages == 1 ? " · 1 page depuis" : latest.unreadPages > 1 ? " · \(latest.unreadPages.formatted()) pages depuis" : "")
                     ) {
                         navigation.open(route(for: latest), from: section)
                     }
@@ -48,9 +49,10 @@ struct FeedView: View {
                         } label: {
                             FeedRow(
                                 title: position.title,
-                                isNew: false,
+                                isNew: position.hasNews,
+                                badge: position.unreadPages > 0 ? "+\(position.unreadPages) p." : nil,
                                 detail: "p. \(position.page.formatted()) · \(position.postAuthor)",
-                                time: ForumTime.short(position.updatedAt) ?? ""
+                                time: ForumTime.short(position.lastPostAt.map { max($0, position.updatedAt) } ?? position.updatedAt) ?? ""
                             )
                             .contentShape(.rect)
                         }

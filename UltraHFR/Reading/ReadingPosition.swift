@@ -21,6 +21,16 @@ final class ReadingPosition {
     var updatedAt = Date.now
     /// Known from the topic list: no reply nor quote in the reader.
     var isLocked = false
+    /// Last message of the topic as seen in a list, to tell what is new without asking HFR.
+    var lastPostAt: Date?
+
+    /// Pages posted after the one where the reader stopped.
+    var unreadPages: Int { max(0, pageCount - page) }
+
+    /// Something was posted since the last message read, as far as the lists seen tell.
+    var hasNews: Bool {
+        unreadPages > 0 || (lastPostAt.map { $0 > updatedAt } ?? false)
+    }
 
     init(topicID: Int, categoryID: Int, title: String, page: Int, pageCount: Int, postID: Int, postAuthor: String, isLocked: Bool = false) {
         self.topicID = topicID

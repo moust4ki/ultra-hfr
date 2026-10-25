@@ -23,6 +23,7 @@ struct TopicListView: View {
     @Environment(\.hfrPalette) private var palette
     @Environment(AppNavigation.self) private var navigation
     @Environment(ForumsStore.self) private var forums
+    @Environment(\.modelContext) private var modelContext
 
     init(route: TopicListRoute, section: AppSection) {
         self.route = route
@@ -105,6 +106,11 @@ struct TopicListView: View {
             if let since = model.offlineSince {
                 OfflineBanner(ForumTime.offline(since: since))
                     .padding(.bottom, 8)
+            }
+        }
+        .onChange(of: model.pages.count) {
+            if let last = model.pages.last {
+                ReadingPositionRecorder(context: modelContext).noteListed(last.topics)
             }
         }
         .refreshable { await model.refresh(using: client, cache: pageCache) }
