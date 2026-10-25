@@ -33,7 +33,7 @@ private struct ReaderScreen: View {
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.openURL) private var openURL
     @Environment(ConnectivityStore.self) private var connectivity
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.rootLayout) private var rootLayout
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
 
     var body: some View {
@@ -113,7 +113,7 @@ private struct ReaderScreen: View {
                 model.onOpenTopic = { [navigation] topic in
                     navigation.open(topic)
                 }
-                model.onOpenLink = { [navigation, openURL, model, horizontalSizeClass] url in
+                model.onOpenLink = { [navigation, openURL, model, rootLayout] url in
                     switch ForumLink(url.absoluteString) {
                     case .topic(let link):
                         navigation.open(TopicRoute(title: "Sujet", category: link.category, topic: link.topic, page: link.page, anchor: link.post))
@@ -121,7 +121,7 @@ private struct ReaderScreen: View {
                         model.presentedProfile = ProfileRequest(profileID: profile, pseudo: "Profil")
                     case .topicList(let path):
                         let list = AppRoute.topicList(TopicListRoute(title: "Sujets", path: path))
-                        if horizontalSizeClass == .regular {
+                        if rootLayout == .columns {
                             // Next to the reading, in the column as it is shown.
                             navigation.push(list, in: navigation.section)
                         } else {

@@ -8,8 +8,9 @@ import HFRKit
 import SwiftData
 import SwiftUI
 
-/// Tabs in compact width (iPhone, folded Duo), a single column next to the reading in regular
-/// width (iPad, unfolded Duo). Both read the same `AppNavigation`.
+/// Tabs on iPhone, folded Duo and any screen held upright; a single column next to the reading
+/// on a wide screen in landscape (unfolded Duo, iPad), see `RootLayout`. Both read the same
+/// `AppNavigation`.
 struct RootView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(AppNavigation.self) private var navigation
@@ -17,15 +18,26 @@ struct RootView: View {
     /// Section and topic, kept when iOS closes the app in the background.
     @SceneStorage("navigation") private var savedNavigation = Data()
     @State private var isRestored = false
+    @State private var windowSize = CGSize.zero
     @Environment(\.scenePhase) private var scenePhase
+
+    private var layout: RootLayout {
+        RootLayout(sizeClass: horizontalSizeClass, size: windowSize)
+    }
 
     var body: some View {
         Group {
-            if horizontalSizeClass == .regular {
+            if layout == .columns {
                 RegularRootView()
             } else {
                 CompactRootView()
             }
+        }
+        .environment(\.rootLayout, layout)
+        .onGeometryChange(for: CGSize.self) { proxy in
+            proxy.size
+        } action: { size in
+            windowSize = size
         }
         .onContinueUserActivity(CSSearchableItemActionType, perform: openFromSpotlight)
         .task {
@@ -36,8 +48,8 @@ struct RootView: View {
             // Reading positions and drafts are written before iOS may close the app.
             if phase != .active, modelContext.hasChanges { try? modelContext.save() }
         }
-        .onChange(of: horizontalSizeClass) { _, sizeClass in
-            if sizeClass != .regular { navigation.showOpenTopicSection() }
+        .onChange(of: layout) { _, layout in
+            if layout == .tabs { navigation.showOpenTopicSection() }
         }
         .onChange(of: navigation.snapshot) { _, snapshot in
             guard isRestored, let data = try? JSONEncoder().encode(snapshot) else { return }
@@ -54,7 +66,7 @@ struct RootView: View {
             descriptor.fetchLimit = 1
             return (try? modelContext.fetch(descriptor).first)?.resumeRoute
         }
-        if horizontalSizeClass != .regular { navigation.showOpenTopicSection() }
+        if layout == .tabs { navigation.showOpenTopicSection() }
     }
 
     /// A topic found in the iOS search opens where it was left.
