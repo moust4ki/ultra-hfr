@@ -204,6 +204,23 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
                 completion(self?.menuElements(for: id) ?? [])
             },
         ])
+        // « Le Fil », C1: with VoiceOver, quoting is an action of the message, like the swipe.
+        button.accessibilityCustomActions = [
+            UIAccessibilityCustomAction(name: "Citer ou retirer de la citation") { [weak self] _ in
+                guard let self, !self.model.route.isLocked || self.model.quoted.contains(id) else { return false }
+                self.model.toggleQuote(id)
+                UIAccessibility.post(
+                    notification: .announcement,
+                    argument: self.model.quoted.contains(id) ? "Ajouté à la citation" : "Retiré de la citation"
+                )
+                return true
+            },
+            UIAccessibilityCustomAction(name: "Voir le profil") { [weak self] _ in
+                guard let self, let post = self.model.post(id), let profile = post.profileID else { return false }
+                self.model.presentedProfile = ProfileRequest(profileID: profile, pseudo: post.author)
+                return true
+            },
+        ]
         scrollView.addSubview(button)
         menuButtons[id] = button
         return button

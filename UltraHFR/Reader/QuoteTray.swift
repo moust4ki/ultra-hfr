@@ -25,13 +25,15 @@ struct QuoteTray: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
-            Button("Vider", systemImage: "xmark", action: clear)
+            Button("Vider la citation", systemImage: "xmark", action: clear)
                 .labelStyle(.iconOnly)
             Button("Répondre", action: reply)
                 .buttonStyle(.borderedProminent)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(authors.count == 1 ? "1 message à citer" : "\(authors.count) messages à citer")
         .glassEffect(.regular, in: .capsule)
         .padding(.horizontal, 12)
     }
