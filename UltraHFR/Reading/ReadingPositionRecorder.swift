@@ -27,6 +27,7 @@ struct ReadingPositionRecorder {
             existing.isLocked = topic.isLocked
             existing.updatedAt = .now
         } else {
+            TopicSpotlight.index(title: topic.title, category: topic.category, topic: topic.topic)
             context.insert(ReadingPosition(
                 topicID: topicID,
                 categoryID: topic.category.rawValue,

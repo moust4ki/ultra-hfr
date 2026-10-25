@@ -34,7 +34,7 @@ struct FeedView: View {
                     .listRowBackground(Color.clear)
                     .contextMenu {
                         Button("Retirer de l'historique", systemImage: "eye.slash", role: .destructive) {
-                            modelContext.delete(latest)
+                            forget(latest)
                         }
                     }
                 }
@@ -56,7 +56,7 @@ struct FeedView: View {
                         .buttonStyle(.plain)
                         .swipeActions {
                             Button("Retirer", systemImage: "eye.slash", role: .destructive) {
-                                modelContext.delete(position)
+                                forget(position)
                             }
                             .tint(palette.destructive.color)
                         }
@@ -79,7 +79,7 @@ struct FeedView: View {
                             }
                             Divider()
                             Button("Retirer de l'historique", systemImage: "eye.slash", role: .destructive) {
-                                modelContext.delete(position)
+                                forget(position)
                             }
                         }
                     }
@@ -132,6 +132,11 @@ struct FeedView: View {
         .navigationTitle("Fil")
         .refreshable { await qualitay.refresh(force: true) }
         .task { await qualitay.refresh() }
+    }
+
+    private func forget(_ position: ReadingPosition) {
+        TopicSpotlight.remove(category: CategoryID(rawValue: position.categoryID), topic: TopicID(rawValue: position.topicID))
+        modelContext.delete(position)
     }
 
     private func route(for position: ReadingPosition) -> TopicRoute {
