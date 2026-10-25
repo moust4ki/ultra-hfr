@@ -22,8 +22,10 @@ struct FeedView: View {
     @Environment(\.hfrPalette) private var palette
 
     var body: some View {
+        let resume = FeedSummary.resume(in: positions)
+        let others = positions.filter { $0.persistentModelID != resume?.persistentModelID }
         List {
-            if let latest = positions.first {
+            if let latest = resume {
                 Section {
                     ResumeCard(
                         title: latest.title,
@@ -40,10 +42,18 @@ struct FeedView: View {
                         }
                     }
                 }
-            }
-            if positions.count > 1 {
+            } else if !positions.isEmpty {
                 Section {
-                    ForEach(positions.dropFirst().prefix(20)) { position in
+                    UpToDateCard(count: positions.count, since: visits.previousVisit) {
+                        navigation.select(.forums)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                }
+            }
+            if !others.isEmpty {
+                Section {
+                    ForEach(others.prefix(20)) { position in
                         Button {
                             navigation.open(route(for: position), from: section)
                         } label: {
@@ -145,5 +155,47 @@ struct FeedView: View {
 
     private func route(for position: ReadingPosition) -> TopicRoute {
         position.resumeRoute
+    }
+}
+
+/// What the Fil puts first, from the reading positions kept on the device.
+enum FeedSummary {
+    /// « Reprendre » (« Le Fil », A1): the latest reading, less than 7 days old, that stopped
+    /// before the end of what is new.
+    static func resume(in positions: [ReadingPosition], now: Date = .now) -> ReadingPosition? {
+        let limit = now.addingTimeInterval(-7 * 24 * 3600)
+        return positions
+            .filter { $0.updatedAt >= limit && $0.hasNews }
+            .max { $0.updatedAt < $1.updatedAt }
+    }
+}
+
+/// « Tout est lu »: nothing new in the topics read, as far as the lists seen tell.
+private struct UpToDateCard: View {
+    let count: Int
+    let since: Date?
+    let browse: () -> Void
+    @Environment(\.hfrPalette) private var palette
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Tout est lu", systemImage: "checkmark.circle.fill")
+                .font(.headline)
+                .foregroundStyle(palette.text.color)
+            Text(detail)
+                .font(.footnote)
+                .foregroundStyle(palette.text2.color)
+            Button("Parcourir les forums", action: browse)
+                .font(.subheadline.weight(.semibold))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .background(palette.cell.color, in: .rect(cornerRadius: 24))
+    }
+
+    private var detail: String {
+        let topics = count == 1 ? "ton sujet lu" : "tes \(count.formatted()) sujets lus"
+        guard let since else { return "Rien de nouveau dans \(topics)." }
+        return "Rien de nouveau dans \(topics) depuis \(ForumTime.moment(since))."
     }
 }

@@ -19,7 +19,7 @@ struct QuoteTray: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(authors.count == 1 ? "1 citation" : "\(authors.count) citations")
                     .font(.subheadline.bold())
-                Text(authors.joined(separator: ", "))
+                Text(authors.joined(separator: ", ") + " · glisser pour en ajouter")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
