@@ -67,3 +67,14 @@ Sans compte, l'app retient sur l'appareil le dernier message lu de chaque sujet 
 ## D10 · Recherches : une requête à la validation, jamais à la frappe
 
 La recherche sur le forum, la recherche dans un sujet et la recherche de smileys n'envoient une requête que lorsque l'on valide. Pendant la frappe, l'app ne cherche que dans ce qu'elle sait déjà (forums, sujets lus). Les résultats suivants d'un sujet se demandent avec un bouton, jamais automatiquement ; une liste filtrée ne charge pas non plus ses pages suivantes toute seule.
+
+## D11 · Le Fil sans compte : ce que l'appareil sait déjà
+
+Sans compte, le Fil ne peut pas lister les drapeaux. Il montre ce que l'appareil sait :
+
+- **la reprise** de la dernière lecture et les sujets lus récemment ;
+- **leurs nouvelles pages** (« +4 p. »), apprises des listes de sujets que l'on parcourt : aucune page n'est demandée à HFR pour le Fil ;
+- **les Alertes Qualitay**, qui viennent d'un flux public ;
+- **« Depuis ta visite de … »**, l'heure à laquelle l'app a été quittée.
+
+Avec un compte (lot 1), les drapeaux de HFR viendront s'ajouter à cette base.
