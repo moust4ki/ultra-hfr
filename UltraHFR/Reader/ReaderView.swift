@@ -73,7 +73,9 @@ private struct ReaderScreen: View {
                     // width: the bar's buttons end 142 pt below the top of the reading there, and
                     // the scrubber keeps the same 24 pt from them as from Répondre below.
                     .padding(.top, usesSideRail ? 142 + 24 : 24)
-                    .padding(.trailing, usesSideRail ? max(0, (trailingInset - 24) / 2) : 0)
+                    // On the axis of the bar's buttons, which the system sets 6 pt left of the
+                    // strip's middle (it keeps a margin along the edge of the screen).
+                    .padding(.trailing, usesSideRail ? max(0, trailingInset / 2 - 6) : 0)
                     // Above Répondre (52 pt, 8 pt from the bottom), 24 pt apart.
                     .padding(.bottom, 8 + 52 + 24)
                     .ignoresSafeArea(.container, edges: usesSideRail ? .trailing : [])
