@@ -15,6 +15,8 @@ enum RootLayout: Equatable {
     /// Below this height a landscape screen is a phone on its side, even a wide one.
     static let minimumColumnHeight: CGFloat = 500
 
+    /// `size`: the whole window, keyboard and bars included, so that the keyboard never
+    /// switches the layout.
     init(sizeClass: UserInterfaceSizeClass?, size: CGSize) {
         let isLandscape = size.width > size.height
         self = sizeClass == .regular && isLandscape && size.height >= Self.minimumColumnHeight ? .columns : .tabs

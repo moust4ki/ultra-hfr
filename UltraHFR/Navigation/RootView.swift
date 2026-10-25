@@ -38,10 +38,17 @@ struct RootView: View {
             }
         }
         .environment(\.rootLayout, layout)
-        .onGeometryChange(for: CGSize.self) { proxy in
-            proxy.size
-        } action: { size in
-            windowSize = size
+        .background {
+            // The whole window, keyboard included: measured within the safe areas, the keyboard
+            // would shrink the height below the column's minimum, switch to tabs, rebuild the
+            // screen and dismiss the keyboard, again and again (search field, Répondre).
+            Color.clear
+                .ignoresSafeArea()
+                .onGeometryChange(for: CGSize.self) { proxy in
+                    proxy.size
+                } action: { size in
+                    windowSize = size
+                }
         }
         .onContinueUserActivity(CSSearchableItemActionType, perform: openFromSpotlight)
         .task {
