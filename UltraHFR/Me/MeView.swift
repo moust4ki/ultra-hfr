@@ -46,6 +46,7 @@ struct MeView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+            StorageSection()
             Section("À propos") {
                 NavigationLink("Essais du lot 0", value: AppRoute.essays)
                 Link("Code source sur GitHub", destination: URL(string: "https://github.com/moust4ki/ultra-hfr")!)

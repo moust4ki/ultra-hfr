@@ -36,6 +36,19 @@ struct HTMLPageCacheTests {
         #expect(files.count == 3)
     }
 
+    @Test func reportsAndClearsItsUsage() async throws {
+        let cache = HTMLPageCache(directory: temporaryDirectory())
+        #expect(await cache.usage().pages == 0)
+        await cache.store("<p>un</p>", for: "/1")
+        await cache.store("<p>deux</p>", for: "/2")
+        let usage = await cache.usage()
+        #expect(usage.pages == 2)
+        #expect(usage.bytes > 0)
+        await cache.removeAll()
+        #expect(await cache.usage().pages == 0)
+        #expect(await cache.page(for: "/1") == nil)
+    }
+
     @Test func compressesPages() async throws {
         let directory = temporaryDirectory()
         let cache = HTMLPageCache(directory: directory)

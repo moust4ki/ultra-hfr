@@ -47,6 +47,20 @@ public actor HTMLPageCache {
         return (String(decoding: html, as: UTF8.self), savedAt)
     }
 
+    /// Pages kept and the room they take, in bytes.
+    public func usage() -> (pages: Int, bytes: Int) {
+        let files = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.fileSizeKey])) ?? []
+        let bytes = files.reduce(0) { total, file in
+            total + ((try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+        }
+        return (files.count, bytes)
+    }
+
+    /// Forgets every page kept.
+    public func removeAll() {
+        try? FileManager.default.removeItem(at: directory)
+    }
+
     /// A copy of `path` is kept on the device.
     public func contains(_ path: String) -> Bool {
         FileManager.default.fileExists(atPath: fileURL(for: path).path(percentEncoded: false))
