@@ -12,6 +12,7 @@ struct ReaderTitle: View {
     let pageCount: Int?
 
     var body: some View {
+        // A bubble centred over the reading, as wide as the room allows (like a chat's title).
         VStack(spacing: 1) {
             Text(title)
                 .font(.subheadline.weight(.semibold))
@@ -23,6 +24,10 @@ struct ReaderTitle: View {
                     .monospacedDigit()
             }
         }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 6)
+        .frame(maxWidth: 520)
+        .glassEffect(.regular, in: .capsule)
         .accessibilityElement(children: .combine)
     }
 }

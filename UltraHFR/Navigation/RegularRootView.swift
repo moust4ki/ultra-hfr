@@ -50,8 +50,8 @@ struct RegularRootView: View {
     }
 }
 
-/// The column: the section's stack, with the section picker under the bar of every screen so
-/// that it stays reachable whatever is pushed in the column (« Le Fil », H2).
+/// The column: the section's stack, with the section bar at the bottom of every screen so that
+/// it stays reachable whatever is pushed in the column (« Le Fil », H2).
 private struct SectionColumn: View {
     @Environment(AppNavigation.self) private var navigation
 
@@ -72,31 +72,50 @@ private struct SectionColumn: View {
     }
 }
 
-/// Every screen of the column: sections on top.
+/// Every screen of the column: a compact title at the very top, the sections in a floating bar
+/// at the bottom of the column (like Telegram on the unfolded Duo).
 private struct ColumnScreen: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .safeAreaBar(edge: .top) {
-                SectionPicker()
+            .navigationBarTitleDisplayMode(.inline)
+            .safeAreaBar(edge: .bottom) {
+                SectionTabBar()
             }
             .environment(\.isInNavigationColumn, true)
     }
 }
 
-/// Row of section icons at the top of the column (replaces the tab bar in regular width).
-private struct SectionPicker: View {
+/// The sections at the bottom of the column (replaces the tab bar next to the reading).
+private struct SectionTabBar: View {
     @Environment(AppNavigation.self) private var navigation
+    @Environment(\.hfrPalette) private var palette
 
     var body: some View {
-        Picker("Section", selection: Binding(get: { navigation.section }, set: { navigation.select($0) })) {
+        HStack(spacing: 2) {
             ForEach(AppSection.allCases) { section in
-                Label(section.title, systemImage: section.systemImage)
-                    .labelStyle(.iconOnly)
-                    .tag(section)
+                let isSelected = navigation.section == section
+                Button {
+                    navigation.select(section)
+                } label: {
+                    Image(systemName: section.systemImage)
+                        .font(.title3)
+                        .foregroundStyle(isSelected ? palette.accent.text.color : palette.text.color)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background {
+                            if isSelected {
+                                Capsule().fill(palette.text.color.opacity(0.1))
+                            }
+                        }
+                        .contentShape(.capsule)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(section.title)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(5)
+        .glassEffect(.regular, in: .capsule)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
     }
 }

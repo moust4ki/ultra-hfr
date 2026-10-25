@@ -25,6 +25,7 @@ struct TopicListView: View {
     @Environment(ForumsStore.self) private var forums
     @Environment(\.modelContext) private var modelContext
     @Environment(ConnectivityStore.self) private var connectivity
+    @Environment(\.isInNavigationColumn) private var isInNavigationColumn
 
     init(route: TopicListRoute, section: AppSection, model: TopicListModel) {
         self.route = route
@@ -75,7 +76,8 @@ struct TopicListView: View {
         .scrollContentBackground(.hidden)
         .background(palette.background.color)
         .navigationTitle(model.title)
-        .navigationBarTitleDisplayMode(.large)
+        // In the column, the title sits at the very top, compact.
+        .navigationBarTitleDisplayMode(isInNavigationColumn ? .inline : .large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Rechercher dans ce forum", systemImage: "magnifyingglass") {
