@@ -33,6 +33,18 @@ enum ForumTime {
         return "\(date.formatted(.dateTime.day().month(.abbreviated))), \(time)"
     }
 
+    /// "Depuis ta visite de 01:25", "… d'hier, 23:12", "… du 21 oct.".
+    static func sinceVisit(_ date: Date, now: Date = .now, calendar: Calendar = .current) -> String {
+        let time = date.formatted(.dateTime.hour().minute())
+        if calendar.isDate(date, inSameDayAs: now) {
+            return "Depuis ta visite de \(time)"
+        }
+        if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(date, inSameDayAs: yesterday) {
+            return "Depuis ta visite d'hier, \(time)"
+        }
+        return "Depuis ta visite du \(date.formatted(.dateTime.day().month(.abbreviated)))"
+    }
+
     /// "Hors ligne · copie de 01:25", "… copie d'hier", "… copie du 21 oct.".
     static func offline(since date: Date, now: Date = .now, calendar: Calendar = .current) -> String {
         if calendar.isDate(date, inSameDayAs: now) {

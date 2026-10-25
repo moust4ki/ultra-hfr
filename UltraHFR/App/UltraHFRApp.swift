@@ -18,6 +18,8 @@ struct UltraHFRApp: App {
     @State private var readers = ReaderSessions()
     @State private var qualitay: QualitayStore
     @State private var accounts: AccountStore
+    @State private var visits = VisitStore()
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         #if DEBUG
@@ -43,7 +45,11 @@ struct UltraHFRApp: App {
                 .environment(readers)
                 .environment(qualitay)
                 .environment(accounts)
+                .environment(visits)
                 .hfrTheme(mode: settings.themeMode, accent: settings.accent)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { visits.noteLeaving() }
         }
         .modelContainer(for: [ReadingPosition.self, Draft.self])
         .commands {

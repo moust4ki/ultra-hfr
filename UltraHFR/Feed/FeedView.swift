@@ -17,6 +17,7 @@ struct FeedView: View {
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
     @Environment(AppNavigation.self) private var navigation
     @Environment(QualitayStore.self) private var qualitay
+    @Environment(VisitStore.self) private var visits
     @Environment(\.modelContext) private var modelContext
     @Environment(\.hfrPalette) private var palette
 
@@ -130,6 +131,7 @@ struct FeedView: View {
         .listStyle(.insetGrouped)
         .hfrGroupedBackground()
         .navigationTitle("Fil")
+        .navigationSubtitle(visits.previousVisit.map { ForumTime.sinceVisit($0) } ?? "")
         .refreshable { await qualitay.refresh(force: true) }
         .task { await qualitay.refresh() }
     }
