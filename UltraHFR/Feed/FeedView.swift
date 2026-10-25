@@ -20,11 +20,20 @@ struct FeedView: View {
     @Environment(VisitStore.self) private var visits
     @Environment(\.modelContext) private var modelContext
     @Environment(\.hfrPalette) private var palette
+    @Environment(\.isInNavigationColumn) private var isInNavigationColumn
 
     var body: some View {
         let resume = FeedSummary.resume(in: positions)
         let others = positions.filter { $0.persistentModelID != resume?.persistentModelID }
         List {
+            if isInNavigationColumn {
+                // « Le Fil », I1: on large screens, MP and Qualitay summed up in tiles.
+                Section {
+                    FeedTiles(section: section)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                }
+            }
             if let latest = resume {
                 Section {
                     ResumeCard(
@@ -197,5 +206,47 @@ private struct UpToDateCard: View {
         let topics = count == 1 ? "ton sujet lu" : "tes \(count.formatted()) sujets lus"
         guard let since else { return "Rien de nouveau dans \(topics)." }
         return "Rien de nouveau dans \(topics) depuis \(ForumTime.moment(since))."
+    }
+}
+
+/// MP and Qualitay tiles at the top of the Fil in the regular column.
+private struct FeedTiles: View {
+    let section: AppSection
+    @Environment(QualitayStore.self) private var qualitay
+    @Environment(AccountStore.self) private var accounts
+    @Environment(AppNavigation.self) private var navigation
+
+    var body: some View {
+        let fresh = qualitay.alerts.filter { ($0.date ?? .distantPast) > qualitay.lastSeen }
+        HStack(spacing: 10) {
+            Button {
+                navigation.select(.messages)
+            } label: {
+                SummaryTile(
+                    title: "MP",
+                    detail: accounts.current == nil ? "Connexion requise" : "Avec le lot 1",
+                    systemImage: "envelope.fill",
+                    isMuted: true
+                )
+            }
+            .buttonStyle(.plain)
+            Button {
+                if let alert = (fresh.first ?? qualitay.alerts.first) {
+                    navigation.open(TopicRoute(
+                        title: alert.topicTitle, category: alert.categoryID, topic: alert.topicID,
+                        page: alert.page, anchor: alert.postID
+                    ), from: section)
+                }
+            } label: {
+                SummaryTile(
+                    title: fresh.isEmpty ? "Qualitay" : "\(fresh.count.formatted()) Qualitay",
+                    detail: fresh.isEmpty ? "Rien de nouveau" : "Depuis \(ForumTime.moment(qualitay.lastSeen))",
+                    systemImage: "megaphone.fill",
+                    isMuted: fresh.isEmpty
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(qualitay.alerts.isEmpty)
+        }
     }
 }
