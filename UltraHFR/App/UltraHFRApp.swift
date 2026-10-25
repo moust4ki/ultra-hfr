@@ -46,5 +46,8 @@ struct UltraHFRApp: App {
                 .hfrTheme(mode: settings.themeMode, accent: settings.accent)
         }
         .modelContainer(for: [ReadingPosition.self, Draft.self])
+        .commands {
+            ReaderCommands()
+        }
     }
 }

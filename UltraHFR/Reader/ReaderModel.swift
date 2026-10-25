@@ -39,6 +39,13 @@ final class ReaderModel {
     var topicSearch: TopicSearchRequest?
     /// A member's profile, open.
     var presentedProfile: ProfileRequest?
+    /// The composer, open.
+    var composer: ComposerRequest?
+
+    /// Some sheet covers the reader.
+    var isCoveredBySheet: Bool {
+        composer != nil || topicSearch != nil || presentedProfile != nil || isGoToPagePresented || presentedImage != nil
+    }
     /// Messages found by « Rechercher dans le sujet », gone through one by one.
     private(set) var searchSelection: TopicSearchSelection?
 
@@ -301,6 +308,22 @@ final class ReaderModel {
                 return "[quotemsg=\(id),\(postPages[id] ?? 1),0]" + BBCodeWriter.write(post.body) + "[/quotemsg]\n"
             }
             .joined(separator: "\n")
+    }
+
+    /// Reply, with the multi-quote when there is one.
+    func startReply() {
+        composer = ComposerRequest(quotes: quoted.isEmpty ? "" : quotedBBCode, authors: authorsOfLoadedPosts)
+    }
+
+    /// Adds the message at the top of the screen to the multi-quote, or removes it.
+    func quoteVisiblePost() {
+        guard let lastVisiblePost, !route.isLocked else { return }
+        toggleQuote(lastVisiblePost)
+    }
+
+    /// Next (1) or previous (-1) message.
+    func step(by offset: Int) {
+        Task { await driver?.step(by: offset) }
     }
 
     func clearQuotes() {

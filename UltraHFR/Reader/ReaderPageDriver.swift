@@ -15,4 +15,5 @@ protocol ReaderPageDriver: AnyObject {
     func setLocked(_ isLocked: Bool) async
     func highlight(post: PostID?, words: String) async
     func endChecked(_ message: String) async
+    func step(by offset: Int) async
 }

@@ -29,7 +29,6 @@ private struct ReaderScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.openURL) private var openURL
-    @State private var composer: ComposerRequest?
 
     var body: some View {
         ReaderWebView(model: model, style: style)
@@ -52,14 +51,10 @@ private struct ReaderScreen: View {
                             .padding(.bottom, 8)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else if !model.quoted.isEmpty {
-                        QuoteTray(authors: model.quotedAuthors, clear: { model.clearQuotes() }, reply: {
-                            composer = ComposerRequest(quotes: model.quotedBBCode, authors: model.authorsOfLoadedPosts)
-                        })
+                        QuoteTray(authors: model.quotedAuthors, clear: { model.clearQuotes() }, reply: { model.startReply() })
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else if model.loadedPages != nil {
-                        ReaderBottomBar(pagesAfter: model.pagesAfterVisible, isLocked: model.route.isLocked, goToLastMessage: { model.openLastMessage() }, reply: {
-                            composer = ComposerRequest(quotes: "", authors: model.authorsOfLoadedPosts)
-                        })
+                        ReaderBottomBar(pagesAfter: model.pagesAfterVisible, isLocked: model.route.isLocked, goToLastMessage: { model.openLastMessage() }, reply: { model.startReply() })
                     }
                 }
                 // Bars stop growing at accessibility sizes, like the system ones.
@@ -92,6 +87,7 @@ private struct ReaderScreen: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .tabBar)
+            .focusedSceneValue(\.reader, model.isCoveredBySheet ? nil : model)
             .background {
                 ContentPopGestureDisabler()
                     .frame(width: 0, height: 0)
@@ -116,7 +112,7 @@ private struct ReaderScreen: View {
             .fullScreenCover(item: Binding(get: { model.presentedImage }, set: { model.presentedImage = $0 })) { image in
                 ImageViewer(url: image.url)
             }
-            .sheet(item: $composer) { request in
+            .sheet(item: Binding(get: { model.composer }, set: { model.composer = $0 })) { request in
                 ComposerView(
                     topic: TopicRoute(title: model.title, category: route.category, topic: route.topic, page: model.visiblePage ?? route.page),
                     quotedText: request.quotes,

@@ -89,6 +89,17 @@
       reader.scrollToPost(id);
     },
 
+    /** Next (1) or previous (-1) message, from the one at the top of the screen. */
+    step(offset) {
+      const list = posts();
+      const current = visiblePost();
+      let index = current ? list.indexOf(current) : -1;
+      // A message partly scrolled past: "previous" goes back to its top first.
+      if (offset < 0 && current && current.getBoundingClientRect().top < topInset() - 4) index += 1;
+      const target = list[Math.min(Math.max(index + offset, 0), list.length - 1)];
+      if (target) reader.scrollToPost(Number(target.dataset.post));
+    },
+
     /** Nothing new after a check: the end card says so. */
     endChecked(message) {
       const end = document.querySelector(".topic-end");

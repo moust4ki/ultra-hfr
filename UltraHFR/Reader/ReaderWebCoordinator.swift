@@ -74,6 +74,10 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         await run("reader.scrollToPost(id)", ["id": post.rawValue])
     }
 
+    func step(by offset: Int) async {
+        await run("reader.step(offset)", ["offset": offset])
+    }
+
     func endChecked(_ message: String) async {
         await run("reader.endChecked(message)", ["message": message])
     }
