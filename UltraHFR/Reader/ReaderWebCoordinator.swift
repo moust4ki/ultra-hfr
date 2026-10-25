@@ -153,7 +153,8 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             }
         case "openImage":
             if let address = body["url"] as? String, let url = URL(string: address) {
-                model.showImage(url)
+                let others = (body["urls"] as? [String] ?? []).compactMap(URL.init(string:))
+                model.showImage(url, among: others)
             }
         case "log":
             Self.logger.debug("\(body["message"] as? String ?? "", privacy: .public)")

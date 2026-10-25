@@ -378,7 +378,8 @@
     const image = event.target.closest("img.image");
     if (image) {
       event.preventDefault();
-      send({ type: "openImage", url: image.src });
+      const siblings = Array.from(image.closest(".post-body")?.querySelectorAll("img.image") ?? [image]).map((img) => img.src);
+      send({ type: "openImage", url: image.src, urls: siblings });
       return;
     }
     const link = event.target.closest("a[href]");

@@ -374,8 +374,8 @@ final class ReaderModel {
         onOpenLink?(url)
     }
 
-    func showImage(_ url: URL) {
-        presentedImage = PresentedImage(url: url)
+    func showImage(_ url: URL, among others: [URL] = []) {
+        presentedImage = PresentedImage(url: url, among: others)
     }
 
     /// A quote header was tapped and its message is not on the loaded pages.

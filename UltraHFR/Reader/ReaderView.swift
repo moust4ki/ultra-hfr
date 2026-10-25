@@ -114,7 +114,7 @@ private struct ReaderScreen: View {
                 model.show(route)
             }
             .fullScreenCover(item: Binding(get: { model.presentedImage }, set: { model.presentedImage = $0 })) { image in
-                ImageViewer(url: image.url)
+                ImageViewer(image: image)
             }
             .sheet(item: Binding(get: { model.composer }, set: { model.composer = $0 })) { request in
                 ComposerView(
