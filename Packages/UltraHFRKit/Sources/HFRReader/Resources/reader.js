@@ -357,6 +357,12 @@
       send({ type: "refresh" });
       return;
     }
+    const author = event.target.closest(".post-head .avatar, .post-head .pseudo");
+    if (author) {
+      const post = author.closest(".post[data-post]");
+      if (post) send({ type: "openProfile", post: Number(post.dataset.post) });
+      return;
+    }
     const expand = event.target.closest(".quote-expand");
     if (expand) {
       expand.closest(".quote")?.classList.remove("collapsed");

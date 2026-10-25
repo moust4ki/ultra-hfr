@@ -147,6 +147,10 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             if let address = body["url"] as? String, let url = URL(string: address) {
                 model.openLink(url)
             }
+        case "openProfile":
+            if let post, let message = model.post(post), let profile = message.profileID {
+                model.presentedProfile = ProfileRequest(profileID: profile, pseudo: message.author)
+            }
         case "openImage":
             if let address = body["url"] as? String, let url = URL(string: address) {
                 model.showImage(url)

@@ -20,7 +20,8 @@ body { padding-bottom: 120px; -webkit-touch-callout: none; }
 .post.swiping.armed::after { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='white' d='M4.6 17.4c-.8-.9-1.3-1.9-1.3-3.5 0-2.8 2-5.3 4.8-6.5l.7 1.1c-2.6 1.4-3.1 3.2-3.3 4.4.4-.2 1-.3 1.6-.2 1.5.1 2.6 1.4 2.6 2.9a3 3 0 0 1-3 3c-.9 0-1.8-.4-2.1-1.2Zm10 0c-.8-.9-1.3-1.9-1.3-3.5 0-2.8 2-5.3 4.8-6.5l.7 1.1c-2.6 1.4-3.1 3.2-3.3 4.4.4-.2 1-.3 1.6-.2 1.5.1 2.6 1.4 2.6 2.9a3 3 0 0 1-3 3c-.9 0-1.8-.4-2.1-1.2Z'/></svg>"); }
 .post.quoted .post-head .pseudo::after { content: "  ❝ Cité"; font-size: 12px; font-weight: 600; color: var(--accent); }
 
-/* En-tête : badge « Cité » et mention de modification */
+/* En-tête : badge « Cité » et mention de modification ; avatar et pseudo ouvrent le profil */
+.post-head .avatar, .post-head .pseudo { cursor: pointer; }
 .post-head .edited-note { color: var(--text-3); }
 
 /* Spoiler en bloc : contenu masqué jusqu'au toucher */

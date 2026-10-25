@@ -42,6 +42,12 @@ struct ReaderHTMLTests {
         #expect(!ReaderHTML.page(page, newAfter: 104).contains("new-marker\" id"))
     }
 
+    @Test func headerSaysHowOftenAMessageWasQuoted() {
+        let body = MessageBody(blocks: [.paragraph([.text("x")])])
+        #expect(ReaderHTML.post(Post(id: 1, author: "a", quoteCount: 3, body: body), page: 1, isQuoted: false).contains("cité 3 fois"))
+        #expect(!ReaderHTML.post(Post(id: 1, author: "a", body: body), page: 1, isQuoted: false).contains("cité"))
+    }
+
     @Test func neverShowsHFRsCopyOfThePreviousPageLastMessage() {
         let body = MessageBody(blocks: [.paragraph([.text("x")])])
         let posts = [

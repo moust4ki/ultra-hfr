@@ -93,6 +93,7 @@ public enum ReaderHTML {
         let initial = post.author.first.map { String($0).uppercased() } ?? "?"
         var meta = post.postedAt.map { postDate($0) } ?? ""
         if post.edit != nil { meta += " · modifié" }
+        if post.quoteCount > 0 { meta += post.quoteCount == 1 ? " · cité 1 fois" : " · cité \(post.quoteCount) fois" }
 
         var html = "<article class=\"\(classes.joined(separator: " "))\" id=\"t\(post.id)\" data-post=\"\(post.id)\" data-page=\"\(page)\" data-author=\"\(escape(post.author))\">"
         html += "<header class=\"post-head\">"
