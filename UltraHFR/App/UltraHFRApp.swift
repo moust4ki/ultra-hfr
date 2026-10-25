@@ -16,6 +16,7 @@ struct UltraHFRApp: App {
     @State private var forums: ForumsStore
     @State private var qualitay: QualitayStore
     @State private var accounts: AccountStore
+    @State private var accountFeed: AccountFeedStore
     @State private var visits = VisitStore()
     @State private var connectivity = ConnectivityStore()
     @Environment(\.scenePhase) private var scenePhase
@@ -30,7 +31,11 @@ struct UltraHFRApp: App {
         _client = State(initialValue: client)
         _forums = State(initialValue: ForumsStore(client: client))
         _qualitay = State(initialValue: QualitayStore(client: client))
-        _accounts = State(initialValue: AccountStore(client: client))
+        let accounts = AccountStore(client: client)
+        let accountFeed = AccountFeedStore(client: client)
+        accountFeed.onSessionExpired = { [weak accounts] in accounts?.markCurrentSessionExpired() }
+        _accounts = State(initialValue: accounts)
+        _accountFeed = State(initialValue: accountFeed)
     }
 
     var body: some Scene {
@@ -42,6 +47,7 @@ struct UltraHFRApp: App {
                 .environment(forums)
                 .environment(qualitay)
                 .environment(accounts)
+                .environment(accountFeed)
                 .environment(visits)
                 .environment(connectivity)
                 .task { await connectivity.watch() }

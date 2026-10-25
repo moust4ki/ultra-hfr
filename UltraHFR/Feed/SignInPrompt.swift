@@ -10,6 +10,8 @@ import SwiftUI
 struct SignInPrompt: View {
     let title: String
     let detail: String
+    /// The account whose session has expired: signing in again, prefilled.
+    var pseudo: String?
     @Environment(\.hfrPalette) private var palette
     @Environment(\.openURL) private var openURL
     @Environment(AccountStore.self) private var accounts
@@ -28,20 +30,22 @@ struct SignInPrompt: View {
                 .foregroundStyle(palette.text2.color)
                 .multilineTextAlignment(.center)
             HStack {
-                Button("Se connecter") { isSigningIn = true }
+                Button(pseudo == nil ? "Se connecter" : "Se reconnecter") { isSigningIn = true }
                     .buttonStyle(.borderedProminent)
-                Button("Créer un compte") {
-                    if let url = URL(string: "https://forum.hardware.fr/inscription.php?config=hfr.inc") {
-                        openURL(url)
+                if pseudo == nil {
+                    Button("Créer un compte") {
+                        if let url = URL(string: "https://forum.hardware.fr/inscription.php?config=hfr.inc") {
+                            openURL(url)
+                        }
                     }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .sheet(isPresented: $isSigningIn) {
-            SignInView()
+            SignInView(pseudo: pseudo ?? "")
         }
     }
 }

@@ -247,6 +247,34 @@ public actor HFRClient {
         return OfflineAwarePage(content: list, savedAt: answer.savedAt)
     }
 
+    /// « Mes drapeaux » (or the favorites only), with the account's session. Reading this list
+    /// moves no flag.
+    public func followedTopics(favoritesOnly: Bool = false, cookies: CookieJar) async throws(HFRClientError) -> AccountPage<FollowedTopicsPage> {
+        try await accountPage(ForumPath.followedTopics(favoritesOnly: favoritesOnly), cookies: cookies) { html throws(HFRParsingError) in
+            try FollowedTopicsParser.parse(html: html)
+        }
+    }
+
+    /// Page `page` of the member's private conversations. Reading the list marks none as read.
+    public func conversations(page: Int = 1, cookies: CookieJar) async throws(HFRClientError) -> AccountPage<ConversationListPage> {
+        try await accountPage(ForumPath.conversations(page: page), cookies: cookies) { html throws(HFRParsingError) in
+            try ConversationListParser.parse(html: html)
+        }
+    }
+
+    /// A page asked with the session, which HFR may answer as to a visitor.
+    private func accountPage<Content: Sendable>(
+        _ path: String,
+        cookies: CookieJar,
+        parse: @escaping @Sendable (String) throws(HFRParsingError) -> Content
+    ) async throws(HFRClientError) -> AccountPage<Content> {
+        let answer = try await request(path, cookies: cookies)
+        guard (200..<300).contains(answer.statusCode) else { throw .httpStatus(answer.statusCode) }
+        let html = answer.html
+        guard SignedInPage.isSignedIn(html) else { return .sessionExpired }
+        return .content(try await Self.parse { () throws(HFRParsingError) in try parse(html) })
+    }
+
     /// Parsing runs off the client actor so that one slow page never holds other requests.
     @concurrent
     private static func parse<Value: Sendable>(

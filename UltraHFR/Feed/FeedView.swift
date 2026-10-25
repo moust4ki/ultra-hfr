@@ -3,8 +3,8 @@
 //  UltraHFR
 //
 //  « Le Fil », A1. Without an account it shows what the device knows: the reading to resume and
-//  the topics read lately. Followed topics, private messages and Qualitay alerts come with the
-//  sign-in (lot 1).
+//  the topics read lately (D11). With one, « Mes drapeaux » and the private messages add what is
+//  new on HFR (`AccountFeedStore`).
 //
 
 import HFRDesign
@@ -18,13 +18,21 @@ struct FeedView: View {
     @Environment(AppNavigation.self) private var navigation
     @Environment(QualitayStore.self) private var qualitay
     @Environment(VisitStore.self) private var visits
+    @Environment(AccountStore.self) private var accounts
+    @Environment(AccountFeedStore.self) private var accountFeed
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.modelContext) private var modelContext
     @Environment(\.hfrPalette) private var palette
     @Environment(\.isInNavigationColumn) private var isInNavigationColumn
 
     var body: some View {
         let resume = FeedSummary.resume(in: positions)
-        let others = positions.filter { $0.persistentModelID != resume?.persistentModelID }
+        let account = accounts.current.flatMap { accounts.isExpired($0) ? nil : $0 }
+        let followed = accountFeed.followed.filter { $0.topic.id.rawValue != resume?.topicID }
+        let followedIDs = Set(accountFeed.followed.map(\.topic.id.rawValue))
+        let unreadConversations = accountFeed.unreadConversations
+        // Followed topics with something new are in « Nouveau ».
+        let others = positions.filter { $0.persistentModelID != resume?.persistentModelID && !followedIDs.contains($0.topicID) }
         List {
             if isInNavigationColumn {
                 // « Le Fil », I1: on large screens, MP and Qualitay summed up in tiles.
@@ -32,6 +40,15 @@ struct FeedView: View {
                     FeedTiles(section: section)
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
+                }
+            }
+            if let expired = accounts.current, accounts.isExpired(expired) {
+                Section {
+                    SignInPrompt(
+                        title: "Ta session HFR a expiré",
+                        detail: "Reconnecte-toi pour revoir tes drapeaux et tes MP dans le Fil.",
+                        pseudo: expired.pseudo
+                    )
                 }
             }
             if let latest = resume {
@@ -51,13 +68,36 @@ struct FeedView: View {
                         }
                     }
                 }
-            } else if !positions.isEmpty {
+            } else if (account != nil ? accountFeed.hasLoaded && followed.isEmpty && unreadConversations.isEmpty : !positions.isEmpty) {
                 Section {
-                    UpToDateCard(count: positions.count, since: visits.previousVisit) {
+                    UpToDateCard(
+                        detail: account != nil
+                            ? "Rien de nouveau dans tes drapeaux ni dans tes MP."
+                            : UpToDateCard.detail(count: positions.count, since: visits.previousVisit)
+                    ) {
                         navigation.select(.forums)
                     }
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
+                }
+            }
+            if account != nil {
+                if !followed.isEmpty || !unreadConversations.isEmpty {
+                    FeedNewSection(section: section, topics: followed, conversations: unreadConversations)
+                } else if !accountFeed.hasLoaded {
+                    Section {
+                        if accountFeed.didFail {
+                            Label("Drapeaux indisponibles. Tire pour réessayer.", systemImage: "exclamationmark.triangle")
+                                .foregroundStyle(palette.text2.color)
+                        } else {
+                            Label {
+                                Text("Chargement de tes drapeaux…")
+                            } icon: {
+                                ProgressView()
+                            }
+                            .foregroundStyle(palette.text2.color)
+                        }
+                    }
                 }
             }
             if !others.isEmpty {
@@ -153,11 +193,13 @@ struct FeedView: View {
                     }
                 }
             }
-            Section {
-                SignInPrompt(
-                    title: "Connecte-toi pour voir tes drapeaux",
-                    detail: "Le Fil réunira tes sujets suivis, tes MP et les Alertes Qualitay qui ont bougé depuis ta dernière visite."
-                )
+            if accounts.current == nil {
+                Section {
+                    SignInPrompt(
+                        title: "Connecte-toi pour voir tes drapeaux",
+                        detail: "Le Fil réunira tes sujets suivis, tes MP et les Alertes Qualitay qui ont bougé depuis ta dernière visite."
+                    )
+                }
             }
         }
         .listStyle(.insetGrouped)
@@ -174,8 +216,21 @@ struct FeedView: View {
                 .disabled(!positions.contains(where: \.hasNews))
             }
         }
-        .refreshable { await qualitay.refresh(force: true) }
+        .refreshable {
+            async let alerts: Void = qualitay.refresh(force: true)
+            await accountFeed.refresh(account: account, force: true)
+            await alerts
+        }
         .task { await qualitay.refresh() }
+        // On each look at the Fil, and when the account changes or its session expires.
+        .task(id: account?.id) { await accountFeed.refresh(account: account) }
+        .onChange(of: navigation.openTopic) { old, _ in
+            // Back from a topic (or on to another one, in columns): flags may have moved.
+            if old != nil { Task { await accountFeed.refresh(account: account) } }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await accountFeed.refresh(account: account) } }
+        }
     }
 
     private func forget(_ position: ReadingPosition) {
@@ -200,10 +255,9 @@ enum FeedSummary {
     }
 }
 
-/// « Tout est lu »: nothing new in the topics read, as far as the lists seen tell.
+/// « Tout est lu »: nothing new in the flags, or in the topics read as far as the lists seen tell.
 private struct UpToDateCard: View {
-    let count: Int
-    let since: Date?
+    let detail: String
     let browse: () -> Void
     @Environment(\.hfrPalette) private var palette
 
@@ -223,7 +277,8 @@ private struct UpToDateCard: View {
         .background(palette.cell.color, in: .rect(cornerRadius: 24))
     }
 
-    private var detail: String {
+    /// Without an account: what the device knows.
+    static func detail(count: Int, since: Date?) -> String {
         let topics = count == 1 ? "ton sujet lu" : "tes \(count.formatted()) sujets lus"
         guard let since else { return "Rien de nouveau dans \(topics)." }
         return "Rien de nouveau dans \(topics) depuis \(ForumTime.moment(since))."
@@ -235,19 +290,21 @@ private struct FeedTiles: View {
     let section: AppSection
     @Environment(QualitayStore.self) private var qualitay
     @Environment(AccountStore.self) private var accounts
+    @Environment(AccountFeedStore.self) private var accountFeed
     @Environment(AppNavigation.self) private var navigation
 
     var body: some View {
         let fresh = qualitay.alerts.filter { ($0.date ?? .distantPast) > qualitay.lastSeen }
+        let unread = accountFeed.unreadConversations.count
         HStack(spacing: 10) {
             Button {
                 navigation.select(.messages)
             } label: {
                 SummaryTile(
-                    title: "MP",
-                    detail: accounts.current == nil ? "Connexion requise" : "Avec le lot 1",
+                    title: unread > 0 ? "\(unread.formatted()) MP" : "MP",
+                    detail: messagesDetail(unread: unread),
                     systemImage: "envelope.fill",
-                    isMuted: true
+                    isMuted: unread == 0
                 )
             }
             .buttonStyle(.plain)
@@ -268,6 +325,17 @@ private struct FeedTiles: View {
             }
             .buttonStyle(.plain)
             .disabled(qualitay.alerts.isEmpty)
+        }
+    }
+
+    private func messagesDetail(unread: Int) -> String {
+        guard let account = accounts.current else { return "Connexion requise" }
+        if accounts.isExpired(account) { return "Session expirée" }
+        if !accountFeed.hasLoaded { return accountFeed.didFail ? "Indisponibles" : "Chargement…" }
+        return switch unread {
+        case 0: "Rien de nouveau"
+        case 1: "1 nouveau"
+        default: "\(unread.formatted()) nouveaux"
         }
     }
 }

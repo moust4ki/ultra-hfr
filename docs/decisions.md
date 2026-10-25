@@ -77,4 +77,4 @@ Sans compte, le Fil ne peut pas lister les drapeaux. Il montre ce que l'appareil
 - **les Alertes Qualitay**, qui viennent d'un flux public ;
 - **« Depuis ta visite de … »**, l'heure à laquelle l'app a été quittée.
 
-Avec un compte (lot 1), les drapeaux de HFR viendront s'ajouter à cette base.
+Avec un compte (lot 1), la section « Nouveau » s'ajoute à cette base : les sujets de « Mes drapeaux » (qui ne liste que les sujets suivis ayant du nouveau) et les MP où un message attend le membre. Ces deux listes sont chargées avec la session, l'une après l'autre ; les lire ne déplace aucun drapeau et ne marque aucun MP comme lu. Elles sont redemandées au plus toutes les 2 minutes quand on revient sur le Fil, ou 10 secondes après un « tirer pour actualiser » ou l'ouverture d'un sujet suivi (son drapeau bouge pendant la lecture). En cas d'échec, rien n'est relancé tout seul. Un sujet suivi s'ouvre à son drapeau, sur le dernier message lu suivi du repère « Nouveau ».

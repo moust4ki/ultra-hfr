@@ -24,6 +24,16 @@ public enum ForumPath {
         "/forum2.php?config=hfr.inc&cat=\(category)&post=\(topic)&page=1&p=1&numreponse=\(post)"
     }
 
+    /// « Mes drapeaux »: the followed topics with something new; `favoritesOnly`: the stars only.
+    public static func followedTopics(favoritesOnly: Bool = false) -> String {
+        "/forum1f.php?config=hfr.inc&owntopic=\(favoritesOnly ? 3 : 1)"
+    }
+
+    /// Page `page` of the member's private conversations.
+    public static func conversations(page: Int) -> String {
+        "/forum1.php?config=hfr.inc&cat=prive&page=\(page)"
+    }
+
     /// Page number in a rewritten topic path (`/hfr/…-sujet_1061629_348.htm#t11405947` → 348).
     public static func topicPageNumber(in path: String) -> Int? {
         guard let end = path.range(of: ".htm")?.lowerBound,
