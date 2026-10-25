@@ -291,6 +291,21 @@
     if (event.target.tagName === "IMG") scheduleLayoutReport();
   }, true);
 
+  // Images whose host is gone (very common on old topics): a small frame with the address
+  // instead of a broken image.
+  document.addEventListener("error", (event) => {
+    const image = event.target;
+    if (image.tagName !== "IMG" || !image.classList.contains("image")) return;
+    const frame = document.createElement("a");
+    frame.className = "image-missing";
+    frame.href = image.src;
+    let host = "";
+    try { host = new URL(image.src).hostname.replace(/^www\./, ""); } catch (_) {}
+    frame.textContent = host ? "Image indisponible · " + host : "Image indisponible";
+    image.replaceWith(frame);
+    scheduleLayoutReport();
+  }, true);
+
   // MARK: Taps
 
   document.addEventListener("click", (event) => {

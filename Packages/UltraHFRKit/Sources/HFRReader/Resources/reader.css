@@ -46,6 +46,11 @@ pre.code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: ca
 .video::after { content: "▶"; position: absolute; inset: 0; display: grid; place-items: center;
   color: #fff; font-size: 28px; text-shadow: 0 1px 8px rgba(0, 0, 0, .5); }
 
+/* Image dont l'hébergeur a disparu : petit cadre avec son adresse (un toucher l'ouvre). */
+.post-body a.image-missing { display: inline-flex; align-items: center; min-height: 36px; margin: 6px 0; padding: 0 12px;
+  border-radius: 10px; background: var(--surface); color: var(--text-2); font-size: 13px; text-decoration: none; }
+.post-body a.image-missing::before { content: "🖼"; margin-right: 6px; filter: grayscale(1); opacity: .6; }
+
 /* Images : place réservée tant qu'elles chargent */
 .post-body img.image { min-height: 60px; background: var(--surface); }
 
