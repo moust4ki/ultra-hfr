@@ -9,6 +9,7 @@ import SwiftUI
 struct EssaysView: View {
     let section: AppSection
     @Environment(AppNavigation.self) private var navigation
+    @Environment(AccountStore.self) private var accounts
 
     var body: some View {
         List {
@@ -20,6 +21,17 @@ struct EssaysView: View {
                 }
             } footer: {
                 Text("Pages chargées sans compte, une à la fois, au fil du défilement. Glisse un message vers la droite pour le citer ; le bouton ••• ouvre le menu du message ; le curseur à droite saute de page en page.")
+            }
+            if let account = accounts.current {
+                Section {
+                    NavigationLink {
+                        SessionCaptureView(account: account)
+                    } label: {
+                        Label("Pages vues connecté", systemImage: "tray.and.arrow.down")
+                    }
+                } footer: {
+                    Text("Pour écrire les fonctions avec compte (lot 1) sur de vraies pages.")
+                }
             }
         }
         .hfrGroupedBackground()
