@@ -21,13 +21,16 @@ struct PageScrubber: View {
     private var shownPage: Int { draggedPage ?? currentPage }
     private var isDragging: Bool { draggedPage != nil }
 
+    private var thumbHeight: CGFloat { isDragging ? 36 : 28 }
+
     private var thumbOffset: CGFloat {
         offset(of: shownPage)
     }
 
+    /// On the last page the thumb ends exactly where the track ends: nothing left below it.
     private func offset(of page: Int) -> CGFloat {
         let progress = pageCount > 1 ? Double(page - 1) / Double(pageCount - 1) : 0
-        return progress * max(trackHeight - 36, 0)
+        return progress * max(trackHeight - thumbHeight, 0)
     }
 
     var body: some View {
@@ -40,12 +43,12 @@ struct PageScrubber: View {
                 Circle()
                     .fill(.tint)
                     .frame(width: 7, height: 7)
-                    .offset(y: offset(of: unreadPage) + 14)
+                    .offset(y: offset(of: unreadPage) + thumbHeight / 2 - 3.5)
                     .accessibilityHidden(true)
             }
             Capsule()
                 .fill(.tint)
-                .frame(width: isDragging ? 14 : 9, height: isDragging ? 36 : 28)
+                .frame(width: isDragging ? 14 : 9, height: thumbHeight)
                 .offset(y: thumbOffset)
             if let draggedPage {
                 Text(draggedPage == unreadPage ? "p. \(draggedPage.formatted()) · non lus" : "p. \(draggedPage.formatted())")

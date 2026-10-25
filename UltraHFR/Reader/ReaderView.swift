@@ -69,11 +69,13 @@ private struct ReaderScreen: View {
                         model.jump(to: page)
                     }
                     .frame(width: 24)
-                    // In the side rail of the unfolded Duo, below the bar's buttons, so that the
-                    // messages keep their whole width.
-                    .padding(.top, usesSideRail ? 200 : 24)
+                    // In the side rail of the unfolded Duo, so that the messages keep their whole
+                    // width: the bar's buttons end 142 pt below the top of the reading there, and
+                    // the scrubber keeps the same 24 pt from them as from Répondre below.
+                    .padding(.top, usesSideRail ? 142 + 24 : 24)
                     .padding(.trailing, usesSideRail ? max(0, (trailingInset - 24) / 2) : 0)
-                    .padding(.bottom, 84)
+                    // Above Répondre (52 pt, 8 pt from the bottom), 24 pt apart.
+                    .padding(.bottom, 8 + 52 + 24)
                     .ignoresSafeArea(.container, edges: usesSideRail ? .trailing : [])
                 }
             }

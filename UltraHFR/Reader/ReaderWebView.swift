@@ -32,6 +32,9 @@ struct ReaderWebView: UIViewRepresentable {
         webView.allowsBackForwardNavigationGestures = false
         webView.navigationDelegate = context.coordinator
         webView.scrollView.contentInsetAdjustmentBehavior = .automatic
+        // The page scrubber shows where the reading is; the system's indicator would repeat it.
+        webView.scrollView.showsVerticalScrollIndicator = false
+        webView.scrollView.showsHorizontalScrollIndicator = false
         context.coordinator.attach(to: webView, style: style)
         webView.loadHTMLString(ReaderHTML.document(style: style), baseURL: HFRKit.forumURL)
         return webView
