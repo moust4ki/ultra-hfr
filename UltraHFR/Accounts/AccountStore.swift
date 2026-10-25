@@ -14,6 +14,8 @@ final class AccountStore {
     private(set) var accounts: [HFRAccount] = []
     /// The account used to read and write.
     private(set) var currentID: String?
+    /// Accounts whose session HFR no longer recognises: they must sign in again.
+    private(set) var expiredIDs: Set<String> = []
 
     @ObservationIgnored private let client: HFRClient
     @ObservationIgnored private let storage = KeychainStorage(service: "com.yendicohen.ultrahfr.accounts", account: "accounts")
@@ -35,8 +37,18 @@ final class AccountStore {
         let account = try await client.login(pseudo: pseudo, password: password)
         accounts.removeAll { $0.id == account.id }
         accounts.append(account)
+        expiredIDs.remove(account.id)
         select(account)
         save()
+    }
+
+    /// HFR answered a page asked with the current account's session as to a visitor.
+    func markCurrentSessionExpired() {
+        if let id = current?.id { expiredIDs.insert(id) }
+    }
+
+    func isExpired(_ account: HFRAccount) -> Bool {
+        expiredIDs.contains(account.id)
     }
 
     func select(_ account: HFRAccount) {

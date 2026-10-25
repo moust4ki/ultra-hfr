@@ -96,9 +96,12 @@ public struct OfflineAwarePage<Content: Sendable>: Sendable {
     public var content: Content
     /// `nil` when the page comes from HFR just now.
     public var savedAt: Date?
+    /// Asked with a session, HFR answered as to a visitor: the session has expired.
+    public var isSessionExpired: Bool
 
-    public init(content: Content, savedAt: Date? = nil) {
+    public init(content: Content, savedAt: Date? = nil, isSessionExpired: Bool = false) {
         self.content = content
         self.savedAt = savedAt
+        self.isSessionExpired = isSessionExpired
     }
 }

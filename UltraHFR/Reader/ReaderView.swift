@@ -33,6 +33,7 @@ private struct ReaderScreen: View {
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.openURL) private var openURL
     @Environment(ConnectivityStore.self) private var connectivity
+    @Environment(AccountStore.self) private var accounts
     @Environment(\.rootLayout) private var rootLayout
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
     /// The unfolded Duo in landscape keeps a strip on the right for the status and the bar's
@@ -148,6 +149,11 @@ private struct ReaderScreen: View {
                     titled.title = model.title
                     recorder.record(topic: titled, page: page, pageCount: pageCount, post: post, author: author)
                 }
+                // The page being read goes with the session while HFR still recognises it.
+                model.session = { [accounts] in
+                    accounts.current.flatMap { accounts.isExpired($0) ? nil : $0.cookies }
+                }
+                model.onSessionExpired = { [accounts] in accounts.markCurrentSessionExpired() }
                 model.onOpenTopic = { [navigation] topic in
                     navigation.open(topic)
                 }

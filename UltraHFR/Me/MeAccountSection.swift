@@ -13,7 +13,7 @@ struct MeAccountSection: View {
     var body: some View {
         Section {
             if let account = accounts.current {
-                AccountCard(account: account) { accounts.signOut(account) }
+                AccountCard(account: account, isExpired: accounts.isExpired(account)) { accounts.signOut(account) }
             } else {
                 SignInPrompt(title: "Aucun compte", detail: "Connecte-toi pour retrouver tes drapeaux, tes MP et répondre. Plusieurs comptes pourront être ajoutés.")
             }

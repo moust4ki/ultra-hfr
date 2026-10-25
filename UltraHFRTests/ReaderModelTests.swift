@@ -78,6 +78,84 @@ struct ReaderModelTests {
         #expect(firstPage.contains("id=\"t\(page1.posts[0].id)\""))
     }
 
+    /// A page as HFR shows it to a signed-in member: its forms carry the member's token.
+    private func signedIn(_ name: String) throws -> String {
+        try Corpus.page(name).replacing(#"name="hash_check" value="""#, with: #"name="hash_check" value="0123456789abcdef""#)
+    }
+
+    private let cookies = CookieJar(cookies: [StoredCookie(name: "md_user", value: "membre", domain: ".hardware.fr")])
+
+    @Test func onlyThePageBeingReadGoesWithTheSession() async throws {
+        StubURLProtocol.answer(.success(try signedIn("sujet-court-p1")), when: onPage(1))
+        StubURLProtocol.answer(.success(try signedIn("sujet-court-p2")), when: onPage(2))
+        let (model, driver) = makeReader()
+        model.session = { [cookies] in cookies }
+        model.sessionReadDelay = .milliseconds(50)
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+        // The page opened is read: with the session.
+        #expect(StubURLProtocol.requestCookies == ["md_user=membre"])
+
+        // The next page is loaded ahead, anonymously…
+        model.loadNext()
+        try await waitUntil { !driver.appended.isEmpty }
+        #expect(StubURLProtocol.requestCookies.last == .some(nil))
+
+        // …then loaded again with the session once the reader stays on it.
+        let post = try #require(try TopicPageParser.parse(html: Corpus.page("sujet-court-p2")).posts.last?.id)
+        model.didShow(post: post, page: 2, seen: post, seenPage: 2)
+        try await waitUntil { StubURLProtocol.requestCookies.count == 3 }
+        #expect(StubURLProtocol.requestCookies.last == "md_user=membre")
+        #expect(StubURLProtocol.requestedURLs.last.map { onPage(2)($0) } == true)
+
+        // Once is enough.
+        model.didShow(post: post, page: 1, seen: post, seenPage: 1)
+        model.didShow(post: post, page: 2, seen: post, seenPage: 2)
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(StubURLProtocol.requestCookies.count == 3)
+    }
+
+    @Test func aPagePassedQuicklyIsNotReadWithTheSession() async throws {
+        StubURLProtocol.answer(.success(try signedIn("sujet-court-p1")), when: onPage(1))
+        StubURLProtocol.answer(.success(try signedIn("sujet-court-p2")), when: onPage(2))
+        let (model, driver) = makeReader()
+        model.session = { [cookies] in cookies }
+        model.sessionReadDelay = .milliseconds(150)
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+        model.loadNext()
+        try await waitUntil { !driver.appended.isEmpty }
+
+        let post = try #require(try TopicPageParser.parse(html: Corpus.page("sujet-court-p2")).posts.last?.id)
+        model.didShow(post: post, page: 2, seen: post, seenPage: 2)
+        model.didShow(post: post, page: 1, seen: post, seenPage: 1)
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(StubURLProtocol.requestCookies.count == 2)
+    }
+
+    @Test func tellsWhenTheSessionHasExpired() async throws {
+        // Asked with the session, HFR answers as to a visitor.
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        let (model, driver) = makeReader()
+        var expired = false
+        model.session = { [cookies] in cookies }
+        model.onSessionExpired = { expired = true }
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+        #expect(expired)
+    }
+
+    @Test func withoutAccountNothingGoesWithASession() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        let (model, driver) = makeReader()
+        var expired = false
+        model.onSessionExpired = { expired = true }
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+        #expect(StubURLProtocol.requestCookies == [nil])
+        #expect(!expired)
+    }
+
     @Test func aDetentAtEachPagePassed() async throws {
         StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
         let (model, driver) = makeReader()

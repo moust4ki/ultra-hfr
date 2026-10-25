@@ -18,6 +18,7 @@ nonisolated final class StubURLProtocol: URLProtocol, @unchecked Sendable {
 
     private static let routes = Mutex<[Route]>([])
     private static let requests = Mutex<[URL]>([])
+    private static let cookieHeaders = Mutex<[String?]>([])
 
     /// The latest answer added wins over older ones for the same address.
     static func answer(_ answer: Answer, when matches: @escaping @Sendable (URL) -> Bool) {
@@ -27,10 +28,16 @@ nonisolated final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     static func reset() {
         routes.withLock { $0.removeAll() }
         requests.withLock { $0.removeAll() }
+        cookieHeaders.withLock { $0.removeAll() }
     }
 
     static var requestedURLs: [URL] {
         requests.withLock { $0 }
+    }
+
+    /// The `Cookie` header of each request, in the same order: `nil` for an anonymous one.
+    static var requestCookies: [String?] {
+        cookieHeaders.withLock { $0 }
     }
 
     static func configuration() -> URLSessionConfiguration {
@@ -45,6 +52,7 @@ nonisolated final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     override func startLoading() {
         guard let url = request.url else { return }
         Self.requests.withLock { $0.append(url) }
+        Self.cookieHeaders.withLock { $0.append(request.value(forHTTPHeaderField: "Cookie")) }
         let answer = Self.routes.withLock { routes in routes.first { $0.matches(url) }?.answer }
             ?? .failure(URLError(.fileDoesNotExist))
         switch answer {

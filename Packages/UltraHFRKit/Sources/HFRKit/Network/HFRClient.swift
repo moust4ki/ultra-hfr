@@ -9,7 +9,8 @@ import HFRContent
 /// HTTP access to forum.hardware.fr.
 ///
 /// Polite by construction: an identifiable User-Agent and at most two requests at a time.
-/// This first version is anonymous; sessions come with the accounts (lot 1).
+/// Pages are loaded anonymously unless an account's cookies are given: only the page being read
+/// is, so that the member's flags move as on the site (docs/decisions.md, D6).
 public actor HFRClient {
     public static let userAgent = "UltraHFR/0.1 (iOS; +https://github.com/moust4ki/ultra-hfr)"
 
@@ -55,8 +56,18 @@ public actor HFRClient {
     }
 
     /// A page that is kept on the device, and shown from there when HFR cannot be reached.
-    public func page(_ path: String, cache: HTMLPageCache) async throws(HFRClientError) -> OfflineAwarePage<String> {
-        do {
+    /// With `cookies`, the page is loaded with that account's session (which moves its flag on a
+    /// topic page); the answer says whether HFR still recognised the session.
+    public func page(_ path: String, cache: HTMLPageCache, cookies: CookieJar? = nil) async throws(HFRClientError) -> OfflineAwarePage<String> {
+        do throws(HFRClientError) {
+            if let cookies {
+                let answer = try await request(path, cookies: cookies)
+                guard (200..<300).contains(answer.statusCode) || answer.statusCode == 404 else {
+                    throw HFRClientError.httpStatus(answer.statusCode)
+                }
+                await cache.store(answer.html, for: path)
+                return OfflineAwarePage(content: answer.html, isSessionExpired: !SignedInPage.isSignedIn(answer.html))
+            }
             let html = try await page(path)
             await cache.store(html, for: path)
             return OfflineAwarePage(content: html)
@@ -74,6 +85,7 @@ public actor HFRClient {
         cookies: CookieJar
     ) async throws(HFRClientError) -> HFRResponse {
         guard let url = URL(string: path, relativeTo: HFRKit.forumURL)?.absoluteURL else { throw .httpStatus(0) }
+        guard !simulatesNoConnection else { throw .network(URLError.Code.notConnectedToInternet.rawValue) }
         var request = URLRequest(url: url)
         request.httpMethod = method
         if let body {

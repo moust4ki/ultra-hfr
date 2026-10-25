@@ -11,10 +11,15 @@ import SwiftUI
 struct SignInView: View {
     @Environment(AccountStore.self) private var accounts
     @Environment(\.dismiss) private var dismiss
-    @State private var pseudo = ""
+    @State private var pseudo: String
     @State private var password = ""
     @State private var isSigningIn = false
     @State private var errorMessage: String?
+
+    /// `pseudo`: prefilled when signing in again after the session expired.
+    init(pseudo: String = "") {
+        _pseudo = State(initialValue: pseudo)
+    }
 
     var body: some View {
         NavigationStack {

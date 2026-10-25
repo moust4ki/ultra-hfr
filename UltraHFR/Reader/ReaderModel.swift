@@ -61,6 +61,17 @@ final class ReaderModel {
     @ObservationIgnored var onPositionChange: ((Int, Int, PostID, String) -> Void)?
     /// A link of a message was tapped (topics of the forum open in the app, the rest outside).
     @ObservationIgnored var onOpenLink: ((URL) -> Void)?
+    /// The signed-in account's session, if any. Only the page being read is loaded with it, so
+    /// that the member's HFR flag moves as on the site (D6); pages loaded ahead are anonymous.
+    @ObservationIgnored var session: (() -> CookieJar?)?
+    /// HFR answered a page asked with the session as to a visitor.
+    @ObservationIgnored var onSessionExpired: (() -> Void)?
+    /// How long a page loaded ahead must stay on screen before it is loaded again with the
+    /// session (the flag then moves to its end, as when the site shows it).
+    @ObservationIgnored var sessionReadDelay: Duration = .seconds(2)
+    /// Pages already loaded with the session.
+    @ObservationIgnored private var pagesReadWithSession: Set<Int> = []
+    @ObservationIgnored private var sessionReadTask: Task<Void, Never>?
     @ObservationIgnored private let client: HFRClient
     @ObservationIgnored private let cache: HTMLPageCache
     @ObservationIgnored private let quoteStore: MultiQuoteStore
@@ -135,7 +146,7 @@ final class ReaderModel {
             return
         }
         Task {
-            guard let (topicPage, html) = await load(page, excluding: [], anchor: anchor) else {
+            guard let (topicPage, html) = await load(page, excluding: [], anchor: anchor, withSession: true) else {
                 retryAction = .open(page: page, anchor: anchor)
                 return
             }
@@ -252,7 +263,7 @@ final class ReaderModel {
         let lastPage = range.upperBound
         Task {
             let excluded = renderedPosts
-            guard let (topicPage, html) = await load(lastPage, excluding: excluded, continuing: true) else {
+            guard let (topicPage, html) = await load(lastPage, excluding: excluded, continuing: true, withSession: true) else {
                 // The end card offers Réessayer itself.
                 clearErrorShownInline()
                 await driver?.endChecked("Réessayer")
@@ -277,7 +288,7 @@ final class ReaderModel {
         }
     }
 
-    private func load(_ page: Int, excluding: Set<PostID>, anchor: PostID? = nil, continuing: Bool = false) async -> (TopicPage, String)? {
+    private func load(_ page: Int, excluding: Set<PostID>, anchor: PostID? = nil, continuing: Bool = false, withSession: Bool = false) async -> (TopicPage, String)? {
         loadingPages.insert(page)
         defer { loadingPages.remove(page) }
         let path = if page == TopicRoute.pageOfAnchor, let anchor {
@@ -286,9 +297,11 @@ final class ReaderModel {
             ForumPath.topic(category: route.category, topic: route.topic, page: page)
         }
         do {
-            let answer = try await client.page(path, cache: cache)
+            let cookies = withSession ? session?() : nil
+            let answer = try await client.page(path, cache: cache, cookies: cookies)
             let html = answer.content
             offlineSince = answer.savedAt
+            if answer.isSessionExpired { onSessionExpired?() }
             let (topicPage, rendered, duration) = try await Self.parseAndRender(
                 html: html, quoted: Set(quoted), excluding: excluding, newAfter: pendingNewMarker, continuing: continuing
             )
@@ -299,6 +312,9 @@ final class ReaderModel {
             guard topicPage.topicID == route.topic else {
                 errorMessage = "Ce message n'est pas dans ce sujet."
                 return nil
+            }
+            if cookies != nil, answer.savedAt == nil, !answer.isSessionExpired {
+                pagesReadWithSession.insert(topicPage.page)
             }
             title = topicPage.title.isEmpty ? title : topicPage.title
             if topicPage.poll != nil { hasPoll = true }
@@ -382,6 +398,25 @@ final class ReaderModel {
         lastVisiblePost = post
         if let author = posts[seen]?.author {
             onPositionChange?(seenPage, pageCount ?? seenPage, seen, author)
+        }
+        readWithSessionWhenSettled(page)
+    }
+
+    /// A page loaded ahead became the one being read: once the reader stays on it, it is loaded
+    /// once more, with the session, for the HFR flag to move to its end.
+    private func readWithSessionWhenSettled(_ page: Int) {
+        sessionReadTask?.cancel()
+        guard session?() != nil, !pagesReadWithSession.contains(page) else { return }
+        let delay = sessionReadDelay
+        sessionReadTask = Task { [weak self] in
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled, let self, self.visiblePage == page,
+                  !self.pagesReadWithSession.contains(page), let cookies = self.session?() else { return }
+            self.pagesReadWithSession.insert(page)
+            let path = ForumPath.topic(category: self.route.category, topic: self.route.topic, page: page)
+            if let answer = try? await self.client.page(path, cache: self.cache, cookies: cookies), answer.isSessionExpired {
+                self.onSessionExpired?()
+            }
         }
     }
 
@@ -548,7 +583,7 @@ final class ReaderModel {
             return
         }
         Task {
-            guard let (topicPage, html) = await load(TopicRoute.lastPage, excluding: []) else {
+            guard let (topicPage, html) = await load(TopicRoute.lastPage, excluding: [], withSession: true) else {
                 retryAction = .lastMessage
                 return
             }

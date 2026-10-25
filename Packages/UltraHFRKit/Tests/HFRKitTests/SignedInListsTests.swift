@@ -65,4 +65,13 @@ struct SignedInListsTests {
             #expect(form.action.contains("bddpost.php"))
         }
     }
+
+    @Test func tellsASignedInPageFromAVisitorOne() throws {
+        for name in ["connecte-accueil", "connecte-drapeaux", "connecte-mp-liste", "connecte-sujet", "connecte-mp"] {
+            #expect(SignedInPage.isSignedIn(try Fixture.html(name)), "\(name)")
+        }
+        for name in ["accueil", "liste-hardware-p1", "sujet-court-p1"] {
+            #expect(!SignedInPage.isSignedIn(try Fixture.html(name)), "\(name)")
+        }
+    }
 }
