@@ -46,7 +46,7 @@ public enum ReaderHTML {
         var html = "<section class=\"topic-page\" data-page=\"\(page.page)\">"
         let date = page.posts.first?.postedAt.map { $0.formatted(.dateTime.day().month(.abbreviated).year().locale(french)) } ?? ""
         if !continuing {
-            html += "<div class=\"page-divider\"><span class=\"page\">Page \(page.page.formatted(.number.locale(french)))</span><span class=\"date\">\(escape(date))</span></div>"
+            html += "<div class=\"page-divider\" role=\"heading\" aria-level=\"2\"><span class=\"page\">Page \(page.page.formatted(.number.locale(french)))</span><span class=\"date\">\(escape(date))</span></div>"
         }
         if page.page == 1, !continuing, let poll = page.poll {
             html += self.poll(poll)
@@ -54,7 +54,7 @@ public enum ReaderHTML {
         var newAfter = newAfter
         for post in page.posts where !excluding.contains(post.id) && !post.isRepeatedFromPreviousPage {
             if let last = newAfter, post.id.rawValue > last.rawValue {
-                html += "<div class=\"new-marker\" id=\"new-marker\">Nouveau</div>"
+                html += "<div class=\"new-marker\" id=\"new-marker\" role=\"heading\" aria-level=\"2\">Nouveau</div>"
                 newAfter = nil
             }
             html += self.post(post, page: page.page, isQuoted: quoted.contains(post.id))
@@ -95,7 +95,9 @@ public enum ReaderHTML {
         if post.edit != nil { meta += " · modifié" }
         if post.quoteCount > 0 { meta += post.quoteCount == 1 ? " · cité 1 fois" : " · cité \(post.quoteCount) fois" }
 
-        var html = "<article class=\"\(classes.joined(separator: " "))\" id=\"t\(post.id)\" data-post=\"\(post.id)\" data-page=\"\(page)\" data-author=\"\(escape(post.author))\">"
+        // VoiceOver: one article per message, named by its author and date.
+        let label = meta.isEmpty ? "Message de \(post.author)" : "Message de \(post.author), \(meta)"
+        var html = "<article class=\"\(classes.joined(separator: " "))\" id=\"t\(post.id)\" data-post=\"\(post.id)\" data-page=\"\(page)\" data-author=\"\(escape(post.author))\" aria-label=\"\(escape(label))\">"
         html += "<header class=\"post-head\">"
         html += "<div class=\"avatar\" style=\"background: oklch(0.62 0.13 \(hue(of: post.author)))\" aria-hidden=\"true\">\(escape(initial))</div>"
         html += "<div class=\"post-meta\"><span class=\"pseudo\">\(escape(post.author))</span><span class=\"date\">\(escape(meta))</span></div>"

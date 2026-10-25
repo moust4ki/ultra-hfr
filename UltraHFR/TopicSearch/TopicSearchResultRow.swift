@@ -22,6 +22,7 @@ struct TopicSearchResultRow: View {
                     .font(.subheadline)
                     .bold()
                     .foregroundStyle(palette.text.color)
+                    .lineLimit(1)
                 Spacer()
                 if post.quoteCount > 0 {
                     HStack(spacing: 2) {
@@ -37,6 +38,8 @@ struct TopicSearchResultRow: View {
                     Text(date.formatted(date: .abbreviated, time: .shortened))
                         .font(.footnote)
                         .foregroundStyle(palette.text2.color)
+                        .lineLimit(1)
+                        .layoutPriority(1)
                 }
             }
             Text(SearchHighlight.text(excerpt, query: words, color: palette.highlight.color))

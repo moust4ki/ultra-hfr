@@ -42,6 +42,14 @@ struct ReaderHTMLTests {
         #expect(!ReaderHTML.page(page, newAfter: 104).contains("new-marker\" id"))
     }
 
+    @Test func messagesAreNamedForVoiceOver() {
+        let body = MessageBody(blocks: [.paragraph([.text("x")])])
+        let html = ReaderHTML.post(Post(id: 1, author: "Kaiju", body: body), page: 1, isQuoted: false)
+        #expect(html.contains("aria-label=\"Message de Kaiju\""))
+        let page = ReaderHTML.page(TopicPage(topicID: 1, categoryID: 1, title: "S", page: 2, pageCount: 3, posts: [Post(id: 1, author: "a", body: body)]))
+        #expect(page.contains("class=\"page-divider\" role=\"heading\""))
+    }
+
     @Test func headerSaysHowOftenAMessageWasQuoted() {
         let body = MessageBody(blocks: [.paragraph([.text("x")])])
         #expect(ReaderHTML.post(Post(id: 1, author: "a", quoteCount: 3, body: body), page: 1, isQuoted: false).contains("cité 3 fois"))
