@@ -14,6 +14,10 @@ final class ComposerModel {
     var selection: TextSelection?
     var mode: ComposerMode = .bbcode
     var isSmileyPanelShown = false
+    /// When the draft found on opening was written.
+    var restoredDraftDate: Date?
+    /// Last save of the draft.
+    var savedAt: Date?
 
     init(text: String) {
         self.text = text

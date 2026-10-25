@@ -86,9 +86,7 @@ struct ComposerView: View {
                 }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
-                Text("Brouillon enregistré sur l'appareil · l'envoi arrive avec la connexion")
-                    .font(.caption)
-                    .foregroundStyle(palette.text3.color)
+                DraftStatus(restoredAt: model.restoredDraftDate, savedAt: model.savedAt, erase: eraseDraft)
                     .padding(.bottom, 4)
             }
         }
@@ -114,24 +112,52 @@ struct ComposerView: View {
     }
 
     private func loadDraft() {
-        let topicID = topic.topic.rawValue
-        let descriptor = FetchDescriptor<Draft>(predicate: #Predicate { $0.topicID == topicID })
-        let saved = (try? modelContext.fetch(descriptor).first)?.text ?? ""
+        let store = DraftStore(context: modelContext)
+        store.purge()
+        let draft = store.draft(for: topic.topic.rawValue)
+        let saved = draft?.text ?? ""
+        if !saved.isEmpty {
+            model.restoredDraftDate = draft?.updatedAt
+        }
         model.text = quotedText.isEmpty ? saved : (saved.isEmpty ? quotedText : saved + "\n\n" + quotedText)
     }
 
     private func saveDraft(_ text: String) {
-        let topicID = topic.topic.rawValue
-        let descriptor = FetchDescriptor<Draft>(predicate: #Predicate { $0.topicID == topicID })
-        if let draft = try? modelContext.fetch(descriptor).first {
-            if text.isEmpty {
-                modelContext.delete(draft)
+        DraftStore(context: modelContext).save(text, for: topic.topic.rawValue)
+        model.savedAt = text.isEmpty ? nil : .now
+    }
+
+    /// Starts again from the quotes only.
+    private func eraseDraft() {
+        model.restoredDraftDate = nil
+        model.text = quotedText
+    }
+}
+
+/// « Brouillon de 22:58 restauré · Effacer », then « Brouillon enregistré · 23:04 ».
+private struct DraftStatus: View {
+    let restoredAt: Date?
+    let savedAt: Date?
+    let erase: () -> Void
+    @Environment(\.hfrPalette) private var palette
+
+    var body: some View {
+        Group {
+            if let restoredAt {
+                HStack(spacing: 6) {
+                    Text("Brouillon de \(ForumTime.moment(restoredAt)) restauré")
+                    Button("Effacer", action: erase)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(palette.accent.text.color)
+                        .accessibilityHint("Repart de zéro, en gardant les citations")
+                }
+            } else if let savedAt {
+                Text("Brouillon enregistré · \(ForumTime.moment(savedAt)) · l'envoi arrive avec la connexion")
             } else {
-                draft.text = text
-                draft.updatedAt = .now
+                Text("Brouillon enregistré sur l'appareil · l'envoi arrive avec la connexion")
             }
-        } else if !text.isEmpty {
-            modelContext.insert(Draft(topicID: topicID, text: text))
         }
+        .font(.caption)
+        .foregroundStyle(palette.text3.color)
     }
 }
