@@ -47,6 +47,8 @@ struct MemberProfileView: View {
                     } label: {
                         Label("Tous ses messages", systemImage: "text.bubble")
                     }
+                    // Opened from a link, the pseudo is only known once the profile is read.
+                    .disabled(model.profile == nil)
                     Button {} label: {
                         Label("Envoyer un MP", systemImage: "envelope")
                             .foregroundStyle(palette.text3.color)

@@ -38,6 +38,9 @@ final class ForumSearchModel {
     private(set) var results: [TopicSummary] = []
     private(set) var isSearching = false
     private(set) var searchedText: String?
+    /// Scope and category of the results shown (the pickers may have moved since).
+    private(set) var searchedScope: ForumSearchQuery.Scope = .titles
+    private(set) var searchedCategory: CategoryID?
     private(set) var errorMessage: String?
 
     private let defaults: UserDefaults
@@ -64,40 +67,57 @@ final class ForumSearchModel {
         recents = defaults.stringArray(forKey: Self.recentsKey) ?? []
     }
 
+    /// A new search (or clearing the field) makes the answers of the previous one stale.
+    @ObservationIgnored private var generation = 0
+
     func search(_ text: String, using client: HFRClient) async {
         let trimmed = text.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty, !isSearching else { return }
+        guard !trimmed.isEmpty else { return }
+        generation += 1
+        let current = generation
         isSearching = true
-        defer { isSearching = false }
+        defer { if current == generation { isSearching = false } }
+        let searchedScope = scope
+        let searchedCategory = category
         do {
             if category == .everywhere {
                 let categories = allCategories.isEmpty ? ForumPath.allCategoryIDs : allCategories
                 let found = try await client.search(ForumWideSearch(text: trimmed, scope: scope, categories: categories))
+                guard current == generation else { return }
                 everywhereResults = found
                 results = found.topics
             } else {
+                let found = try await client.search(ForumSearchQuery(text: trimmed, category: category, subcategory: subcategory, scope: scope))
+                guard current == generation else { return }
                 everywhereResults = nil
-                results = try await client.search(ForumSearchQuery(text: trimmed, category: category, subcategory: subcategory, scope: scope))
+                results = found
             }
             searchedText = trimmed
+            self.searchedScope = searchedScope
+            self.searchedCategory = searchedCategory
             errorMessage = nil
             remember(trimmed)
         } catch {
+            guard current == generation else { return }
             errorMessage = "La recherche n'a pas abouti. Réessaie dans un moment."
         }
     }
 
     /// « Tout HFR »: the results of another category with results.
     func showEverywhere(in category: CategoryID, using client: HFRClient) async {
-        guard let found = everywhereResults, let text = searchedText, !isSearching else { return }
+        guard let found = everywhereResults, let text = searchedText else { return }
+        generation += 1
+        let current = generation
         isSearching = true
-        defer { isSearching = false }
+        defer { if current == generation { isSearching = false } }
         do {
-            let other = try await client.search(ForumWideSearch(text: text, scope: scope, categoryList: found.categoryList, category: category))
+            let other = try await client.search(ForumWideSearch(text: text, scope: searchedScope, categoryList: found.categoryList, category: category))
+            guard current == generation else { return }
             everywhereResults = other
             results = other.topics
             errorMessage = nil
         } catch {
+            guard current == generation else { return }
             errorMessage = "La recherche n'a pas abouti. Réessaie dans un moment."
         }
     }
@@ -120,6 +140,8 @@ final class ForumSearchModel {
     }
 
     func clear() {
+        generation += 1
+        isSearching = false
         everywhereResults = nil
         results = []
         searchedText = nil

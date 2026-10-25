@@ -34,6 +34,17 @@ struct AppNavigationTests {
         #expect(navigation.compactPath(for: .forums) == [list, .topic(topic)])
     }
 
+    @Test func foldingShowsTheTabOfTheTopic() {
+        let navigation = AppNavigation()
+        // Unfolded: a topic opened from the Fil, then the column moved to Forums.
+        navigation.select(.feed)
+        navigation.open(topic)
+        navigation.select(.forums)
+        navigation.showOpenTopicSection()
+        #expect(navigation.section == .feed)
+        #expect(navigation.compactPath(for: .feed) == [.topic(topic)])
+    }
+
     @Test func goingBackFromTheTopicClosesIt() {
         let navigation = AppNavigation()
         navigation.setCompactPath([list, .topic(topic)], for: .forums)

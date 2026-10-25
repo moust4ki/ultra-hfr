@@ -120,11 +120,17 @@ private struct ReaderScreen: View {
                     case .profile(let profile):
                         model.presentedProfile = ProfileRequest(profileID: profile, pseudo: "Profil")
                     case .topicList(let path):
-                        let section = navigation.openTopicSection ?? navigation.section
-                        // In compact width the reading sits on top of its section: it gives way
-                        // to the list, as a link to another topic replaces it.
-                        if horizontalSizeClass != .regular { navigation.closeTopic() }
-                        navigation.push(.topicList(TopicListRoute(title: "Sujets", path: path)), in: section)
+                        let list = AppRoute.topicList(TopicListRoute(title: "Sujets", path: path))
+                        if horizontalSizeClass == .regular {
+                            // Next to the reading, in the column as it is shown.
+                            navigation.push(list, in: navigation.section)
+                        } else {
+                            // The reading sits on top of its section: it gives way to the list,
+                            // as a link to another topic replaces it.
+                            let section = navigation.openTopicSection ?? navigation.section
+                            navigation.closeTopic()
+                            navigation.push(list, in: section)
+                        }
                     case nil:
                         openURL(url)
                     }

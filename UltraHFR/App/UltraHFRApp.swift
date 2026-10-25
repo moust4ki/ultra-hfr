@@ -13,9 +13,7 @@ struct UltraHFRApp: App {
     @State private var client: HFRClient
     @State private var pageCache = HTMLPageCache(directory: URL.cachesDirectory.appending(path: "Pages"))
     @State private var settings = AppSettings()
-    @State private var navigation = AppNavigation()
     @State private var forums: ForumsStore
-    @State private var readers = ReaderSessions()
     @State private var qualitay: QualitayStore
     @State private var accounts: AccountStore
     @State private var visits = VisitStore()
@@ -37,13 +35,11 @@ struct UltraHFRApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            SceneRoot()
                 .environment(\.hfrClient, client)
                 .environment(\.pageCache, pageCache)
                 .environment(settings)
-                .environment(navigation)
                 .environment(forums)
-                .environment(readers)
                 .environment(qualitay)
                 .environment(accounts)
                 .environment(visits)

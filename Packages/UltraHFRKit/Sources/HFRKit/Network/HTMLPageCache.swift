@@ -12,7 +12,9 @@ import Foundation
 public actor HTMLPageCache {
     private let directory: URL
     private let limit: Int
-    private var storesSinceTrim = 0
+    /// Starts at the threshold so that the first page stored at each launch trims what
+    /// earlier, shorter sessions left behind.
+    private var storesSinceTrim = 20
 
     /// `limit`: number of pages kept, the oldest go first. A topic page takes 20 to 60 KB
     /// once compressed.
@@ -29,11 +31,11 @@ public actor HTMLPageCache {
         } catch {
             return
         }
-        storesSinceTrim += 1
         if storesSinceTrim >= 20 {
             storesSinceTrim = 0
             trim()
         }
+        storesSinceTrim += 1
     }
 
     /// The page saved for `path`, and when it was saved.

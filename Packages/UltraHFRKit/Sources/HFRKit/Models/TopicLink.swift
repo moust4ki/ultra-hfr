@@ -10,6 +10,7 @@ import Foundation
 public struct TopicLink: Sendable, Hashable {
     public var category: CategoryID
     public var topic: TopicID
+    /// 0 when the link names a message (`numreponse=`) without its page: HFR finds the page.
     public var page: Int
     public var post: PostID?
 
@@ -32,6 +33,11 @@ public struct TopicLink: Sendable, Hashable {
             let items = components.queryItems ?? []
             func value(_ name: String) -> Int? { items.first { $0.name == name }?.value.flatMap(Int.init) }
             guard let category = value("cat"), let topic = value("post") else { return nil }
+            // Search results link to `numreponse=…` with `page=1`, whatever the message's page.
+            if post == nil, let message = value("numreponse"), message > 0 {
+                self.init(category: CategoryID(rawValue: category), topic: TopicID(rawValue: topic), page: 0, post: PostID(rawValue: message))
+                return
+            }
             self.init(category: CategoryID(rawValue: category), topic: TopicID(rawValue: topic), page: value("page") ?? 1, post: post)
             return
         }

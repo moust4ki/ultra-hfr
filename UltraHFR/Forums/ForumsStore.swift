@@ -25,6 +25,9 @@ final class ForumsStore {
     @ObservationIgnored private let client: HFRClient
     @ObservationIgnored private let cacheURL = URL.cachesDirectory.appending(path: "categories.json")
     @ObservationIgnored private let recentsKey = "recent_topic_lists"
+    /// The forum list barely changes: going back to it does not ask HFR again for a while.
+    @ObservationIgnored private var refreshedAt: Date?
+    nonisolated static let refreshInterval: TimeInterval = 600
 
     init(client: HFRClient) {
         self.client = client
@@ -38,13 +41,16 @@ final class ForumsStore {
         }
     }
 
-    func refresh() async {
+    /// `force`: pull to refresh, retry or the network coming back.
+    func refresh(force: Bool = false, now: Date = .now) async {
         guard !isLoading else { return }
+        if !force, !categories.isEmpty, let refreshedAt, now.timeIntervalSince(refreshedAt) < Self.refreshInterval { return }
         isLoading = true
         defer { isLoading = false }
         do {
             let fresh = try await client.categories()
             categories = fresh
+            refreshedAt = now
             errorMessage = nil
             isOffline = false
             if let data = try? JSONEncoder().encode(fresh) {

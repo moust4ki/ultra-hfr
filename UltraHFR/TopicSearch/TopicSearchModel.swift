@@ -60,9 +60,13 @@ final class TopicSearchModel {
         current?.word ?? ""
     }
 
+    /// A new search (or clearing it) makes the answers of the previous one stale.
+    @ObservationIgnored private var generation = 0
+
     func search(using client: HFRClient) async {
         let query = query
-        guard !query.isEmpty, !isLoading else { return }
+        guard !query.isEmpty else { return }
+        generation += 1
         results = []
         next = nil
         current = query
@@ -76,6 +80,8 @@ final class TopicSearchModel {
     #endif
 
     func clear() {
+        generation += 1
+        isLoading = false
         results = []
         next = nil
         current = nil
@@ -89,15 +95,18 @@ final class TopicSearchModel {
     }
 
     private func load(_ query: TopicSearch, using client: HFRClient) async {
+        let current = generation
         isLoading = true
-        defer { isLoading = false }
+        defer { if current == generation { isLoading = false } }
         do {
             let page = try await client.search(in: query)
+            guard current == generation else { return }
             let known = Set(results.map(\.id))
             results += page.posts.filter { !known.contains($0.id) }
             next = page.next
             errorMessage = nil
         } catch {
+            guard current == generation else { return }
             errorMessage = "La recherche n'a pas abouti. Réessaie dans un moment."
         }
     }

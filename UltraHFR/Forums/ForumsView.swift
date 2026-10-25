@@ -56,7 +56,7 @@ struct ForumsView: View {
         .overlay {
             if forums.categories.isEmpty {
                 ForumsPlaceholder(isLoading: forums.isLoading, errorMessage: forums.errorMessage) {
-                    Task { await forums.refresh() }
+                    Task { await forums.refresh(force: true) }
                 }
             }
         }
@@ -66,10 +66,10 @@ struct ForumsView: View {
                     .padding(.bottom, 8)
             }
         }
-        .refreshable { await forums.refresh() }
+        .refreshable { await forums.refresh(force: true) }
         .task { await forums.refresh() }
         .onChange(of: connectivity.reconnections) {
-            if forums.isOffline || forums.categories.isEmpty { Task { await forums.refresh() } }
+            if forums.isOffline || forums.categories.isEmpty { Task { await forums.refresh(force: true) } }
         }
         .task(id: forums.isOffline) {
             if forums.isOffline { await forums.checkOfflineLists(in: pageCache) }

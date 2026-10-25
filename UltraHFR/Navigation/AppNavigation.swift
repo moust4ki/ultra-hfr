@@ -70,6 +70,12 @@ final class AppNavigation {
         openTopicSection = section ?? self.section
     }
 
+    /// In compact width the topic sits on top of its section's tab: that tab is shown, after
+    /// folding the Duo or a restore saved in regular width (where the column may show another).
+    func showOpenTopicSection() {
+        if let openTopicSection { section = openTopicSection }
+    }
+
     func closeTopic() {
         openTopic = nil
         openTopicSection = nil

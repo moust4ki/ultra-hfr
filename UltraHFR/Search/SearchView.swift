@@ -216,14 +216,14 @@ private struct RemoteResults: View {
         } else if let searched = model.searchedText {
             Section(model.results.isEmpty ? "Sur forum.hardware.fr" : "Sur forum.hardware.fr · \(model.results.count) sujets") {
                 if model.results.isEmpty {
-                    Text(model.category == .everywhere
+                    Text(model.searchedCategory == .everywhere
                          ? "Aucun résultat pour « \(searched) » dans tout HFR."
                          : "Aucun résultat pour « \(searched) » dans cette catégorie.")
                         .foregroundStyle(.secondary)
-                    if model.scope == .titles {
+                    if model.searchedScope == .titles {
                         Button("Chercher aussi dans les messages", systemImage: "text.magnifyingglass", action: widen)
                     }
-                    if model.category != .everywhere {
+                    if model.searchedCategory != .everywhere {
                         Button("Chercher dans tout HFR", systemImage: "globe", action: everywhere)
                     }
                 }

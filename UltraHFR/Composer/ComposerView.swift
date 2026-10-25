@@ -133,7 +133,7 @@ struct ComposerView: View {
         if !saved.isEmpty {
             model.restoredDraftDate = draft?.updatedAt
         }
-        model.text = quotedText.isEmpty ? saved : (saved.isEmpty ? quotedText : saved + "\n\n" + quotedText)
+        model.text = DraftMerge.text(draft: saved, quotes: quotedText)
     }
 
     private func saveDraft(_ text: String) {

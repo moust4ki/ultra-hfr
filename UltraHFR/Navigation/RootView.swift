@@ -36,6 +36,9 @@ struct RootView: View {
             // Reading positions and drafts are written before iOS may close the app.
             if phase != .active, modelContext.hasChanges { try? modelContext.save() }
         }
+        .onChange(of: horizontalSizeClass) { _, sizeClass in
+            if sizeClass != .regular { navigation.showOpenTopicSection() }
+        }
         .onChange(of: navigation.snapshot) { _, snapshot in
             guard isRestored, let data = try? JSONEncoder().encode(snapshot) else { return }
             savedNavigation = data
@@ -51,12 +54,15 @@ struct RootView: View {
             descriptor.fetchLimit = 1
             return (try? modelContext.fetch(descriptor).first)?.resumeRoute
         }
+        if horizontalSizeClass != .regular { navigation.showOpenTopicSection() }
     }
 
     /// A topic found in the iOS search opens where it was left.
     private func openFromSpotlight(_ activity: NSUserActivity) {
         guard let identifier = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
               let (category, topic) = TopicSpotlight.topic(fromIdentifier: identifier) else { return }
+        // Asked for now: the saved navigation must not replace it.
+        isRestored = true
         let topicID = topic.rawValue
         var descriptor = FetchDescriptor<ReadingPosition>(predicate: #Predicate { $0.topicID == topicID })
         descriptor.fetchLimit = 1

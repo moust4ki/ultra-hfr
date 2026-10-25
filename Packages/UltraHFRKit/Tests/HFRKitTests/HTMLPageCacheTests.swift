@@ -36,6 +36,23 @@ struct HTMLPageCacheTests {
         #expect(files.count == 3)
     }
 
+    @Test func eachLaunchTrimsWhatShortSessionsLeft() async throws {
+        let directory = temporaryDirectory()
+        var page = 0
+        // Three launches storing two pages each, fewer than the trimming interval.
+        for _ in 1...3 {
+            let cache = HTMLPageCache(directory: directory, limit: 3)
+            for _ in 1...2 {
+                page += 1
+                await cache.store("<p>page \(page)</p>", for: "/page/\(page)")
+                try await Task.sleep(for: .milliseconds(20))
+            }
+        }
+        let files = try FileManager.default.contentsOfDirectory(atPath: directory.path(percentEncoded: false))
+        #expect(files.count <= 4)
+        #expect(await HTMLPageCache(directory: directory, limit: 3).page(for: "/page/1") == nil)
+    }
+
     @Test func reportsAndClearsItsUsage() async throws {
         let cache = HTMLPageCache(directory: temporaryDirectory())
         #expect(await cache.usage().pages == 0)
