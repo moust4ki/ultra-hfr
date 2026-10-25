@@ -6,6 +6,7 @@
 //  iPhone Duo is folded or unfolded: the new web view is filled again from the model.
 //
 
+import Foundation
 import HFRKit
 import Observation
 
@@ -21,6 +22,12 @@ final class ReaderSessions {
             return existing
         }
         let model = ReaderModel(route: route, client: client, cache: cache)
+        #if DEBUG
+        // Simulator checks: SIMCTL_CHILD_ULTRAHFR_MAX_PAGES=2 xcrun simctl launch …
+        if let limit = ProcessInfo.processInfo.environment["ULTRAHFR_MAX_PAGES"].flatMap(Int.init) {
+            model.maxLoadedPages = limit
+        }
+        #endif
         models[route.topic] = model
         touch(route.topic)
         while order.count > capacity {

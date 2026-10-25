@@ -122,6 +122,33 @@
       if (target) reader.scrollToPost(Number(target.dataset.post));
     },
 
+    /** Removes the pages before `page`, keeping what the reader sees in place. */
+    trimPagesBefore(page) {
+      const anchorElement = visibleElement();
+      const anchorTop = anchorElement ? anchorElement.getBoundingClientRect().top : 0;
+      for (const section of thread().querySelectorAll(".topic-page")) {
+        if (Number(section.dataset.page) < page) section.remove();
+      }
+      postsCache = null;
+      if (anchorElement && anchorElement.isConnected) {
+        isAdjusting = true;
+        window.scrollBy(0, anchorElement.getBoundingClientRect().top - anchorTop);
+        isAdjusting = false;
+      }
+      nearStartSent = false;
+      changed();
+    },
+
+    /** Removes the pages after `page` (the reader went back up). */
+    trimPagesAfter(page) {
+      for (const section of thread().querySelectorAll(".topic-page")) {
+        if (Number(section.dataset.page) > page) section.remove();
+      }
+      for (const loading of document.querySelectorAll(".page-loading")) loading.remove();
+      nearEndSent = false;
+      changed();
+    },
+
     /** The next topic to read, or null; shown at the end of the topic. */
     setNextTopic(topic) {
       nextTopic = topic;

@@ -72,6 +72,10 @@ final class ReaderModel {
     @ObservationIgnored private var postPages: [PostID: Int] = [:]
     /// Messages in the page, so that HFR's repeat of a page's last message is not shown twice.
     @ObservationIgnored private var renderedPosts: Set<PostID> = []
+    @ObservationIgnored private var renderedPostsByPage: [Int: Set<PostID>] = [:]
+    /// Pages kept in the web page while reading on; the furthest from the reader are removed
+    /// and loaded again if the reader goes back to them, so that a long reading stays light.
+    @ObservationIgnored var maxLoadedPages = 10
     @ObservationIgnored private var isReady = false
     @ObservationIgnored private var pendingOpen: (page: Int, anchor: PostID?)?
     /// Last message read when the topic was opened, until the page with the next one is shown.
@@ -133,6 +137,7 @@ final class ReaderModel {
             }
             retryAction = nil
             renderedPosts = Set(topicPage.posts.map(\.id))
+            renderedPostsByPage = [topicPage.page: renderedPosts]
             renderedPages = [(topicPage.page, html)]
             loadedPages = topicPage.page...topicPage.page
             visiblePage = topicPage.page
@@ -162,9 +167,11 @@ final class ReaderModel {
             guard let current = loadedPages, topicPage.page == current.upperBound + 1 else { return }
             retryAction = nil
             renderedPosts.formUnion(topicPage.posts.map(\.id))
+            renderedPostsByPage[topicPage.page, default: []].formUnion(topicPage.posts.map(\.id))
             renderedPages.append((topicPage.page, html))
             loadedPages = current.lowerBound...topicPage.page
             await driver?.append(html: html)
+            await trimLoadedPages(keepingEnd: true)
         }
     }
 
@@ -179,9 +186,30 @@ final class ReaderModel {
             guard let current = loadedPages, topicPage.page == current.lowerBound - 1 else { return }
             retryAction = nil
             renderedPosts.formUnion(topicPage.posts.map(\.id))
+            renderedPostsByPage[topicPage.page, default: []].formUnion(topicPage.posts.map(\.id))
             renderedPages.insert((topicPage.page, html), at: 0)
             loadedPages = topicPage.page...current.upperBound
             await driver?.prepend(html: html)
+            await trimLoadedPages(keepingEnd: false)
+        }
+    }
+
+    /// Removes the pages furthest from where the reader is going, beyond `maxLoadedPages`.
+    private func trimLoadedPages(keepingEnd: Bool) async {
+        guard let range = loadedPages, range.count > maxLoadedPages else { return }
+        let kept = keepingEnd
+            ? (range.upperBound - maxLoadedPages + 1)...range.upperBound
+            : range.lowerBound...(range.lowerBound + maxLoadedPages - 1)
+        let dropped = Set(range).subtracting(kept)
+        for page in dropped {
+            renderedPosts.subtract(renderedPostsByPage.removeValue(forKey: page) ?? [])
+        }
+        renderedPages.removeAll { dropped.contains($0.page) }
+        loadedPages = kept
+        if keepingEnd {
+            await driver?.trimPages(before: kept.lowerBound)
+        } else {
+            await driver?.trimPages(after: kept.upperBound)
         }
     }
 
@@ -200,6 +228,7 @@ final class ReaderModel {
                 return
             }
             renderedPosts.formUnion(newPosts.map(\.id))
+            renderedPostsByPage[topicPage.page, default: []].formUnion(newPosts.map(\.id))
             renderedPages.append((topicPage.page, html))
             await driver?.append(html: html)
         }
@@ -466,6 +495,7 @@ final class ReaderModel {
             }
             retryAction = nil
             renderedPosts = Set(topicPage.posts.map(\.id))
+            renderedPostsByPage = [topicPage.page: renderedPosts]
             renderedPages = [(topicPage.page, html)]
             loadedPages = topicPage.page...topicPage.page
             visiblePage = topicPage.page

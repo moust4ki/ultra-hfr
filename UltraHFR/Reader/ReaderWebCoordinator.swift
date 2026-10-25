@@ -82,6 +82,14 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         await run("reader.setNextTopic(null)", [:])
     }
 
+    func trimPages(before page: Int) async {
+        await run("reader.trimPagesBefore(page)", ["page": page])
+    }
+
+    func trimPages(after page: Int) async {
+        await run("reader.trimPagesAfter(page)", ["page": page])
+    }
+
     func showLoading(page: Int) async {
         await run("reader.showLoading(page, label)", ["page": page, "label": "Page \(page.formatted())"])
     }

@@ -49,6 +49,31 @@ struct ReaderModelTests {
         #expect(!ids.isEmpty)
     }
 
+    @Test func keepsTheReadingLight() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
+        let (model, driver) = makeReader()
+        model.maxLoadedPages = 1
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+
+        // Reading on: page 1 leaves the web page.
+        model.loadNext()
+        try await waitUntil { !driver.trimmedBefore.isEmpty }
+        #expect(driver.trimmedBefore == [2])
+        #expect(model.loadedPages == 2...2)
+
+        // Going back up: page 1 comes back with its messages (they are no longer « shown »),
+        // page 2 leaves.
+        model.loadPrevious()
+        try await waitUntil { !driver.trimmedAfter.isEmpty }
+        #expect(driver.trimmedAfter == [1])
+        #expect(model.loadedPages == 1...1)
+        let firstPage = try #require(driver.prepended.first)
+        let page1 = try TopicPageParser.parse(html: Corpus.page("sujet-court-p1"))
+        #expect(firstPage.contains("id=\"t\(page1.posts[0].id)\""))
+    }
+
     @Test func marksTheFirstNewMessage() async throws {
         let html = try Corpus.page("sujet-court-p1")
         let posts = try TopicPageParser.parse(html: html).posts
