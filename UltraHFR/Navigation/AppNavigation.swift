@@ -18,6 +18,8 @@ final class AppNavigation {
     /// The topic being read, shown in the detail (regular) or on top of its section (compact).
     private(set) var openTopic: TopicRoute?
     private(set) var openTopicSection: AppSection?
+    /// The part of « Moi » on the central page, next to the column.
+    var meCategory: MeCategory = .account
 
     // MARK: - Regular width
 

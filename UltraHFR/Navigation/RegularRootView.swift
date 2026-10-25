@@ -16,16 +16,25 @@ struct RegularRootView: View {
     var body: some View {
         NavigationSplitView(columnVisibility: .constant(.all)) {
             SectionColumn()
-                .navigationSplitViewColumnWidth(min: 300, ideal: 320, max: 340)
+                // The width of Messages' and WhatsApp's list on the unfolded Duo.
+                .navigationSplitViewColumnWidth(375)
                 .toolbar(removing: .sidebarToggle)
         } detail: {
             NavigationStack {
-                if let topic = navigation.openTopic {
-                    ReaderView(route: topic)
-                        .id(topic)
-                } else {
-                    ContentUnavailableView("Aucun sujet ouvert", systemImage: "text.bubble", description: Text("Choisis un sujet dans la colonne."))
-                        .background(palette.background.color)
+                Group {
+                    if navigation.section == .me {
+                        // Settings deserve the central page, not the narrow column.
+                        MePane(category: navigation.meCategory)
+                    } else if let topic = navigation.openTopic {
+                        ReaderView(route: topic)
+                            .id(topic)
+                    } else {
+                        ContentUnavailableView("Aucun sujet ouvert", systemImage: "text.bubble", description: Text("Choisis un sujet dans la colonne."))
+                            .background(palette.background.color)
+                    }
+                }
+                .navigationDestination(for: AppRoute.self) { route in
+                    RouteDestination(route: route, section: navigation.section)
                 }
             }
         }

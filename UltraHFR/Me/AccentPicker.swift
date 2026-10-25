@@ -14,7 +14,8 @@ struct AccentPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Couleur")
-            HStack(spacing: 10) {
+            // Wraps on a narrow screen rather than overflowing the row.
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 30, maximum: 30), spacing: 10, alignment: .leading)], alignment: .leading, spacing: 10) {
                 ForEach(HFRAccent.allCases) { accent in
                     let swatch = HFRPalette(dark: palette.isDark, oled: palette.isOLED, accent: accent).accent
                     Button {
