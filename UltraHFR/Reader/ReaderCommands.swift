@@ -3,7 +3,7 @@
 //  UltraHFR
 //
 //  Keyboard shortcuts of the reader (« Le Fil », I1), in the « Lecture » menu of iPadOS:
-//  J / K next and previous message, Q quote, R reply, ⌘F search in the topic.
+//  J / K next and previous message, Q quote, R reply, N next unread topic, ⌘F search in the topic.
 //
 
 import SwiftUI
@@ -39,6 +39,8 @@ struct ReaderCommands: Commands {
                 .keyboardShortcut("g", modifiers: .command)
             Button("Dernier message") { reader?.openLastMessage() }
                 .keyboardShortcut(.downArrow, modifiers: .command)
+            Button("Sujet suivant non lu") { reader?.openNextTopic() }
+                .keyboardShortcut("n", modifiers: [])
         }
     }
 }

@@ -18,6 +18,9 @@ struct ReaderView: View {
 
     var body: some View {
         ReaderScreen(route: route, model: sessions.model(for: route, client: client, cache: pageCache))
+            // Another topic in the same place of the stack (a link, « Sujet suivant ») gets its
+            // own web view: the page and its script belong to one reader model.
+            .id(route.topic)
     }
 }
 
@@ -29,6 +32,7 @@ private struct ReaderScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.openURL) private var openURL
+    @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
 
     var body: some View {
         ReaderWebView(model: model, style: style)
@@ -104,6 +108,9 @@ private struct ReaderScreen: View {
                     titled.title = model.title
                     recorder.record(topic: titled, page: page, pageCount: pageCount, post: post, author: author)
                 }
+                model.onOpenTopic = { [navigation] topic in
+                    navigation.open(topic)
+                }
                 model.onOpenLink = { [navigation, openURL] url in
                     if let link = TopicLink(url.absoluteString) {
                         navigation.open(TopicRoute(title: "Sujet", category: link.category, topic: link.topic, page: link.page, anchor: link.post))
@@ -112,6 +119,18 @@ private struct ReaderScreen: View {
                     }
                 }
                 model.show(route)
+            }
+            .task(id: nextTopicKey) {
+                if let next = nextPosition {
+                    let pages = next.unreadPages
+                    let detail = [
+                        pages == 1 ? "1 page non lue" : pages > 1 ? "\(pages.formatted()) pages non lues" : "Nouveaux messages",
+                        next.postAuthor,
+                    ].joined(separator: " · ")
+                    model.setNextTopic(next.resumeRoute, detail: detail)
+                } else {
+                    model.setNextTopic(nil)
+                }
             }
             .fullScreenCover(item: Binding(get: { model.presentedImage }, set: { model.presentedImage = $0 })) { image in
                 ImageViewer(image: image)
@@ -154,6 +173,15 @@ private struct ReaderScreen: View {
                     }
                 }
             }
+    }
+
+    /// The most recent topic read with new messages, other than this one (« Le Fil », H1).
+    private var nextPosition: ReadingPosition? {
+        positions.first { $0.topicID != route.topic.rawValue && $0.hasNews }
+    }
+
+    private var nextTopicKey: String {
+        nextPosition.map { "\($0.topicID)-\($0.pageCount)" } ?? ""
     }
 
     private var style: ReaderStyle {

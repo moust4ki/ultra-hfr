@@ -34,4 +34,7 @@ final class FakeReaderDriver: ReaderPageDriver {
     private(set) var failedPages: [Int] = []
     func showLoading(page: Int) async { loadingPages.append(page) }
     func showLoadFailed(page: Int) async { failedPages.append(page) }
+    private(set) var nextTopics: [String?] = []
+    func setNextTopic(title: String, detail: String) async { nextTopics.append(title) }
+    func clearNextTopic() async { nextTopics.append(nil) }
 }

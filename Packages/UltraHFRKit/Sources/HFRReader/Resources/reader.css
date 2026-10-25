@@ -62,6 +62,14 @@ pre.code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: ca
 .topic-refresh { min-height: 44px; padding: 0; border: 0; background: none; color: var(--accent);
   font: 600 15px/1.2 -apple-system, system-ui, sans-serif; }
 .topic-end.checking .topic-refresh { opacity: .5; }
+.topic-next { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; margin-top: 6px;
+  padding: 12px 36px 12px 0; border: 0; border-top: .5px solid var(--separator); background: none; text-align: left;
+  font: inherit; color: var(--text); position: relative; }
+.topic-next::after { content: "›"; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  font-size: 22px; color: var(--text-3); }
+.topic-next-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+.topic-next-title { font-size: 16px; font-weight: 600; line-height: 1.3; }
+.topic-next-detail { font-size: 13px; color: var(--text-2); }
 
 /* Page suivante en chargement : intertitre et squelettes ; en erreur : carte « Réessayer ». */
 .page-loading .skeleton { display: flex; flex-direction: column; gap: 8px; padding: 14px var(--page-padding); }

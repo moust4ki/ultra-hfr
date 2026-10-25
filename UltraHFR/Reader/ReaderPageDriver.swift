@@ -18,4 +18,6 @@ protocol ReaderPageDriver: AnyObject {
     func step(by offset: Int) async
     func showLoading(page: Int) async
     func showLoadFailed(page: Int) async
+    func setNextTopic(title: String, detail: String) async
+    func clearNextTopic() async
 }

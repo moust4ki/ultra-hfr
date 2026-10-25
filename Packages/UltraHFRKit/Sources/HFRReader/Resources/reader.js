@@ -12,9 +12,31 @@
   let nearEndSent = false;
   let nearStartSent = false;
   let postsCache = null;
+  /** « Sujet suivant » shown in the end card: { title, detail } or null. */
+  let nextTopic = null;
+
+  function renderNextTopic() {
+    for (const old of document.querySelectorAll(".topic-next")) old.remove();
+    const end = document.querySelector(".topic-end");
+    if (!end || !nextTopic) return;
+    const link = document.createElement("button");
+    link.className = "topic-next";
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "topic-next-eyebrow";
+    eyebrow.textContent = "Sujet suivant";
+    const title = document.createElement("span");
+    title.className = "topic-next-title";
+    title.textContent = nextTopic.title;
+    const detail = document.createElement("span");
+    detail.className = "topic-next-detail";
+    detail.textContent = nextTopic.detail;
+    link.append(eyebrow, title, detail);
+    end.append(link);
+  }
 
   function changed() {
     postsCache = null;
+    renderNextTopic();
     scheduleLayoutReport();
     onScroll();
   }
@@ -98,6 +120,12 @@
       if (offset < 0 && current && current.getBoundingClientRect().top < topInset() - 4) index += 1;
       const target = list[Math.min(Math.max(index + offset, 0), list.length - 1)];
       if (target) reader.scrollToPost(Number(target.dataset.post));
+    },
+
+    /** The next topic to read, or null; shown at the end of the topic. */
+    setNextTopic(topic) {
+      nextTopic = topic;
+      renderNextTopic();
     },
 
     /** Page `page` is on its way: a divider and skeletons at the bottom of the thread. */
@@ -343,6 +371,10 @@
       if (!reader.scrollToPost(id)) {
         send({ type: "openQuotedPost", post: id, path: quoteLink.getAttribute("href") });
       }
+      return;
+    }
+    if (event.target.closest(".topic-next")) {
+      send({ type: "openNext" });
       return;
     }
     const retry = event.target.closest(".page-retry");

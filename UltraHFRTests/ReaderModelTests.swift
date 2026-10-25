@@ -120,6 +120,23 @@ struct ReaderModelTests {
         #expect(driver.appended.isEmpty)
     }
 
+    @Test func offersTheNextTopic() async throws {
+        let (model, driver) = makeReader()
+        var opened: TopicRoute?
+        model.onOpenTopic = { opened = $0 }
+        let next = TopicRoute(title: "Blackwell", category: 1, topic: 1061629, page: 350, anchor: 11_405_000)
+
+        model.setNextTopic(next, detail: "2 pages non lues · Kaiju")
+        try await waitUntil { !driver.nextTopics.isEmpty }
+        #expect(driver.nextTopics == ["Blackwell"])
+        model.openNextTopic()
+        #expect(opened == next)
+
+        model.setNextTopic(nil)
+        try await waitUntil { driver.nextTopics.count == 2 }
+        #expect(driver.nextTopics.last == .some(nil))
+    }
+
     @Test func refusesAMessageOfAnotherTopic() async throws {
         // HFR redirects a message number to its own topic: here, another one.
         StubURLProtocol.answer(.success(try Corpus.page("sujet-blackwell-p1"))) { url in

@@ -74,6 +74,14 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
         await run("reader.scrollToPost(id)", ["id": post.rawValue])
     }
 
+    func setNextTopic(title: String, detail: String) async {
+        await run("reader.setNextTopic({ title, detail })", ["title": title, "detail": detail])
+    }
+
+    func clearNextTopic() async {
+        await run("reader.setNextTopic(null)", [:])
+    }
+
     func showLoading(page: Int) async {
         await run("reader.showLoading(page, label)", ["page": page, "label": "Page \(page.formatted())"])
     }
@@ -137,6 +145,8 @@ final class ReaderWebCoordinator: NSObject, WKScriptMessageHandler, WKNavigation
             model.checkForNewMessages()
         case "retry":
             model.retry()
+        case "openNext":
+            model.openNextTopic()
         case "haptic":
             model.swipeReachedThreshold()
         case "toggleQuote":

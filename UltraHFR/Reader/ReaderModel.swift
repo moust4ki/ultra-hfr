@@ -41,6 +41,10 @@ final class ReaderModel {
     var presentedProfile: ProfileRequest?
     /// The composer, open.
     var composer: ComposerRequest?
+    /// The next topic with new messages (« Le Fil », H1), offered at the end of this one.
+    @ObservationIgnored private(set) var nextTopic: (route: TopicRoute, detail: String)?
+    /// Opens a topic in place of this one.
+    @ObservationIgnored var onOpenTopic: ((TopicRoute) -> Void)?
 
     /// Some sheet covers the reader.
     var isCoveredBySheet: Bool {
@@ -268,6 +272,9 @@ final class ReaderModel {
 
     func pageIsReady() {
         isReady = true
+        if let next = nextTopic {
+            Task { await driver?.setNextTopic(title: next.route.title, detail: next.detail) }
+        }
         if let pendingOpen {
             self.pendingOpen = nil
             open(page: pendingOpen.page, anchor: pendingOpen.anchor)
@@ -382,6 +389,23 @@ final class ReaderModel {
     func openQuotedPost(_ post: PostID, path: String?) {
         guard let page = path.flatMap(ForumPath.topicPageNumber(in:)) else { return }
         open(page: page, anchor: post)
+    }
+
+    func setNextTopic(_ route: TopicRoute?, detail: String = "") {
+        guard route?.topic != nextTopic?.route.topic || detail != nextTopic?.detail else { return }
+        nextTopic = route.map { ($0, detail) }
+        Task {
+            if let route {
+                await driver?.setNextTopic(title: route.title, detail: detail)
+            } else {
+                await driver?.clearNextTopic()
+            }
+        }
+    }
+
+    func openNextTopic() {
+        guard let next = nextTopic?.route else { return }
+        onOpenTopic?(next)
     }
 
     /// Loads again the page that failed (the page script does not ask twice for the same edge).
