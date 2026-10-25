@@ -57,6 +57,9 @@ final class ReaderModel {
     @ObservationIgnored var onOpenLink: ((URL) -> Void)?
     @ObservationIgnored private let client: HFRClient
     @ObservationIgnored private let cache: HTMLPageCache
+    @ObservationIgnored private let quoteStore: MultiQuoteStore
+    /// The quoted messages as kept on the device, by message.
+    @ObservationIgnored private var savedQuotes: [PostID: SavedQuote] = [:]
     /// HTML of the loaded pages, in order, to rebuild the page when the web view is recreated
     /// (folding or unfolding the iPhone Duo switches layouts).
     @ObservationIgnored private var renderedPages: [(page: Int, html: String)] = []
@@ -79,11 +82,15 @@ final class ReaderModel {
         case lastMessage
     }
 
-    init(route: TopicRoute, client: HFRClient, cache: HTMLPageCache) {
+    init(route: TopicRoute, client: HFRClient, cache: HTMLPageCache, quoteStore: MultiQuoteStore = MultiQuoteStore()) {
         self.route = route
         self.title = route.title
         self.client = client
         self.cache = cache
+        self.quoteStore = quoteStore
+        let saved = quoteStore.quotes(for: route.topic.rawValue)
+        quoted = saved.map { PostID(rawValue: $0.post) }
+        savedQuotes = Dictionary(saved.map { (PostID(rawValue: $0.post), $0) }, uniquingKeysWith: { first, _ in first })
     }
 
     /// First display, or a new request for the same topic (another page or message).
@@ -100,7 +107,7 @@ final class ReaderModel {
     }
 
     var quotedAuthors: [String] {
-        quoted.compactMap { posts[$0]?.author }
+        quoted.compactMap { posts[$0]?.author ?? savedQuotes[$0]?.author }
     }
 
     func post(_ id: PostID) -> Post? {
@@ -292,16 +299,36 @@ final class ReaderModel {
     func toggleQuote(_ post: PostID) {
         if let index = quoted.firstIndex(of: post) {
             quoted.remove(at: index)
+            savedQuotes[post] = nil
         } else {
             quoted.append(post)
+            if let message = posts[post] {
+                let page = postPages[post] ?? 1
+                savedQuotes[post] = SavedQuote(
+                    post: post.rawValue,
+                    page: page,
+                    author: message.author,
+                    bbcode: "[quotemsg=\(post),\(page),0]" + BBCodeWriter.write(message.body) + "[/quotemsg]\n",
+                    addedAt: .now
+                )
+            }
         }
+        saveQuotes()
         let quoted = quoted
         Task { await driver?.setQuoted(quoted) }
     }
 
-    /// Authors of the messages loaded so far, by message number.
+    private func saveQuotes() {
+        quoteStore.save(quoted.compactMap { savedQuotes[$0] }, for: route.topic.rawValue)
+    }
+
+    /// Authors of the messages loaded so far and of the quoted ones, by message number.
     var authorsOfLoadedPosts: [Int: String] {
-        Dictionary(posts.map { ($0.key.rawValue, $0.value.author) }, uniquingKeysWith: { first, _ in first })
+        var authors = Dictionary(posts.map { ($0.key.rawValue, $0.value.author) }, uniquingKeysWith: { first, _ in first })
+        for (id, quote) in savedQuotes where authors[id.rawValue] == nil {
+            authors[id.rawValue] = quote.author
+        }
+        return authors
     }
 
     /// BBCode of the quoted messages, in the order of the topic, each followed by an empty line.
@@ -309,7 +336,7 @@ final class ReaderModel {
         quoted
             .sorted { $0.rawValue < $1.rawValue }
             .compactMap { id -> String? in
-                guard let post = posts[id] else { return nil }
+                guard let post = posts[id] else { return savedQuotes[id]?.bbcode }
                 return "[quotemsg=\(id),\(postPages[id] ?? 1),0]" + BBCodeWriter.write(post.body) + "[/quotemsg]\n"
             }
             .joined(separator: "\n")
@@ -333,6 +360,8 @@ final class ReaderModel {
 
     func clearQuotes() {
         quoted = []
+        savedQuotes = [:]
+        saveQuotes()
         Task { await driver?.setQuoted([]) }
     }
 

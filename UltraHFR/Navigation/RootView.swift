@@ -17,6 +17,7 @@ struct RootView: View {
     /// Section and topic, kept when iOS closes the app in the background.
     @SceneStorage("navigation") private var savedNavigation = Data()
     @State private var isRestored = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -30,6 +31,10 @@ struct RootView: View {
         .task {
             TopicSpotlight.indexOnce((try? modelContext.fetch(FetchDescriptor<ReadingPosition>())) ?? [])
             restoreNavigation()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Reading positions and drafts are written before iOS may close the app.
+            if phase != .active, modelContext.hasChanges { try? modelContext.save() }
         }
         .onChange(of: navigation.snapshot) { _, snapshot in
             guard isRestored, let data = try? JSONEncoder().encode(snapshot) else { return }

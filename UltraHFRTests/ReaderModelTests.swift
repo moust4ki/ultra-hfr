@@ -158,3 +158,57 @@ struct ReaderModelTests {
         #expect(StubURLProtocol.requestedURLs.count == 1)
     }
 }
+
+@MainActor
+@Suite("Multi-citation gardée")
+struct MultiQuoteTests {
+    private let route = TopicRoute(title: "1440p -> 4K", category: 1, topic: 1069640, page: 1)
+
+    private func freshDefaults() -> UserDefaults {
+        let name = "citations-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name) ?? .standard
+        defaults.removePersistentDomain(forName: name)
+        return defaults
+    }
+
+    @Test func survivesANewReaderWithoutItsPage() async throws {
+        StubURLProtocol.reset()
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1"))) { url in (url.query ?? "").contains("&page=1&") }
+        let defaults = freshDefaults()
+        let cache = HTMLPageCache(directory: URL.temporaryDirectory.appending(path: "citations-\(UUID().uuidString)"))
+        let client = HFRClient(configuration: StubURLProtocol.configuration())
+
+        let first = ReaderModel(route: route, client: client, cache: cache, quoteStore: MultiQuoteStore(defaults: defaults))
+        let driver = FakeReaderDriver()
+        first.driver = driver
+        first.driverAttached()
+        first.pageIsReady()
+        first.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+        let posts = try TopicPageParser.parse(html: Corpus.page("sujet-court-p1")).posts
+        first.toggleQuote(posts[2].id)
+        first.toggleQuote(posts[0].id)
+
+        // A new reader, nothing loaded: the tray and the reply still have both quotes.
+        let second = ReaderModel(route: route, client: client, cache: cache, quoteStore: MultiQuoteStore(defaults: defaults))
+        #expect(second.quoted == [posts[2].id, posts[0].id])
+        #expect(second.quotedAuthors == [posts[2].author, posts[0].author])
+        let bbcode = second.quotedBBCode
+        let firstQuote = try #require(bbcode.range(of: "[quotemsg=\(posts[0].id),1,0]"))
+        let secondQuote = try #require(bbcode.range(of: "[quotemsg=\(posts[2].id),1,0]"))
+        // In the order of the topic.
+        #expect(firstQuote.lowerBound < secondQuote.lowerBound)
+
+        second.clearQuotes()
+        #expect(MultiQuoteStore(defaults: defaults).quotes(for: 1069640).isEmpty)
+    }
+
+    @Test func oldQuotesGo() {
+        let store = MultiQuoteStore(defaults: freshDefaults())
+        let now = Date.now
+        let old = SavedQuote(post: 1, page: 1, author: "a", bbcode: "x", addedAt: now.addingTimeInterval(-31 * 24 * 3600))
+        let recent = SavedQuote(post: 2, page: 1, author: "b", bbcode: "y", addedAt: now)
+        store.save([old, recent], for: 7, now: now)
+        #expect(store.quotes(for: 7).map(\.post) == [2])
+    }
+}
