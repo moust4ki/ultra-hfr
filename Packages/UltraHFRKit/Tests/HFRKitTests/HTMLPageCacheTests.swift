@@ -15,6 +15,8 @@ struct HTMLPageCacheTests {
         let saved = try #require(await cache.page(for: "/forum2.php?cat=1&post=1069640&page=1"))
         #expect(saved.html == html)
         #expect(saved.savedAt.timeIntervalSinceNow > -60)
+        #expect(await cache.contains("/forum2.php?cat=1&post=1069640&page=1"))
+        #expect(await !cache.contains("/forum2.php?cat=1&post=1069640&page=2"))
         #expect(await cache.page(for: "/forum2.php?cat=1&post=1069640&page=2") == nil)
     }
 

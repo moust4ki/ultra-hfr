@@ -13,6 +13,7 @@ struct ForumsView: View {
     let section: AppSection
     @Environment(ForumsStore.self) private var forums
     @Environment(\.hfrPalette) private var palette
+    @Environment(\.pageCache) private var pageCache
 
     var body: some View {
         List {
@@ -29,11 +30,7 @@ struct ForumsView: View {
                     Section(group.title) {
                         ForEach(categories) { category in
                             NavigationLink(value: AppRoute.category(category)) {
-                                CategoryRow(
-                                    title: category.title,
-                                    systemImage: ForumIcon.systemImage(for: category.id),
-                                    count: category.subforums.count
-                                )
+                                ForumCategoryRow(category: category)
                             }
                         }
                     }
@@ -46,7 +43,7 @@ struct ForumsView: View {
                 Section("Autres") {
                     ForEach(others) { category in
                         NavigationLink(value: AppRoute.category(category)) {
-                            CategoryRow(title: category.title, systemImage: ForumIcon.systemImage(for: category.id), count: category.subforums.count)
+                            ForumCategoryRow(category: category)
                         }
                     }
                 }
@@ -62,8 +59,34 @@ struct ForumsView: View {
                 }
             }
         }
+        .overlay(alignment: .bottom) {
+            if forums.isOffline {
+                OfflineBanner("Hors ligne · seuls les forums déjà ouverts se lisent")
+                    .padding(.bottom, 8)
+            }
+        }
         .refreshable { await forums.refresh() }
         .task { await forums.refresh() }
+        .task(id: forums.isOffline) {
+            if forums.isOffline { await forums.checkOfflineLists(in: pageCache) }
+        }
+    }
+}
+
+/// A category; offline, the ones never opened on this device are dimmed (« Le Fil », states).
+private struct ForumCategoryRow: View {
+    let category: ForumCategory
+    @Environment(ForumsStore.self) private var forums
+
+    var body: some View {
+        let isUnavailable = forums.isOffline && !forums.isAvailableOffline(category)
+        CategoryRow(
+            title: category.title,
+            systemImage: ForumIcon.systemImage(for: category.id),
+            count: category.subforums.count,
+            note: isUnavailable ? "non disponible" : nil
+        )
+        .opacity(isUnavailable ? 0.45 : 1)
     }
 }
 

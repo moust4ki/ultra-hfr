@@ -13,6 +13,7 @@ struct CategoryView: View {
     let category: ForumCategory
     let section: AppSection
     @Environment(\.hfrPalette) private var palette
+    @Environment(ForumsStore.self) private var forums
 
     var body: some View {
         List {
@@ -25,9 +26,19 @@ struct CategoryView: View {
             if !category.subforums.isEmpty {
                 Section("\(category.subforums.count) sous-forums") {
                     ForEach(category.subforums) { subforum in
+                        let isUnavailable = forums.isOffline && !forums.listsAvailableOffline.contains(subforum.path)
                         NavigationLink(value: AppRoute.topicList(TopicListRoute(title: subforum.title, path: subforum.path))) {
-                            Text(subforum.title)
-                                .foregroundStyle(palette.text.color)
+                            HStack {
+                                Text(subforum.title)
+                                    .foregroundStyle(palette.text.color)
+                                if isUnavailable {
+                                    Spacer()
+                                    Text("non disponible")
+                                        .font(.subheadline)
+                                        .foregroundStyle(palette.text3.color)
+                                }
+                            }
+                            .opacity(isUnavailable ? 0.45 : 1)
                         }
                     }
                 }

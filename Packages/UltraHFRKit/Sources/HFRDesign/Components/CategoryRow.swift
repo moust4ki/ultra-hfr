@@ -12,13 +12,16 @@ public struct CategoryRow: View {
     let title: String
     let systemImage: String
     let count: Int?
+    /// Shown instead of the count, e.g. « non disponible » offline.
+    let note: String?
     @Environment(\.hfrPalette) private var palette
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    public init(title: String, systemImage: String, count: Int? = nil) {
+    public init(title: String, systemImage: String, count: Int? = nil, note: String? = nil) {
         self.title = title
         self.systemImage = systemImage
         self.count = count
+        self.note = note
     }
 
     public var body: some View {
@@ -28,7 +31,11 @@ public struct CategoryRow: View {
                     CategoryIcon(systemImage: systemImage)
                     Text(title)
                         .foregroundStyle(palette.text.color)
-                    if let count, count > 0 {
+                    if let note {
+                        Text(note)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.text3.color)
+                    } else if let count, count > 0 {
                         Text(count == 1 ? "1 sous-forum" : "\(count.formatted()) sous-forums")
                             .font(.subheadline)
                             .foregroundStyle(palette.text2.color)
@@ -41,7 +48,11 @@ public struct CategoryRow: View {
                     Text(title)
                         .foregroundStyle(palette.text.color)
                     Spacer(minLength: 8)
-                    if let count, count > 0 {
+                    if let note {
+                        Text(note)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.text3.color)
+                    } else if let count, count > 0 {
                         Text(count.formatted())
                             .font(.subheadline)
                             .foregroundStyle(palette.text2.color)

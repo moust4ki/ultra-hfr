@@ -47,6 +47,11 @@ public actor HTMLPageCache {
         return (String(decoding: html, as: UTF8.self), savedAt)
     }
 
+    /// A copy of `path` is kept on the device.
+    public func contains(_ path: String) -> Bool {
+        FileManager.default.fileExists(atPath: fileURL(for: path).path(percentEncoded: false))
+    }
+
     /// Keeps the `limit` most recent pages.
     public func trim() {
         let keys: [URLResourceKey] = [.contentModificationDateKey]
