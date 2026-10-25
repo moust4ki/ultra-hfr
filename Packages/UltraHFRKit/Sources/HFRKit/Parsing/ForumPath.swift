@@ -31,6 +31,9 @@ public enum ForumPath {
         return Int(path[path.index(after: start)..<end])
     }
 
+    /// The forum's categories, in HFR's order (as its search lists them).
+    public static let allCategoryIDs: [CategoryID] = [1, 16, 15, 2, 30, 23, 25, 3, 14, 5, 4, 22, 21, 11, 10, 32, 12, 6, 8, 13]
+
     /// Category number from the first segment of rewritten paths (`/hfr/Discussions/…` → 13).
     public static func categoryID(forSlug slug: String) -> CategoryID? {
         categorySlugs[slug.lowercased()].map(CategoryID.init(rawValue:))

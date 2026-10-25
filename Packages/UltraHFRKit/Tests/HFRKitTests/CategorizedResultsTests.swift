@@ -3,7 +3,7 @@ import Testing
 
 /// The category switch of a member's messages, on a synthetic copy of HFR's form (the topics
 /// themselves are the ones of a search page, covered by the search tests).
-@Suite("Messages d'un membre")
+@Suite("Résultats par catégorie")
 struct MemberMessagesTests {
     private let form = """
     <html><body><table class="main"><tr class="cBackHeader fondForum1Description"><th>Sujet</th></tr></table>
@@ -17,7 +17,7 @@ struct MemberMessagesTests {
     """
 
     @Test func readsTheCategoriesWithMessages() throws {
-        let page = try MemberMessagesParser.parse(html: Fixture.html("recherche-contenu-undervolt") + form)
+        let page = try CategorizedResultsParser.parse(html: Fixture.html("recherche-contenu-undervolt") + form)
         #expect(page.categories.map(\.title) == ["Hardware", "Discussions"])
         #expect(page.categories.map(\.id) == [1, 13])
         #expect(page.current == 13)
@@ -26,8 +26,16 @@ struct MemberMessagesTests {
     }
 
     @Test func noMessageMeansAnEmptyPage() throws {
-        let page = try MemberMessagesParser.parse(html: Fixture.html("sujet-filtre-fin"))
+        let page = try CategorizedResultsParser.parse(html: Fixture.html("sujet-filtre-fin"))
         #expect(page.topics.isEmpty)
         #expect(page.categories.isEmpty)
+    }
+
+    @Test func buildsAForumWideSearch() {
+        let search = ForumWideSearch(text: "sonoma", scope: .titles, categories: [1, 13])
+        #expect(search.category == 1)
+        #expect(search.path.contains("&cat=1&post_cat_list=%7C1*hfr%7C13*hfr%7C&"))
+        #expect(search.path.contains("&titre=1&search=sonoma&pseud=&"))
+        #expect(search.path.hasSuffix("&searchall=1"))
     }
 }

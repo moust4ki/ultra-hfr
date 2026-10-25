@@ -34,8 +34,8 @@ struct ForumSearchTests {
         #expect(query.path.hasSuffix("&searchtype=2"))
         #expect(query.path.contains("&subcat=0&"))
         #expect(ForumSearchQuery(text: "5090", category: 1, subcategory: 109).path.contains("&subcat=109&"))
-        #expect(MemberMessagesParser.path(pseudo: "Exemple Test") == "/hfr/recherche/pseudo-Exemple+Test.htm")
-        let other = MemberMessagesParser.path(pseudo: "Exemple Test", category: 13, categoryList: "|1*hfr|13*hfr|")
+        #expect(ForumWideSearch.memberMessagesPath(pseudo: "Exemple Test") == "/hfr/recherche/pseudo-Exemple+Test.htm")
+        let other = ForumWideSearch(pseudo: "Exemple Test", scope: .both, categoryList: "|1*hfr|13*hfr|", category: 13).path
         #expect(other.contains("&cat=13&post_cat_list=%7C1*hfr%7C13*hfr%7C&"))
         #expect(other.contains("&pseud=Exemple+Test&"))
     }

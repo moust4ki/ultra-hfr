@@ -10,12 +10,25 @@ import Foundation
 import HFRKit
 import Observation
 
+extension CategoryID {
+    /// « Tout HFR » in the search: every category (HFR's own `searchall`).
+    static let everywhere = CategoryID(rawValue: 0)
+}
+
 @Observable
 final class ForumSearchModel {
     var scope: ForumSearchQuery.Scope = .titles
     var category: CategoryID {
-        didSet { if subcategory == nil, !isScoped { defaults.set(category.rawValue, forKey: Self.categoryKey) } }
+        didSet {
+            guard subcategory == nil, !isScoped else { return }
+            defaults.set(category == .everywhere, forKey: Self.everywhereKey)
+            if category != .everywhere { defaults.set(category.rawValue, forKey: Self.categoryKey) }
+        }
     }
+    /// Every category of the forum, in HFR's order, for « Tout HFR ».
+    var allCategories: [CategoryID] = []
+    /// « Tout HFR »: the categories with results and the one shown.
+    private(set) var everywhereResults: CategorizedResults?
     /// Searching one sub-forum (from its topic list).
     let subcategory: Int?
     /// Searching from a topic list: the category is the list's, not the saved preference.
@@ -29,13 +42,14 @@ final class ForumSearchModel {
 
     private let defaults: UserDefaults
     private static let categoryKey = "search_category"
+    private static let everywhereKey = "search_everywhere"
     private static let recentsKey = "search_recents"
     static let recentLimit = 10
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let saved = defaults.integer(forKey: Self.categoryKey)
-        category = CategoryID(rawValue: saved == 0 ? 13 : saved)
+        category = defaults.bool(forKey: Self.everywhereKey) ? .everywhere : CategoryID(rawValue: saved == 0 ? 13 : saved)
         subcategory = nil
         isScoped = false
         recents = defaults.stringArray(forKey: Self.recentsKey) ?? []
@@ -56,10 +70,33 @@ final class ForumSearchModel {
         isSearching = true
         defer { isSearching = false }
         do {
-            results = try await client.search(ForumSearchQuery(text: trimmed, category: category, subcategory: subcategory, scope: scope))
+            if category == .everywhere {
+                let categories = allCategories.isEmpty ? ForumPath.allCategoryIDs : allCategories
+                let found = try await client.search(ForumWideSearch(text: trimmed, scope: scope, categories: categories))
+                everywhereResults = found
+                results = found.topics
+            } else {
+                everywhereResults = nil
+                results = try await client.search(ForumSearchQuery(text: trimmed, category: category, subcategory: subcategory, scope: scope))
+            }
             searchedText = trimmed
             errorMessage = nil
             remember(trimmed)
+        } catch {
+            errorMessage = "La recherche n'a pas abouti. Réessaie dans un moment."
+        }
+    }
+
+    /// « Tout HFR »: the results of another category with results.
+    func showEverywhere(in category: CategoryID, using client: HFRClient) async {
+        guard let found = everywhereResults, let text = searchedText, !isSearching else { return }
+        isSearching = true
+        defer { isSearching = false }
+        do {
+            let other = try await client.search(ForumWideSearch(text: text, scope: scope, categoryList: found.categoryList, category: category))
+            everywhereResults = other
+            results = other.topics
+            errorMessage = nil
         } catch {
             errorMessage = "La recherche n'a pas abouti. Réessaie dans un moment."
         }
@@ -83,6 +120,7 @@ final class ForumSearchModel {
     }
 
     func clear() {
+        everywhereResults = nil
         results = []
         searchedText = nil
         errorMessage = nil

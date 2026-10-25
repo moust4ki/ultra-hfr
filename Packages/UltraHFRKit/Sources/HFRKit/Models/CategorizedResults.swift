@@ -1,11 +1,11 @@
 //
-//  MemberMessagesPage.swift
+//  CategorizedResults.swift
 //  HFRKit
 //
 
-/// A member's messages in one category, and the other categories they posted in. HFR shows
-/// one category at a time.
-public struct MemberMessagesPage: Sendable, Hashable {
+/// Results of a search over every category. HFR shows them one category at a time, with the
+/// list of the categories that have results.
+public struct CategorizedResults: Sendable, Hashable {
     public struct Category: Sendable, Hashable, Identifiable {
         public var id: CategoryID
         public var title: String
@@ -17,10 +17,10 @@ public struct MemberMessagesPage: Sendable, Hashable {
     }
 
     public var topics: [TopicSummary]
-    /// Categories with messages of the member, in HFR's order.
+    /// Categories with results, in HFR's order.
     public var categories: [Category]
     public var current: CategoryID?
-    /// HFR's own list of those categories (`post_cat_list`), sent back to see another one.
+    /// HFR's own list of the categories searched (`post_cat_list`), sent back to see another one.
     public var categoryList: String
 
     public init(topics: [TopicSummary], categories: [Category], current: CategoryID?, categoryList: String) {

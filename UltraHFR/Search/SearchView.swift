@@ -24,6 +24,9 @@ struct SearchView: View {
         List {
             Section {
                 SearchCriteria(model: forumSearch, categories: forums.categories)
+                    .onChange(of: forums.categories.map(\.id), initial: true) { _, ids in
+                        forumSearch.allCategories = ids
+                    }
                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     .listRowBackground(Color.clear)
             }
@@ -41,10 +44,13 @@ struct SearchView: View {
                 }
             } else {
                 LocalResults(query: query, positions: positions, forums: forums.categories, section: section)
-                RemoteResults(model: forumSearch, query: query, section: section) {
+                RemoteResults(model: forumSearch, query: query, section: section, widen: {
                     forumSearch.scope = .both
                     Task { await forumSearch.search(query, using: client) }
-                }
+                }, everywhere: {
+                    forumSearch.category = .everywhere
+                    Task { await forumSearch.search(query, using: client) }
+                })
             }
         }
         .listStyle(.insetGrouped)
@@ -79,12 +85,13 @@ private struct SearchCriteria: View {
         HStack(spacing: 8) {
             Menu {
                 Picker("Catégorie", selection: $model.category) {
+                    Text("Tout HFR").tag(CategoryID.everywhere)
                     ForEach(categories) { category in
                         Text(category.title).tag(category.id)
                     }
                 }
             } label: {
-                Label(categories.first { $0.id == model.category }?.title ?? "Catégorie", systemImage: "chevron.down")
+                Label(model.category == .everywhere ? "Tout HFR" : categories.first { $0.id == model.category }?.title ?? "Catégorie", systemImage: "chevron.down")
                     .labelStyle(TrailingIconLabelStyle())
             }
             .buttonStyle(.bordered)
@@ -191,6 +198,9 @@ private struct RemoteResults: View {
     let section: AppSection
     /// « Chercher aussi dans les messages », when only titles were searched.
     let widen: () -> Void
+    /// « Chercher dans tout HFR », when one category was searched.
+    let everywhere: () -> Void
+    @Environment(\.hfrClient) private var client
     @Environment(AppNavigation.self) private var navigation
 
     var body: some View {
@@ -211,6 +221,20 @@ private struct RemoteResults: View {
                     if model.scope == .titles {
                         Button("Chercher aussi dans les messages", systemImage: "text.magnifyingglass", action: widen)
                     }
+                    if model.category != .everywhere {
+                        Button("Chercher dans tout HFR", systemImage: "globe", action: everywhere)
+                    }
+                }
+                if let found = model.everywhereResults, found.categories.count > 1 {
+                    Picker("Catégorie", selection: Binding(
+                        get: { found.current ?? found.categories[0].id },
+                        set: { category in Task { await model.showEverywhere(in: category, using: client) } }
+                    )) {
+                        ForEach(found.categories) { category in
+                            Text(category.title).tag(category.id)
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
                 ForEach(model.results) { topic in
                     Button {

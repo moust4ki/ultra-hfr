@@ -13,7 +13,7 @@ import SwiftUI
 struct MemberMessagesView: View {
     let pseudo: String
     let open: (TopicRoute) -> Void
-    @State private var page: MemberMessagesPage?
+    @State private var page: CategorizedResults?
     @State private var isLoading = false
     @State private var errorMessage: String?
     @Environment(\.hfrClient) private var client

@@ -189,16 +189,25 @@ public actor HFRClient {
 
     /// The topics a member posted in, one category at a time (the first one with messages
     /// when `category` is nil); most recent message first.
-    public func messages(of pseudo: String, in category: CategoryID? = nil, categoryList: String = "") async throws(HFRClientError) -> MemberMessagesPage {
+    public func messages(of pseudo: String, in category: CategoryID? = nil, categoryList: String = "") async throws(HFRClientError) -> CategorizedResults {
         let path = if let category, !categoryList.isEmpty {
-            MemberMessagesParser.path(pseudo: pseudo, category: category, categoryList: categoryList)
+            ForumWideSearch(pseudo: pseudo, scope: .both, categoryList: categoryList, category: category).path
         } else {
-            MemberMessagesParser.path(pseudo: pseudo)
+            ForumWideSearch.memberMessagesPath(pseudo: pseudo)
         }
+        var results = try await categorizedResults(at: path)
+        results.topics = Self.newestFirst(results.topics)
+        return results
+    }
+
+    /// Words searched in every category, one category at a time.
+    public func search(_ search: ForumWideSearch) async throws(HFRClientError) -> CategorizedResults {
+        try await categorizedResults(at: search.path)
+    }
+
+    private func categorizedResults(at path: String) async throws(HFRClientError) -> CategorizedResults {
         let html = try await self.page(path)
-        var page = try await Self.parse { () throws(HFRParsingError) in try MemberMessagesParser.parse(html: html) }
-        page.topics = Self.newestFirst(page.topics)
-        return page
+        return try await Self.parse { () throws(HFRParsingError) in try CategorizedResultsParser.parse(html: html) }
     }
 
     static func newestFirst(_ topics: [TopicSummary]) -> [TopicSummary] {
