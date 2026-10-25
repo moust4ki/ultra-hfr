@@ -22,7 +22,11 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     private var layout: RootLayout {
-        RootLayout(sizeClass: horizontalSizeClass, size: windowSize)
+        #if DEBUG
+        // Simulator checks of the landscape layout: SIMCTL_CHILD_ULTRAHFR_LAYOUT=columns xcrun simctl launch …
+        if ProcessInfo.processInfo.environment["ULTRAHFR_LAYOUT"] == "columns" { return .columns }
+        #endif
+        return RootLayout(sizeClass: horizontalSizeClass, size: windowSize)
     }
 
     var body: some View {

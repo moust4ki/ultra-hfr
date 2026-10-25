@@ -33,14 +33,22 @@ struct RegularRootView: View {
                     if navigation.section == .me {
                         // Settings deserve the central page, not the narrow column.
                         MePane(category: navigation.meCategory)
+                            .id(navigation.meCategory)
+                            .transition(.opacity)
                     } else if let topic = navigation.openTopic {
                         ReaderView(route: topic)
                             .id(topic)
+                            .transition(.asymmetric(insertion: .opacity.combined(with: .offset(x: 28)), removal: .opacity))
                     } else {
                         ContentUnavailableView("Aucun sujet ouvert", systemImage: "text.bubble", description: Text("Choisis un sujet dans la colonne."))
                             .background(palette.background.color)
+                            .transition(.opacity)
                     }
                 }
+                // The central page changes with a short movement rather than all at once.
+                .animation(.smooth(duration: 0.3), value: navigation.openTopic)
+                .animation(.smooth(duration: 0.25), value: navigation.section == .me)
+                .animation(.smooth(duration: 0.25), value: navigation.meCategory)
                 .navigationDestination(for: AppRoute.self) { route in
                     RouteDestination(route: route, section: navigation.section)
                 }
@@ -50,13 +58,42 @@ struct RegularRootView: View {
     }
 }
 
-/// The column: the section's stack, with the section bar at the bottom of every screen so that
-/// it stays reachable whatever is pushed in the column (« Le Fil », H2).
+/// The column: the sections in a real tab bar at its bottom (Liquid Glass, with the system's
+/// animations, like Telegram on the unfolded Duo), each section with its own stack kept alive.
+/// Topics open on the central page.
 private struct SectionColumn: View {
     @Environment(AppNavigation.self) private var navigation
 
     var body: some View {
-        let section = navigation.section
+        TabView(selection: Binding(get: { navigation.section }, set: { navigation.select($0) })) {
+            Tab(AppSection.feed.title, systemImage: AppSection.feed.systemImage, value: AppSection.feed) {
+                ColumnStack(section: .feed)
+            }
+            Tab(AppSection.forums.title, systemImage: AppSection.forums.systemImage, value: AppSection.forums) {
+                ColumnStack(section: .forums)
+            }
+            Tab(AppSection.messages.title, systemImage: AppSection.messages.systemImage, value: AppSection.messages) {
+                ColumnStack(section: .messages)
+            }
+            Tab(AppSection.me.title, systemImage: AppSection.me.systemImage, value: AppSection.me) {
+                ColumnStack(section: .me)
+            }
+            Tab(value: AppSection.search, role: .search) {
+                ColumnStack(section: .search)
+            }
+        }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        // The column is phone-sized: its tab bar sits at the bottom, as on iPhone.
+        .environment(\.horizontalSizeClass, .compact)
+    }
+}
+
+/// One section's stack in the column.
+private struct ColumnStack: View {
+    let section: AppSection
+    @Environment(AppNavigation.self) private var navigation
+
+    var body: some View {
         NavigationStack(path: Binding(
             get: { navigation.columnPath(for: section) },
             set: { navigation.setColumnPath($0, for: section) }
@@ -68,54 +105,14 @@ private struct SectionColumn: View {
                         .modifier(ColumnScreen())
                 }
         }
-        .id(section)
     }
 }
 
-/// Every screen of the column: a compact title at the very top, the sections in a floating bar
-/// at the bottom of the column (like Telegram on the unfolded Duo).
+/// Every screen of the column: a compact title at the very top.
 private struct ColumnScreen: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationBarTitleDisplayMode(.inline)
-            .safeAreaBar(edge: .bottom) {
-                SectionTabBar()
-            }
             .environment(\.isInNavigationColumn, true)
-    }
-}
-
-/// The sections at the bottom of the column (replaces the tab bar next to the reading).
-private struct SectionTabBar: View {
-    @Environment(AppNavigation.self) private var navigation
-    @Environment(\.hfrPalette) private var palette
-
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(AppSection.allCases) { section in
-                let isSelected = navigation.section == section
-                Button {
-                    navigation.select(section)
-                } label: {
-                    Image(systemName: section.systemImage)
-                        .font(.title3)
-                        .foregroundStyle(isSelected ? palette.accent.text.color : palette.text.color)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .background {
-                            if isSelected {
-                                Capsule().fill(palette.text.color.opacity(0.1))
-                            }
-                        }
-                        .contentShape(.capsule)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(section.title)
-                .accessibilityAddTraits(isSelected ? .isSelected : [])
-            }
-        }
-        .padding(5)
-        .glassEffect(.regular, in: .capsule)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
     }
 }

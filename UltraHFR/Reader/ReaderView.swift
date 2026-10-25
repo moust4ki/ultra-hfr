@@ -35,11 +35,30 @@ private struct ReaderScreen: View {
     @Environment(ConnectivityStore.self) private var connectivity
     @Environment(\.rootLayout) private var rootLayout
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
+    /// The unfolded Duo in landscape keeps a strip on the right for the status and the bar's
+    /// buttons; the scrubber and Répondre join them there.
+    @State private var trailingInset: CGFloat = 0
+
+    private var usesSideRail: Bool {
+        rootLayout == .columns && trailingInset > 20
+    }
 
     var body: some View {
-        ReaderWebView(model: model, style: style)
-            .ignoresSafeArea(edges: .bottom)
-            .background(palette.background.color)
+        ZStack {
+            palette.background.color
+                .ignoresSafeArea()
+            // Under the bars, like a chat: the messages pass beneath the title bubble and fade.
+            ReaderWebView(model: model, style: style)
+                .ignoresSafeArea(edges: [.top, .bottom])
+        }
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.safeAreaInsets.trailing
+            } action: { inset in
+                trailingInset = inset
+            }
+            .overlay(alignment: .top) {
+                TopFade(color: palette.background.color)
+            }
             .overlay(alignment: .trailing) {
                 if let pageCount = model.pageCount, pageCount > 1 {
                     PageScrubber(
@@ -50,8 +69,12 @@ private struct ReaderScreen: View {
                         model.jump(to: page)
                     }
                     .frame(width: 24)
-                    .padding(.top, 24)
+                    // In the side rail of the unfolded Duo, below the bar's buttons, so that the
+                    // messages keep their whole width.
+                    .padding(.top, usesSideRail ? 200 : 24)
+                    .padding(.trailing, usesSideRail ? max(0, (trailingInset - 24) / 2) : 0)
                     .padding(.bottom, 84)
+                    .ignoresSafeArea(.container, edges: usesSideRail ? .trailing : [])
                 }
             }
             .overlay(alignment: .bottom) {
@@ -65,6 +88,8 @@ private struct ReaderScreen: View {
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else if model.loadedPages != nil {
                         ReaderBottomBar(pagesAfter: model.pagesAfterVisible, isLocked: model.route.isLocked, goToLastMessage: { model.openLastMessage() }, reply: { model.startReply() })
+                            // Répondre goes to the side rail too.
+                            .ignoresSafeArea(.container, edges: usesSideRail ? .trailing : [])
                     }
                 }
                 // Bars stop growing at accessibility sizes, like the system ones.
