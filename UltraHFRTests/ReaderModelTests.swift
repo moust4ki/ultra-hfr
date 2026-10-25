@@ -84,6 +84,26 @@ struct ReaderModelTests {
         #expect(model.errorMessage == nil)
     }
 
+    @Test func nextPageFailureStaysInTheThread() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        StubURLProtocol.answer(.failure(URLError(.timedOut)), when: onPage(2))
+        let (model, driver) = makeReader()
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+
+        model.loadNext()
+        try await waitUntil { !driver.failedPages.isEmpty }
+        #expect(driver.loadingPages == [2])
+        #expect(driver.failedPages == [2])
+        // No banner over the messages: the card is in the thread.
+        #expect(model.errorMessage == nil)
+
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
+        model.retry()
+        try await waitUntil { !driver.appended.isEmpty }
+        #expect(model.loadedPages == 1...2)
+    }
+
     @Test func saysWhenThereIsNothingNewAtTheEnd() async throws {
         StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
         var last = route

@@ -30,4 +30,8 @@ final class FakeReaderDriver: ReaderPageDriver {
     func highlight(post: PostID?, words: String) async { highlighted.append(post) }
     func endChecked(_ message: String) async { endMessages.append(message) }
     func step(by offset: Int) async {}
+    private(set) var loadingPages: [Int] = []
+    private(set) var failedPages: [Int] = []
+    func showLoading(page: Int) async { loadingPages.append(page) }
+    func showLoadFailed(page: Int) async { failedPages.append(page) }
 }

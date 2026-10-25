@@ -42,6 +42,17 @@ struct ReaderHTMLTests {
         #expect(!ReaderHTML.page(page, newAfter: 104).contains("new-marker\" id"))
     }
 
+    @Test func neverShowsHFRsCopyOfThePreviousPageLastMessage() {
+        let body = MessageBody(blocks: [.paragraph([.text("x")])])
+        let posts = [
+            Post(id: 10, author: "a", body: body, isRepeatedFromPreviousPage: true),
+            Post(id: 11, author: "b", body: body),
+        ]
+        let html = ReaderHTML.page(TopicPage(topicID: 1, categoryID: 1, title: "Sujet", page: 2, pageCount: 3, posts: posts))
+        #expect(!html.contains("id=\"t10\""))
+        #expect(html.contains("id=\"t11\""))
+    }
+
     @Test func lastPageEndsWithTheUpToDateCard() {
         let posts = [Post(id: 1, author: "a", body: MessageBody(blocks: [.paragraph([.text("x")])]))]
         let last = TopicPage(topicID: 1, categoryID: 1, title: "Sujet", page: 3, pageCount: 3, posts: posts)

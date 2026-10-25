@@ -16,4 +16,6 @@ protocol ReaderPageDriver: AnyObject {
     func highlight(post: PostID?, words: String) async
     func endChecked(_ message: String) async
     func step(by offset: Int) async
+    func showLoading(page: Int) async
+    func showLoadFailed(page: Int) async
 }

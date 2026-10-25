@@ -31,9 +31,10 @@ public enum ReaderHTML {
         """
     }
 
-    /// One HFR page: a divider, then its messages. `excluding`: messages already shown (HFR
-    /// repeats the last message of a page at the top of the next one). `newAfter`: the last
-    /// message read; the « Nouveau » marker goes before the first message after it.
+    /// One HFR page: a divider, then its messages. HFR repeats the last message of a page at the
+    /// top of the next one: that copy is never shown (its own page shows it). `excluding`:
+    /// messages already shown. `newAfter`: the last message read; the « Nouveau » marker goes
+    /// before the first message after it.
     /// `continuing`: messages added to a page already shown (no divider, no poll).
     public static func page(
         _ page: TopicPage,
@@ -51,7 +52,7 @@ public enum ReaderHTML {
             html += self.poll(poll)
         }
         var newAfter = newAfter
-        for post in page.posts where !excluding.contains(post.id) {
+        for post in page.posts where !excluding.contains(post.id) && !post.isRepeatedFromPreviousPage {
             if let last = newAfter, post.id.rawValue > last.rawValue {
                 html += "<div class=\"new-marker\" id=\"new-marker\">Nouveau</div>"
                 newAfter = nil

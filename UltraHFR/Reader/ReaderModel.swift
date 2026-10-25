@@ -138,9 +138,14 @@ final class ReaderModel {
     func loadNext() {
         guard let range = loadedPages, let pageCount, range.upperBound < pageCount,
               !loadingPages.contains(range.upperBound + 1) else { return }
+        let next = range.upperBound + 1
         Task {
-            guard let (topicPage, html) = await load(range.upperBound + 1, excluding: renderedPosts) else {
+            await driver?.showLoading(page: next)
+            guard let (topicPage, html) = await load(next, excluding: renderedPosts) else {
                 retryAction = .next
+                // Shown where the page should be rather than over the messages (« Le Fil », states).
+                errorMessage = nil
+                await driver?.showLoadFailed(page: next)
                 return
             }
             guard let current = loadedPages, topicPage.page == current.upperBound + 1 else { return }

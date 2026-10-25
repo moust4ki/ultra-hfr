@@ -36,7 +36,7 @@
 
     append(html) {
       // The topic grew: the end card moves to the new end.
-      for (const end of document.querySelectorAll(".topic-end")) end.remove();
+      for (const end of document.querySelectorAll(".topic-end, .page-loading")) end.remove();
       thread().insertAdjacentHTML("beforeend", html);
       nearEndSent = false;
       changed();
@@ -98,6 +98,27 @@
       if (offset < 0 && current && current.getBoundingClientRect().top < topInset() - 4) index += 1;
       const target = list[Math.min(Math.max(index + offset, 0), list.length - 1)];
       if (target) reader.scrollToPost(Number(target.dataset.post));
+    },
+
+    /** Page `page` is on its way: a divider and skeletons at the bottom of the thread. */
+    showLoading(page, label) {
+      for (const old of document.querySelectorAll(".page-loading")) old.remove();
+      const html = '<div class="page-loading" aria-live="polite">'
+        + '<div class="page-divider"><span class="page"></span><span class="date">chargement…</span></div>'
+        + '<div class="skeleton"><i></i><i></i><i class="short"></i></div>'
+        + '<div class="skeleton"><i></i><i class="short"></i></div></div>';
+      thread().insertAdjacentHTML("beforeend", html);
+      thread().lastElementChild.querySelector(".page").textContent = label;
+      scheduleLayoutReport();
+    },
+
+    /** Page `page` could not be loaded: a card to try again, where the page should be. */
+    showLoadFailed(message) {
+      const loading = document.querySelector(".page-loading");
+      if (!loading) return;
+      loading.innerHTML = '<div class="page-failed"><span class="page-failed-text"></span>'
+        + '<button class="page-retry">Réessayer</button></div>';
+      loading.querySelector(".page-failed-text").textContent = message;
     },
 
     /** Nothing new after a check: the end card says so. */
@@ -322,6 +343,11 @@
       if (!reader.scrollToPost(id)) {
         send({ type: "openQuotedPost", post: id, path: quoteLink.getAttribute("href") });
       }
+      return;
+    }
+    const retry = event.target.closest(".page-retry");
+    if (retry) {
+      send({ type: "retry" });
       return;
     }
     const refresh = event.target.closest(".topic-refresh");
