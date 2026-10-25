@@ -18,9 +18,10 @@ public actor HFRClient {
     /// Every request fails as without a connection (to try the offline states).
     private let simulatesNoConnection: Bool
 
-    public init(simulatesNoConnection: Bool = false) {
+    /// `configuration`: tests pass one with their own `URLProtocol`; the cookie and cache
+    /// settings are always the client's.
+    public init(configuration: URLSessionConfiguration = .ephemeral, simulatesNoConnection: Bool = false) {
         self.simulatesNoConnection = simulatesNoConnection
-        let configuration = URLSessionConfiguration.ephemeral
         configuration.httpCookieStorage = nil
         configuration.httpShouldSetCookies = false
         configuration.httpCookieAcceptPolicy = .never
