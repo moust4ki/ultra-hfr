@@ -32,6 +32,7 @@ private struct ReaderScreen: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AppNavigation.self) private var navigation
     @Environment(\.openURL) private var openURL
+    @Environment(ConnectivityStore.self) private var connectivity
     @Query(sort: \ReadingPosition.updatedAt, order: .reverse) private var positions: [ReadingPosition]
 
     var body: some View {
@@ -119,6 +120,11 @@ private struct ReaderScreen: View {
                     }
                 }
                 model.show(route)
+            }
+            .onChange(of: connectivity.reconnections) {
+                // « Le Fil », states: the page that failed is asked again once, when the
+                // network comes back.
+                model.retryAfterReconnection()
             }
             .task(id: nextTopicKey) {
                 if let next = nextPosition {

@@ -408,6 +408,12 @@ final class ReaderModel {
         onOpenTopic?(next)
     }
 
+    /// The network came back: the page that failed, if any, is asked again once.
+    func retryAfterReconnection() {
+        guard retryAction != nil else { return }
+        retry()
+    }
+
     /// Loads again the page that failed (the page script does not ask twice for the same edge).
     func retry() {
         guard let action = retryAction else { return }

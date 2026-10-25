@@ -104,6 +104,24 @@ struct ReaderModelTests {
         #expect(model.loadedPages == 1...2)
     }
 
+    @Test func triesOnceWhenTheNetworkComesBack() async throws {
+        StubURLProtocol.answer(.failure(URLError(.notConnectedToInternet)), when: onPage(1))
+        let (model, driver) = makeReader()
+        model.show(route)
+        try await waitUntil { model.errorMessage != nil }
+
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        model.retryAfterReconnection()
+        try await waitUntil { !driver.replaced.isEmpty }
+        #expect(model.errorMessage == nil)
+
+        // Nothing failed any more: a new reconnection asks nothing.
+        let before = StubURLProtocol.requestedURLs.count
+        model.retryAfterReconnection()
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(StubURLProtocol.requestedURLs.count == before)
+    }
+
     @Test func saysWhenThereIsNothingNewAtTheEnd() async throws {
         StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
         var last = route

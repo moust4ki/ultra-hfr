@@ -14,6 +14,7 @@ struct ForumsView: View {
     @Environment(ForumsStore.self) private var forums
     @Environment(\.hfrPalette) private var palette
     @Environment(\.pageCache) private var pageCache
+    @Environment(ConnectivityStore.self) private var connectivity
 
     var body: some View {
         List {
@@ -67,6 +68,9 @@ struct ForumsView: View {
         }
         .refreshable { await forums.refresh() }
         .task { await forums.refresh() }
+        .onChange(of: connectivity.reconnections) {
+            if forums.isOffline || forums.categories.isEmpty { Task { await forums.refresh() } }
+        }
         .task(id: forums.isOffline) {
             if forums.isOffline { await forums.checkOfflineLists(in: pageCache) }
         }

@@ -19,6 +19,7 @@ struct UltraHFRApp: App {
     @State private var qualitay: QualitayStore
     @State private var accounts: AccountStore
     @State private var visits = VisitStore()
+    @State private var connectivity = ConnectivityStore()
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -46,6 +47,8 @@ struct UltraHFRApp: App {
                 .environment(qualitay)
                 .environment(accounts)
                 .environment(visits)
+                .environment(connectivity)
+                .task { await connectivity.watch() }
                 .hfrTheme(mode: settings.themeMode, accent: settings.accent)
         }
         .onChange(of: scenePhase) { _, phase in

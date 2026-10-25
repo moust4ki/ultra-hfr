@@ -24,6 +24,7 @@ struct TopicListView: View {
     @Environment(AppNavigation.self) private var navigation
     @Environment(ForumsStore.self) private var forums
     @Environment(\.modelContext) private var modelContext
+    @Environment(ConnectivityStore.self) private var connectivity
 
     init(route: TopicListRoute, section: AppSection) {
         self.route = route
@@ -106,6 +107,13 @@ struct TopicListView: View {
             if let since = model.offlineSince {
                 OfflineBanner(ForumTime.offline(since: since))
                     .padding(.bottom, 8)
+            }
+        }
+        .onChange(of: connectivity.reconnections) {
+            if model.failedPage != nil {
+                Task { await model.retry(using: client, cache: pageCache) }
+            } else if model.offlineSince != nil {
+                Task { await model.refresh(using: client, cache: pageCache) }
             }
         }
         .onChange(of: model.pages.count) {
