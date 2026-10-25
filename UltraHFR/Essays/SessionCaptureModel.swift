@@ -104,7 +104,7 @@ final class SessionCaptureModel {
         return listed.filter { $0.flag != nil && $0.flagPath != nil && !unreadIDs.contains($0.id) }
     }
 
-    /// Conversations without « [non lu] ».
+    /// Conversations without a new message for the member (opening one marks it read).
     static func readConversations(_ conversations: [ConversationSummary]) -> [ConversationSummary] {
         conversations.filter { !$0.isUnread }
     }

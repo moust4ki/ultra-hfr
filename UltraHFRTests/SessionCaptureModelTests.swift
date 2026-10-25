@@ -37,6 +37,6 @@ struct SessionCaptureModelTests {
         #expect(read.count == 5)
         #expect(read.allSatisfy { topic in !flags.topics.contains { $0.id == topic.id } })
         let conversations = try ConversationListParser.parse(html: Corpus.page("connecte-mp-liste"))
-        #expect(SessionCaptureModel.readConversations(conversations.conversations).count == 49)
+        #expect(SessionCaptureModel.readConversations(conversations.conversations).count == 50)
     }
 }

@@ -17,7 +17,9 @@ Constats faits le 25 octobre 2026 sur de vraies pages chargées avec un compte (
 ## MP
 
 - Liste : `/forum1.php?config=hfr.inc&cat=prive&page=1`, mêmes lignes qu'une liste de sujets, avec une colonne de plus (`td.sujetCase2` « ignorer »).
-- Une conversation non lue a `<span class="red">[non lu]</span>` devant le lien du titre, pas dans le titre.
+- Un nouveau message pour le membre se voit à l'icône de la première colonne (`alt="On"`, infobulle « Nouveau message »), comme dans une liste de sujets ; « Pas de nouveau message » sinon.
+- `<span class="red">[non lu]</span>` devant le titre ne veut **pas** dire non lu pour le membre : l'infobulle dit « Ce message n'a pas été lu par : … ». C'est le correspondant qui n'a pas encore lu le dernier message.
+- Aucune page vue ne portait de bandeau « nouveau message privé » quand il n'y en avait pas ; à vérifier quand il y en aura un.
 - Une conversation est une page `forum2.php?…&cat=prive&post=N` : `cat` n'est pas un nombre, l'analyseur de sujet devra l'accepter.
 
 ## Formulaires de réponse (`/message.php?config=hfr.inc&cat=…&post=…`)

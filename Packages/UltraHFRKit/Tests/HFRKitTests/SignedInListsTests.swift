@@ -26,8 +26,10 @@ struct SignedInListsTests {
     @Test func conversationsTellWhatIsUnread() throws {
         let page = try ConversationListParser.parse(html: Fixture.html("connecte-mp-liste"))
         #expect(page.conversations.count == 50)
-        #expect(page.unreadCount == 1)
-        #expect(page.conversations.first?.isUnread == true)
+        // Nothing new for the member; the first one waits for the other member to read it.
+        #expect(page.unreadCount == 0)
+        #expect(page.conversations.first?.isUnreadByOthers == true)
+        #expect(page.conversations.count(where: \.isUnreadByOthers) == 1)
         #expect(page.conversations.allSatisfy { $0.id.rawValue > 0 && !$0.interlocutor.isEmpty && !$0.title.isEmpty })
         #expect(page.conversations.allSatisfy { $0.path.contains("cat=prive") })
     }
