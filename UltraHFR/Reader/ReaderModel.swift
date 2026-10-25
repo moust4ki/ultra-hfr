@@ -80,13 +80,15 @@ final class ReaderModel {
     @ObservationIgnored private var pendingOpen: (page: Int, anchor: PostID?)?
     /// Last message read when the topic was opened, until the page with the next one is shown.
     @ObservationIgnored private var pendingNewMarker: PostID?
-    /// What to do again after a page could not be loaded.
+    /// What to do again after the topic could not be opened.
     @ObservationIgnored private var retryAction: RetryAction?
+    /// The page before (or after) the loaded ones could not be loaded. Each edge is kept apart,
+    /// so that loading one side never forgets that the other failed.
+    @ObservationIgnored private var previousFailed = false
+    @ObservationIgnored private var nextFailed = false
 
     private enum RetryAction {
         case open(page: Int, anchor: PostID?)
-        case next
-        case previous
         case lastMessage
     }
 
@@ -135,12 +137,7 @@ final class ReaderModel {
                 retryAction = .open(page: page, anchor: anchor)
                 return
             }
-            retryAction = nil
-            renderedPosts = Set(topicPage.posts.map(\.id))
-            renderedPostsByPage = [topicPage.page: renderedPosts]
-            renderedPages = [(topicPage.page, html)]
-            loadedPages = topicPage.page...topicPage.page
-            visiblePage = topicPage.page
+            startOver(with: topicPage, html: html)
             // On the first message of page 1, show the top of the page: the poll is above it.
             let isTopicStart = topicPage.page == 1 && anchor == topicPage.posts.first?.id
             await driver?.replace(html: html, anchor: isTopicStart ? nil : anchor)
@@ -157,17 +154,17 @@ final class ReaderModel {
         let next = range.upperBound + 1
         Task {
             await driver?.showLoading(page: next)
-            guard let (topicPage, html) = await load(next, excluding: renderedPosts) else {
-                retryAction = .next
+            let excluded = renderedPosts
+            guard let (topicPage, html) = await load(next, excluding: excluded) else {
+                nextFailed = true
                 // Shown where the page should be rather than over the messages (« Le Fil », states).
-                errorMessage = nil
+                clearErrorShownInline()
                 await driver?.showLoadFailed(page: next)
                 return
             }
             guard let current = loadedPages, topicPage.page == current.upperBound + 1 else { return }
-            retryAction = nil
-            renderedPosts.formUnion(topicPage.posts.map(\.id))
-            renderedPostsByPage[topicPage.page, default: []].formUnion(topicPage.posts.map(\.id))
+            nextFailed = false
+            noteDrawn(Self.drawnPosts(of: topicPage, excluding: excluded), on: topicPage.page)
             renderedPages.append((topicPage.page, html))
             loadedPages = current.lowerBound...topicPage.page
             await driver?.append(html: html)
@@ -179,14 +176,15 @@ final class ReaderModel {
         guard let range = loadedPages, range.lowerBound > 1,
               !loadingPages.contains(range.lowerBound - 1) else { return }
         Task {
-            guard let (topicPage, html) = await load(range.lowerBound - 1, excluding: renderedPosts) else {
-                retryAction = .previous
+            previousFailed = false
+            let excluded = renderedPosts
+            guard let (topicPage, html) = await load(range.lowerBound - 1, excluding: excluded) else {
+                // The banner stays, with Réessayer: the page script asks only once per edge.
+                previousFailed = true
                 return
             }
             guard let current = loadedPages, topicPage.page == current.lowerBound - 1 else { return }
-            retryAction = nil
-            renderedPosts.formUnion(topicPage.posts.map(\.id))
-            renderedPostsByPage[topicPage.page, default: []].formUnion(topicPage.posts.map(\.id))
+            noteDrawn(Self.drawnPosts(of: topicPage, excluding: excluded), on: topicPage.page)
             renderedPages.insert((topicPage.page, html), at: 0)
             loadedPages = topicPage.page...current.upperBound
             await driver?.prepend(html: html)
@@ -195,11 +193,14 @@ final class ReaderModel {
     }
 
     /// Removes the pages furthest from where the reader is going, beyond `maxLoadedPages`.
+    /// Never the page on screen: a page may also load while the reader is elsewhere (a retry
+    /// when the network comes back); trimming then waits for a later load.
     private func trimLoadedPages(keepingEnd: Bool) async {
         guard let range = loadedPages, range.count > maxLoadedPages else { return }
         let kept = keepingEnd
             ? (range.upperBound - maxLoadedPages + 1)...range.upperBound
             : range.lowerBound...(range.lowerBound + maxLoadedPages - 1)
+        if let visiblePage, range.contains(visiblePage), !kept.contains(visiblePage) { return }
         let dropped = Set(range).subtracting(kept)
         for page in dropped {
             renderedPosts.subtract(renderedPostsByPage.removeValue(forKey: page) ?? [])
@@ -213,22 +214,62 @@ final class ReaderModel {
         }
     }
 
+    /// A page opened in place of everything shown.
+    private func startOver(with topicPage: TopicPage, html: String) {
+        retryAction = nil
+        previousFailed = false
+        nextFailed = false
+        let drawn = Self.drawnPosts(of: topicPage, excluding: [])
+        renderedPosts = drawn
+        renderedPostsByPage = [topicPage.page: drawn]
+        renderedPages = [(topicPage.page, html)]
+        loadedPages = topicPage.page...topicPage.page
+        visiblePage = topicPage.page
+    }
+
+    /// Messages a page adds to the web page: HFR's copy of the previous page's last message
+    /// is never drawn, nor what is already shown (see `ReaderHTML.page`).
+    private static func drawnPosts(of topicPage: TopicPage, excluding: Set<PostID>) -> Set<PostID> {
+        Set(topicPage.posts.lazy.filter { !$0.isRepeatedFromPreviousPage && !excluding.contains($0.id) }.map(\.id))
+    }
+
+    private func noteDrawn(_ drawn: Set<PostID>, on page: Int) {
+        renderedPosts.formUnion(drawn)
+        renderedPostsByPage[page, default: []].formUnion(drawn)
+    }
+
+    /// A failure shown in the page itself needs no banner, unless the banner tells of another
+    /// failure (the page before the loaded ones).
+    private func clearErrorShownInline() {
+        if !previousFailed { errorMessage = nil }
+    }
+
     /// The last page again, for the messages posted since it was shown.
     func checkForNewMessages() {
         guard let range = loadedPages, !loadingPages.contains(range.upperBound) else { return }
         let lastPage = range.upperBound
         Task {
-            guard let (topicPage, html) = await load(lastPage, excluding: renderedPosts, continuing: true) else {
+            let excluded = renderedPosts
+            guard let (topicPage, html) = await load(lastPage, excluding: excluded, continuing: true) else {
+                // The end card offers Réessayer itself.
+                clearErrorShownInline()
                 await driver?.endChecked("Réessayer")
                 return
             }
-            let newPosts = topicPage.posts.filter { !renderedPosts.contains($0.id) }
+            // Another page was opened meanwhile: this answer is for a page no longer shown.
+            guard loadedPages?.upperBound == lastPage else { return }
+            let newPosts = Self.drawnPosts(of: topicPage, excluding: excluded)
             guard !newPosts.isEmpty else {
-                await driver?.endChecked("Rien de nouveau · Vérifier encore")
+                if topicPage.pageCount > lastPage {
+                    // The page was full: what is new starts the next page.
+                    await driver?.endChecked("Vérifier les nouveaux messages")
+                    loadNext()
+                } else {
+                    await driver?.endChecked("Rien de nouveau · Vérifier encore")
+                }
                 return
             }
-            renderedPosts.formUnion(newPosts.map(\.id))
-            renderedPostsByPage[topicPage.page, default: []].formUnion(newPosts.map(\.id))
+            noteDrawn(newPosts, on: topicPage.page)
             renderedPages.append((topicPage.page, html))
             await driver?.append(html: html)
         }
@@ -262,9 +303,10 @@ final class ReaderModel {
             pageCount = max(pageCount ?? 0, topicPage.pageCount)
             for post in topicPage.posts {
                 posts[post.id] = post
-                postPages[post.id] = postPages[post.id] ?? topicPage.page
+                // HFR's copy of the previous page's last message belongs to that page.
+                postPages[post.id] = postPages[post.id] ?? (post.isRepeatedFromPreviousPage ? max(1, topicPage.page - 1) : topicPage.page)
             }
-            errorMessage = nil
+            if !previousFailed { errorMessage = nil }
             return (topicPage, rendered)
         } catch {
             errorMessage = Self.message(for: error)
@@ -308,13 +350,23 @@ final class ReaderModel {
             self.pendingOpen = nil
             open(page: pendingOpen.page, anchor: pendingOpen.anchor)
         } else if !renderedPages.isEmpty {
-            // Same topic in a new web view: show the same pages at the same message.
-            let html = renderedPages.map(\.html).joined()
+            // Same topic in a new web view: show the same pages at the same message. The pages
+            // were drawn with the quotes of their time, and only the last one ends the topic.
+            let lastIndex = renderedPages.count - 1
+            let html = renderedPages.enumerated()
+                .map { index, page in index == lastIndex ? page.html : page.html.replacing(ReaderHTML.topicEndCard, with: "") }
+                .joined()
             let anchor = lastVisiblePost
             let isLocked = route.isLocked
+            let quoted = quoted
+            let selection = searchSelection.flatMap { renderedPosts.contains($0.current) ? $0 : nil }
             Task {
                 await driver?.replace(html: html, anchor: anchor)
                 await driver?.setLocked(isLocked)
+                await driver?.setQuoted(quoted)
+                if let selection {
+                    await driver?.highlight(post: selection.current, words: selection.words)
+                }
             }
         }
     }
@@ -439,20 +491,22 @@ final class ReaderModel {
 
     /// The network came back: the page that failed, if any, is asked again once.
     func retryAfterReconnection() {
-        guard retryAction != nil else { return }
+        guard retryAction != nil || previousFailed || nextFailed else { return }
         retry()
     }
 
-    /// Loads again the page that failed (the page script does not ask twice for the same edge).
+    /// Loads again the pages that failed (the page script does not ask twice for the same edge).
     func retry() {
-        guard let action = retryAction else { return }
         errorMessage = nil
-        switch action {
-        case .open(let page, let anchor): open(page: page, anchor: anchor)
-        case .next: loadNext()
-        case .previous: loadPrevious()
-        case .lastMessage: openLastMessage()
+        if let action = retryAction {
+            switch action {
+            case .open(let page, let anchor): open(page: page, anchor: anchor)
+            case .lastMessage: openLastMessage()
+            }
+            return
         }
+        if previousFailed { loadPrevious() }
+        if nextFailed { loadNext() }
     }
 
     func jump(to page: Int) {
@@ -493,12 +547,7 @@ final class ReaderModel {
                 retryAction = .lastMessage
                 return
             }
-            retryAction = nil
-            renderedPosts = Set(topicPage.posts.map(\.id))
-            renderedPostsByPage = [topicPage.page: renderedPosts]
-            renderedPages = [(topicPage.page, html)]
-            loadedPages = topicPage.page...topicPage.page
-            visiblePage = topicPage.page
+            startOver(with: topicPage, html: html)
             await driver?.replace(html: html, anchor: topicPage.posts.last?.id)
         }
     }

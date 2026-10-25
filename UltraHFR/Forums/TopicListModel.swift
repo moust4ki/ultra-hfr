@@ -20,6 +20,8 @@ final class TopicListModel {
     private(set) var errorMessage: String?
     /// When the first page shown was saved, if HFR could not be reached.
     private(set) var offlineSince: Date?
+    /// Bumped at each page received, refreshes included (the page count may stay the same).
+    private(set) var receivedPages = 0
     var filter: TopicFilter = .all
     var showsReadStickies = false
 
@@ -92,6 +94,7 @@ final class TopicListModel {
             list.topics = list.topics.filter { seenTopics.insert($0.id).inserted }
             if list.page == page {
                 pages.append(list)
+                receivedPages += 1
             }
             errorMessage = nil
         } catch {

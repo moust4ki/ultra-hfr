@@ -67,10 +67,13 @@ struct TopicListModelTests {
         await model.loadFirstPage(using: client, cache: cache)
         await model.loadNextPage(using: client, cache: cache)
 
+        let received = model.receivedPages
         await model.refresh(using: client, cache: cache)
 
         #expect(model.pages.map(\.page) == [1])
         #expect(!(model.pages.first?.topics.isEmpty ?? true))
+        // Seen by the view to update the Fil, even when the page count stays the same.
+        #expect(model.receivedPages == received + 1)
     }
 
     @Test func refreshWithoutNetworkKeepsAList() async throws {

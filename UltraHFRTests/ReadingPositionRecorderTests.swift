@@ -56,6 +56,48 @@ struct ReadingPositionRecorderTests {
         #expect(try positions(in: context).count == 1)
     }
 
+    @Test func markedReadDoesNotGoBack() throws {
+        let container = try ModelContainer(for: ReadingPosition.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = ModelContext(container)
+        let recorder = ReadingPositionRecorder(context: context)
+        recorder.record(topic: route, page: 10, pageCount: 50, post: 11_000_000, author: "Kaiju")
+        var saved = try #require(try positions(in: context).first)
+        saved.markRead()
+        #expect(saved.page == 50)
+
+        // « Première page » from the Fil: the position stays at the end.
+        recorder.record(topic: route, page: 1, pageCount: 50, post: 10_000_000, author: "Grumly")
+        saved = try #require(try positions(in: context).first)
+        #expect(saved.page == 50)
+        #expect(!saved.hasNews)
+
+        // Reading the last page moves it again, to the message.
+        recorder.record(topic: route, page: 50, pageCount: 50, post: 11_900_000, author: "Xixou2")
+        saved = try #require(try positions(in: context).first)
+        #expect(saved.postID == 11_900_000)
+    }
+
+    @Test func readingOlderPagesKeepsTheNews() throws {
+        let container = try ModelContainer(for: ReadingPosition.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let context = ModelContext(container)
+        let recorder = ReadingPositionRecorder(context: context)
+        recorder.record(topic: route, page: 350, pageCount: 350, post: 11_405_000, author: "Kaiju")
+        // A list says something was posted on the same page since.
+        let listed = TopicSummary(
+            id: 1061629, title: "Blackwell", path: "/hfr/Hardware/2D-3D/blackwell-sujet_1061629_1.htm",
+            pageCount: 350, author: "Xixou2",
+            lastPost: LastPost(author: "Grumly", date: .now.addingTimeInterval(60), path: "/hfr/Hardware/2D-3D/blackwell-sujet_1061629_350.htm")
+        )
+        recorder.noteListed([listed])
+        #expect(try positions(in: context).first?.hasNews == true)
+
+        // Reading page 2 again does not hide it, nor an older page count.
+        recorder.record(topic: route, page: 2, pageCount: 2, post: 11_000_000, author: "Grumly")
+        let saved = try #require(try positions(in: context).first)
+        #expect(saved.hasNews)
+        #expect(saved.pageCount == 350)
+    }
+
     @Test func remembersTheLockForTheFil() throws {
         let container = try ModelContainer(for: ReadingPosition.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         let context = ModelContext(container)

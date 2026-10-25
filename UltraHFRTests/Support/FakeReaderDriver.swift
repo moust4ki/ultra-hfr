@@ -24,7 +24,8 @@ final class FakeReaderDriver: ReaderPageDriver {
     func replace(html: String, anchor: PostID?) async { replaced.append((html, anchor)) }
     func append(html: String) async { appended.append(html) }
     func prepend(html: String) async { prepended.append(html) }
-    func setQuoted(_ posts: [PostID]) async {}
+    private(set) var quotedStates: [[PostID]] = []
+    func setQuoted(_ posts: [PostID]) async { quotedStates.append(posts) }
     func scrollTo(post: PostID) async {}
     func setLocked(_ isLocked: Bool) async { lockedStates.append(isLocked) }
     func highlight(post: PostID?, words: String) async { highlighted.append(post) }

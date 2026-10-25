@@ -34,15 +34,21 @@ struct ReadingPositionRecorder {
         var descriptor = FetchDescriptor<ReadingPosition>(predicate: #Predicate { $0.topicID == topicID })
         descriptor.fetchLimit = 1
         if let existing = try? context.fetch(descriptor).first {
-            if post.rawValue >= existing.postID {
+            // Once marked read from a list, the last message is not known: only its page counts.
+            let movesForward = post.rawValue >= existing.postID && (existing.postID > 0 || page >= existing.page)
+            // Reading older pages must not hide what the lists said was posted since.
+            let hasDatedNews = existing.lastPostAt.map { $0 > existing.updatedAt } ?? false
+            if movesForward {
                 existing.page = page
                 existing.postID = post.rawValue
                 existing.postAuthor = author
             }
-            existing.pageCount = max(pageCount, existing.page)
+            if movesForward || !hasDatedNews {
+                existing.updatedAt = .now
+            }
+            existing.pageCount = max(existing.pageCount, pageCount, existing.page)
             existing.title = topic.title
             existing.isLocked = topic.isLocked
-            existing.updatedAt = .now
         } else {
             TopicSpotlight.index(title: topic.title, category: topic.category, topic: topic.topic)
             context.insert(ReadingPosition(

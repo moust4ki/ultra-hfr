@@ -60,12 +60,15 @@ public enum ReaderHTML {
             html += self.post(post, page: page.page, isQuoted: quoted.contains(post.id))
         }
         if page.page >= page.pageCount {
-            html += "<div class=\"topic-end\"><span class=\"topic-end-title\">✓ Tu es à jour sur ce sujet</span>"
-            html += "<button class=\"topic-refresh\">Vérifier les nouveaux messages</button></div>"
+            html += topicEndCard
         }
         html += "</section>"
         return html
     }
+
+    /// The card at the end of the last page (« Le Fil », H1).
+    public static let topicEndCard = "<div class=\"topic-end\"><span class=\"topic-end-title\">✓ Tu es à jour sur ce sujet</span>"
+        + "<button class=\"topic-refresh\">Vérifier les nouveaux messages</button></div>"
 
     /// A full page showing one message, for the composer's preview.
     public static func preview(of body: MessageBody, author: String, style: ReaderStyle) -> String {

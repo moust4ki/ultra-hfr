@@ -116,7 +116,7 @@ struct TopicListView: View {
                 Task { await model.refresh(using: client, cache: pageCache) }
             }
         }
-        .onChange(of: model.pages.count) {
+        .onChange(of: model.receivedPages) {
             if let last = model.pages.last {
                 ReadingPositionRecorder(context: modelContext).noteListed(last.topics)
             }

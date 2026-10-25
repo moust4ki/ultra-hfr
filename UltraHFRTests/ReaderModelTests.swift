@@ -56,8 +56,11 @@ struct ReaderModelTests {
         model.maxLoadedPages = 1
         model.show(route)
         try await waitUntil { !driver.replaced.isEmpty }
+        let page2 = try TopicPageParser.parse(html: Corpus.page("sujet-court-p2"))
+        let onPage2 = try #require(page2.posts.last?.id)
 
-        // Reading on: page 1 leaves the web page.
+        // Reading on (the reader is past page 1): page 1 leaves the web page.
+        model.didShow(post: onPage2, page: 2, seen: onPage2, seenPage: 2)
         model.loadNext()
         try await waitUntil { !driver.trimmedBefore.isEmpty }
         #expect(driver.trimmedBefore == [2])
@@ -65,6 +68,7 @@ struct ReaderModelTests {
 
         // Going back up: page 1 comes back with its messages (they are no longer « shown »),
         // page 2 leaves.
+        model.didShow(post: onPage2, page: 1, seen: onPage2, seenPage: 1)
         model.loadPrevious()
         try await waitUntil { !driver.trimmedAfter.isEmpty }
         #expect(driver.trimmedAfter == [1])
@@ -72,6 +76,112 @@ struct ReaderModelTests {
         let firstPage = try #require(driver.prepended.first)
         let page1 = try TopicPageParser.parse(html: Corpus.page("sujet-court-p1"))
         #expect(firstPage.contains("id=\"t\(page1.posts[0].id)\""))
+    }
+
+    @Test func neverRemovesThePageOnScreen() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
+        let (model, driver) = makeReader()
+        model.maxLoadedPages = 1
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+
+        // Page 2 arrives while page 1 is still on screen (a retry, for instance).
+        model.loadNext()
+        try await waitUntil { !driver.appended.isEmpty }
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(driver.trimmedBefore.isEmpty)
+        #expect(model.loadedPages == 1...2)
+    }
+
+    @Test func scrollingUpShowsEveryMessage() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
+        var second = route
+        second.page = 2
+        let (model, driver) = makeReader(route: second)
+        model.show(second)
+        try await waitUntil { !driver.replaced.isEmpty }
+
+        // Page 2 starts with HFR's copy of page 1's last message, which page 1 shows.
+        model.loadPrevious()
+        try await waitUntil { !driver.prepended.isEmpty }
+        let page1 = try TopicPageParser.parse(html: Corpus.page("sujet-court-p1"))
+        let lastOfPage1 = try #require(page1.posts.last?.id)
+        #expect(driver.prepended[0].contains("id=\"t\(lastOfPage1)\""))
+        let ids = (driver.prepended + driver.replaced.map(\.html)).joined().matches(of: /id="t(\d+)"/).map { String($0.output.1) }
+        #expect(ids.count == Set(ids).count)
+    }
+
+    @Test func aFullLastPageGoesOnToTheNextOne() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
+        let (model, driver) = makeReader()
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+
+        // Nothing new on page 1, but HFR now counts a page 2: it is loaded.
+        model.checkForNewMessages()
+        try await waitUntil { !driver.appended.isEmpty }
+        #expect(model.loadedPages == 1...2)
+        #expect(!driver.endMessages.contains("Rien de nouveau · Vérifier encore"))
+    }
+
+    @Test func aFailedCheckNeedsNoBanner() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
+        var last = route
+        last.page = 2
+        let (model, driver) = makeReader(route: last)
+        model.show(last)
+        try await waitUntil { !driver.replaced.isEmpty }
+
+        // Without network the copy on the device answers; an unreadable page cannot be helped.
+        StubURLProtocol.answer(.success("<html><body>Maintenance</body></html>"), when: onPage(2))
+        model.checkForNewMessages()
+        try await waitUntil { !driver.endMessages.isEmpty }
+        #expect(driver.endMessages == ["Réessayer"])
+        #expect(model.errorMessage == nil)
+    }
+
+    @Test func aFailedEarlierPageIsNotForgotten() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p2")), when: onPage(2))
+        StubURLProtocol.answer(.failure(URLError(.notConnectedToInternet)), when: onPage(1))
+        var last = route
+        last.page = 2
+        let (model, driver) = makeReader(route: last)
+        model.show(last)
+        try await waitUntil { !driver.replaced.isEmpty }
+
+        model.loadPrevious()
+        try await waitUntil { model.errorMessage != nil }
+        // Another load succeeds: the banner about page 1 stays.
+        model.checkForNewMessages()
+        try await waitUntil { !driver.endMessages.isEmpty }
+        #expect(model.errorMessage != nil)
+
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        model.retryAfterReconnection()
+        try await waitUntil { !driver.prepended.isEmpty }
+        #expect(model.loadedPages == 1...2)
+        #expect(model.errorMessage == nil)
+    }
+
+    @Test func aNewWebViewShowsTheQuotes() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("sujet-court-p1")), when: onPage(1))
+        let (model, driver) = makeReader()
+        model.show(route)
+        try await waitUntil { !driver.replaced.isEmpty }
+        let post = try #require(try TopicPageParser.parse(html: Corpus.page("sujet-court-p1")).posts.first?.id)
+        model.toggleQuote(post)
+
+        // Folding the Duo: a new web view, filled again from the model.
+        let newDriver = FakeReaderDriver()
+        model.driver = newDriver
+        model.driverAttached()
+        model.pageIsReady()
+        try await waitUntil { !newDriver.quotedStates.isEmpty }
+        #expect(newDriver.quotedStates.last == [post])
+        model.clearQuotes()
     }
 
     @Test func marksTheFirstNewMessage() async throws {
