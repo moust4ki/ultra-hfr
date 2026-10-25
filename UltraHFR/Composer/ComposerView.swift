@@ -25,6 +25,9 @@ struct ComposerView: View {
     @Environment(AccountStore.self) private var accounts
     @Environment(AppSettings.self) private var settings
     @FocusState private var isEditorFocused: Bool
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    /// Text shown by the live preview, a moment after typing stops.
+    @State private var previewText = ""
 
     init(topic: TopicRoute, quotedText: String = "", quoteAuthors: [Int: String] = [:]) {
         self.topic = topic
@@ -35,40 +38,34 @@ struct ComposerView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 12) {
-                Picker("Mode", selection: $model.mode) {
-                    ForEach(ComposerMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
+            Group {
+                if horizontalSizeClass == .regular {
+                    // « Le Fil », I2: the editor on the left, the live preview on the right.
+                    HStack(spacing: 0) {
+                        ComposerEditor(model: model, isFocused: $isEditorFocused)
+                            .frame(maxWidth: .infinity)
+                        Divider()
+                        ComposerLivePreview(html: previewHTML(of: previewText))
+                            .frame(maxWidth: .infinity)
+                            .background(palette.groupedBackground.color)
                     }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
+                } else {
+                    VStack(spacing: 12) {
+                        Picker("Mode", selection: $model.mode) {
+                            ForEach(ComposerMode.allCases) { mode in
+                                Text(mode.title).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
 
-                switch model.mode {
-                case .bbcode:
-                    TextEditor(text: $model.text, selection: $model.selection)
-                        .font(.body.monospaced())
-                        .focused($isEditorFocused)
-                        .scrollContentBackground(.hidden)
-                        .padding(.horizontal, 12)
-                        .accessibilityLabel("Message en BBCode")
-                case .preview:
-                    MessagePreview(html: ReaderHTML.preview(
-                        of: BBCodeParser.parse(model.text).resolvingQuoteAuthors(quoteAuthors),
-                        author: accounts.current?.pseudo ?? "Toi",
-                        style: previewStyle
-                    ))
-                }
-
-                if model.isSmileyPanelShown, model.mode == .bbcode {
-                    SmileyPanel { model.insert($0) }
-                        .background(palette.surface.color, in: .rect(cornerRadius: 20))
-                        .padding(.horizontal, 12)
-                }
-                if model.mode == .bbcode {
-                    FormattingBar(model: model)
-                        .padding(.horizontal, 12)
-                        .padding(.bottom, 8)
+                        switch model.mode {
+                        case .bbcode:
+                            ComposerEditor(model: model, isFocused: $isEditorFocused)
+                        case .preview:
+                            MessagePreview(html: previewHTML(of: model.text))
+                        }
+                    }
                 }
             }
             .background(palette.background.color)
@@ -90,13 +87,30 @@ struct ComposerView: View {
                     .padding(.bottom, 4)
             }
         }
+        // A large sheet in regular width; the system sheet on iPhone.
+        .presentationSizing(.page)
         .task {
             loadDraft()
+            previewText = model.text
             isEditorFocused = true
         }
         .onChange(of: model.text) { _, text in
             saveDraft(text)
         }
+        .task(id: model.text) {
+            // The live preview follows a moment after typing stops, not at each key.
+            guard horizontalSizeClass == .regular else { return }
+            try? await Task.sleep(for: .milliseconds(350))
+            previewText = model.text
+        }
+    }
+
+    private func previewHTML(of text: String) -> String {
+        ReaderHTML.preview(
+            of: BBCodeParser.parse(text).resolvingQuoteAuthors(quoteAuthors),
+            author: accounts.current?.pseudo ?? "Toi",
+            style: previewStyle
+        )
     }
 
     private var previewStyle: ReaderStyle {
@@ -159,5 +173,52 @@ private struct DraftStatus: View {
         }
         .font(.caption)
         .foregroundStyle(palette.text3.color)
+    }
+}
+
+/// The BBCode text, the smiley panel when open, and the formatting bar.
+private struct ComposerEditor: View {
+    @Bindable var model: ComposerModel
+    var isFocused: FocusState<Bool>.Binding
+    @Environment(\.hfrPalette) private var palette
+
+    var body: some View {
+        VStack(spacing: 12) {
+            TextEditor(text: $model.text, selection: $model.selection)
+                .font(.body.monospaced())
+                .focused(isFocused)
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, 12)
+                .accessibilityLabel("Message en BBCode")
+            if model.isSmileyPanelShown {
+                SmileyPanel { model.insert($0) }
+                    .background(palette.surface.color, in: .rect(cornerRadius: 20))
+                    .padding(.horizontal, 12)
+            }
+            FormattingBar(model: model)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+        }
+    }
+}
+
+/// « Aperçu » above the message as it will look in the topic.
+private struct ComposerLivePreview: View {
+    let html: String
+    @Environment(\.hfrPalette) private var palette
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Aperçu".uppercased())
+                .font(.caption.weight(.semibold))
+                .tracking(0.6)
+                .foregroundStyle(palette.text3.color)
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+            MessagePreview(html: html)
+                .background(palette.background.color, in: .rect(cornerRadius: 20))
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
+        }
     }
 }
