@@ -13,6 +13,9 @@ struct ReaderBottomBar: View {
     var isLocked = false
     let goToLastMessage: () -> Void
     let reply: () -> Void
+    /// Room on the right of Répondre; more in the side rail of the unfolded Duo, to put it on the
+    /// axis of the bar's buttons.
+    var trailingPadding: CGFloat = 16
     @Environment(\.hfrPalette) private var palette
 
     var body: some View {
@@ -41,15 +44,21 @@ struct ReaderBottomBar: View {
                     .glassEffect()
                     .accessibilityLabel("Sujet verrouillé : les réponses sont fermées")
             } else {
-                Button("Répondre", systemImage: "square.and.pencil", action: reply)
-                    .labelStyle(.iconOnly)
-                    .font(.title3)
-                    .frame(width: 52, height: 52)
-                    .foregroundStyle(palette.accent.onFill.color)
-                    .background(palette.accent.fill.color, in: .circle)
+                // Liquid Glass tinted with the accent, reacting to the touch.
+                Button(action: reply) {
+                    Image(systemName: "square.and.pencil")
+                        .font(.title3)
+                        .foregroundStyle(palette.accent.onFill.color)
+                        .frame(width: 52, height: 52)
+                        .contentShape(.circle)
+                }
+                .buttonStyle(.plain)
+                .glassEffect(.regular.tint(palette.accent.fill.color).interactive(), in: .circle)
+                .accessibilityLabel("Répondre")
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.leading, 16)
+        .padding(.trailing, trailingPadding)
         .padding(.bottom, 8)
     }
 }

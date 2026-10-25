@@ -91,7 +91,15 @@ private struct ReaderScreen: View {
                         QuoteTray(authors: model.quotedAuthors, clear: { model.clearQuotes() }, reply: { model.startReply() })
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else if model.loadedPages != nil {
-                        ReaderBottomBar(pagesAfter: model.pagesAfterVisible, isLocked: model.route.isLocked, goToLastMessage: { model.openLastMessage() }, reply: { model.startReply() })
+                        ReaderBottomBar(
+                            pagesAfter: model.pagesAfterVisible,
+                            isLocked: model.route.isLocked,
+                            goToLastMessage: { model.openLastMessage() },
+                            reply: { model.startReply() },
+                            // Centred on the axis of the bar's buttons (see the scrubber): 26 pt
+                            // is half of Répondre.
+                            trailingPadding: usesSideRail ? max(16, trailingInset / 2 + 6 - 26) : 16
+                        )
                             // Répondre goes to the side rail too.
                             .ignoresSafeArea(.container, edges: usesSideRail ? .trailing : [])
                     }
