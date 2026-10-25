@@ -76,6 +76,19 @@ struct TopicListModelTests {
         #expect(model.receivedPages == received + 1)
     }
 
+    @Test func aListKeptWhileAwayIsAskedAgainWhenOld() async throws {
+        StubURLProtocol.answer(.success(try Corpus.page("liste-hardware-p1")), when: onPage(1))
+        let (client, cache) = makeClient()
+        let model = TopicListModel(route: route)
+        await model.loadFirstPage(using: client, cache: cache)
+        #expect(StubURLProtocol.requestedURLs.count == 1)
+
+        await model.refreshIfStale(using: client, cache: cache, now: .now.addingTimeInterval(60))
+        #expect(StubURLProtocol.requestedURLs.count == 1)
+        await model.refreshIfStale(using: client, cache: cache, now: .now.addingTimeInterval(TopicListModel.staleAfter + 1))
+        #expect(StubURLProtocol.requestedURLs.count == 2)
+    }
+
     @Test func refreshWithoutNetworkKeepsAList() async throws {
         StubURLProtocol.answer(.success(try Corpus.page("liste-hardware-p1")), when: onPage(1))
         let (client, cache) = makeClient()

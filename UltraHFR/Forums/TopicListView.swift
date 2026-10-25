@@ -26,10 +26,10 @@ struct TopicListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(ConnectivityStore.self) private var connectivity
 
-    init(route: TopicListRoute, section: AppSection) {
+    init(route: TopicListRoute, section: AppSection, model: TopicListModel) {
         self.route = route
         self.section = section
-        _model = State(initialValue: TopicListModel(route: route))
+        _model = State(initialValue: model)
     }
 
     var body: some View {
@@ -125,6 +125,7 @@ struct TopicListView: View {
         .task {
             forums.noteVisit(route)
             await model.loadFirstPage(using: client, cache: pageCache)
+            await model.refreshIfStale(using: client, cache: pageCache)
         }
     }
 

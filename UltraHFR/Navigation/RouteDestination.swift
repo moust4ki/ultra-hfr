@@ -9,13 +9,14 @@ import SwiftUI
 struct RouteDestination: View {
     let route: AppRoute
     let section: AppSection
+    @Environment(TopicListSessions.self) private var lists
 
     var body: some View {
         switch route {
         case .category(let category):
             CategoryView(category: category, section: section)
         case .topicList(let list):
-            TopicListView(route: list, section: section)
+            TopicListView(route: list, section: section, model: lists.model(for: list))
         case .topic(let topic):
             ReaderView(route: topic)
         case .essays:

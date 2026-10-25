@@ -22,6 +22,10 @@ final class TopicListModel {
     private(set) var offlineSince: Date?
     /// Bumped at each page received, refreshes included (the page count may stay the same).
     private(set) var receivedPages = 0
+    /// When the first page was last received.
+    @ObservationIgnored private(set) var loadedAt: Date?
+    /// A list kept while away (`TopicListSessions`) is asked again past this age.
+    nonisolated static let staleAfter: TimeInterval = 300
     var filter: TopicFilter = .all
     var showsReadStickies = false
 
@@ -59,6 +63,13 @@ final class TopicListModel {
         await load(page: 1, using: client, cache: cache)
     }
 
+    /// Back to a list kept while away: its first page is asked again if it is old, the pages
+    /// shown staying until it arrives.
+    func refreshIfStale(using client: HFRClient, cache: HTMLPageCache, now: Date = .now) async {
+        guard let loadedAt, now.timeIntervalSince(loadedAt) > Self.staleAfter else { return }
+        await refresh(using: client, cache: cache)
+    }
+
     /// Loads the first page again. What is shown stays in place until the new page arrives, and
     /// stays if it cannot be loaded.
     func refresh(using client: HFRClient, cache: HTMLPageCache) async {
@@ -84,7 +95,10 @@ final class TopicListModel {
         do {
             let answer = try await client.topicList(path: route.path, page: page, cache: cache)
             var list = answer.content
-            if page == 1 { offlineSince = answer.savedAt }
+            if page == 1 {
+                offlineSince = answer.savedAt
+                loadedAt = .now
+            }
             if replacing {
                 pages = []
                 seenTopics = []
