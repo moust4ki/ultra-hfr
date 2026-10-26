@@ -8,7 +8,8 @@
 //   - les pseudos, partout où ils apparaissent (même pseudo → même remplaçant, dans tout le corpus) ;
 //   - les smileys persos, les numéros de profil, les statuts ;
 //   - les adresses des images et des liens externes des messages (hôte gardé, chemin haché) ;
-//   - les jetons hash_check et codehex, le numéro de membre (id_user) ;
+//   - les jetons hash_check et codehex, le numéro de membre (id_user), y compris dans les liens
+//     chiffrés par HFR (md_cryptlink…), décodés puis rechiffrés ;
 //   - sur les pages vues connecté, les titres des listes personnelles (sujets suivis, MP).
 // Le remplacement dépend d'un sel secret (Corpus/.salt, ignoré par git) : on ne peut pas
 // retrouver un mot à partir de sa version brouillée.
@@ -371,6 +372,23 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
     page = replaceMatches(in: page, regex(#"\[:([^\]:"<]+)((?::\d+)?)\]"#)) {
         "[:" + scrambleText($0[1]) + $0[2] + "]"
     }
+    page = maskIdentifiers(page)
+    page = replacePseudos(in: page, pseudos: pseudos, navigation: navigation, isLink: false)
+
+    // HFR hides some links in class names (`md_cryptlink…`, `md_noclass_cryptlink…`): the
+    // logout link of a signed-in page carries `codehex` there. Each link is decoded, gets the
+    // same treatment, and is encoded again.
+    page = replaceMatches(in: page, regex(#"(cryptlink)([0-9A-F]+)"#)) { groups in
+        guard let link = CryptLink.decode(groups[2]) else { return groups[0] }
+        let masked = replacePseudos(in: maskIdentifiers(link), pseudos: pseudos, navigation: navigation, isLink: true)
+        return groups[1] + CryptLink.encode(masked)
+    }
+    return page
+}
+
+/// Profile numbers, member number and tokens, in a page or in a decoded link.
+func maskIdentifiers(_ text: String) -> String {
+    var page = text
     // Profile numbers, also in the file names of avatars.
     page = replaceMatches(in: page, regex(#"(profil-)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
     page = replaceMatches(in: page, regex(#"(mesdiscussions-)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
@@ -387,9 +405,15 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
     }
     page = replaceMatches(in: page, regex(#"(id_user=)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
     page = replaceMatches(in: page, regex(#"(_smilies_timer\('hfr\.inc',)(\d+)"#)) { $0[1] + scrambleText($0[2]) }
+    return page
+}
 
-    // Pseudos, longest first so that "Tom" never cuts "Tomtom_44".
+/// Pseudos, longest first so that "Tom" never cuts "Tomtom_44". A pseudo equal to a forum
+/// name is only replaced outside URLs (author cells, quote headers…), so never in a link.
+func replacePseudos(in text: String, pseudos: Set<String>, navigation: Set<String>, isLink: Bool) -> String {
+    var page = text
     for pseudo in pseudos.sorted(by: { $0.count > $1.count }) {
+        if isLink, navigation.contains(pseudo) { continue }
         let variants = Set([
             pseudo,
             pseudo.replacingOccurrences(of: " ", with: "+"),
@@ -400,7 +424,6 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
             let pattern = #"(?<![\p{L}\p{N}_])"# + NSRegularExpression.escapedPattern(for: variant) + #"(?![\p{L}\p{N}_])"#
             let expression = regex(pattern, [.caseInsensitive])
             if navigation.contains(pseudo) {
-                // Only outside URLs (author cells, quote headers…).
                 page = replaceMatches(in: page, regex(#"(>[^<]*<)"#)) { groups in
                     replaceMatches(in: groups[1], expression) { scrambleText($0[0]) }
                 }
@@ -410,6 +433,28 @@ func anonymize(_ html: String, pseudos: Set<String>, navigation: Set<String>) ->
         }
     }
     return page
+}
+
+/// HFR's link obfuscation: each byte is two characters, each one's value being its position
+/// in "0A12B34C56D78E9F".
+enum CryptLink {
+    static let alphabet = Array("0A12B34C56D78E9F")
+
+    static func decode(_ token: String) -> String? {
+        let characters = Array(token)
+        guard !characters.isEmpty, characters.count.isMultiple(of: 2) else { return nil }
+        var bytes: [UInt8] = []
+        for index in stride(from: 0, to: characters.count, by: 2) {
+            guard let high = alphabet.firstIndex(of: characters[index]),
+                  let low = alphabet.firstIndex(of: characters[index + 1]) else { return nil }
+            bytes.append(UInt8(high * 16 + low))
+        }
+        return String(bytes: bytes, encoding: .utf8)
+    }
+
+    static func encode(_ link: String) -> String {
+        String(link.utf8.flatMap { [alphabet[Int($0 >> 4)], alphabet[Int($0 & 0x0F)]] })
+    }
 }
 
 // MARK: - Main
